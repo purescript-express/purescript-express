@@ -1,0 +1,22 @@
+{
+  "name": "bro",
+  "version": "0.2.0",
+  "homepage": "https://github.com/dancingrobot84/bro",
+  "license": "BSD3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "externs",
+    "js"
+  ],
+  "dependencies": {
+    "purescript-foreign"              : "*",
+    "purescript-arrays"               : "*",
+    "purescript-maybe"                : "*",
+    "purescript-foldable-traversable" : "*",
+    "purescript-strings"              : "*",
+    "purescript-easy-ffi"             : "*",
+    "purescript-transformers"         : "*"
+  }
+}

@@ -1,0 +1,7 @@
+.cabal-sandbox
+cabal.sandbox.config
+bower_components
+node_modules
+js/node_modules
+.psci
+.psci_modules
