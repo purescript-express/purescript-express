@@ -5,3 +5,4 @@ node_modules
 js/node_modules
 .psci
 .psci_modules
+tmp

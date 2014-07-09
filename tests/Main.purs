@@ -1,4 +1,4 @@
-module Server where
+module Main where
 
 import Debug.Trace
 import Data.Either
@@ -11,12 +11,12 @@ import Node.Express.Handler
 
 indexHandler :: Handler
 indexHandler = do
-    lift (liftEff $ trace "Answering")
+    liftExpress (liftEff $ trace "Answering")
     json { test: "OK" }
 
 logger :: ExpressM Unit -> Handler
 logger next = do
-    lift (liftEff (trace "Got request") >>= \_ -> next)
+    liftExpress (liftEff (trace "Got request") >>= \_ -> next)
 
 appSetup :: App
 appSetup = do

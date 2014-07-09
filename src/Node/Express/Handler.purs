@@ -2,6 +2,7 @@ module Node.Express.Handler
     ( HandlerM()
     , Handler()
     , withHandler
+    , liftExpress
     , status
     , getHeader, setHeader, setContentType
     , setCookie, clearCookie
@@ -18,33 +19,35 @@ import Node.Express.Types
 import Node.Express.Internal.Response
 
 
-data HandlerM e a = HandlerM (Request -> Response -> Eff e a)
-type HandlerExp a = forall e. HandlerM (express :: Express | e) a
-type Handler = HandlerExp Unit
+data HandlerM a = HandlerM (Request -> Response -> ExpressM a)
+type Handler = HandlerM Unit
 
 
-instance functorHandlerM :: Functor (HandlerM e) where
+instance functorHandlerM :: Functor HandlerM where
     (<$>) f (HandlerM h) = HandlerM \req resp ->
         (h req resp >>= \r -> return $ f r)
 
-instance applyHandlerM :: Apply (HandlerM e) where
+instance applyHandlerM :: Apply HandlerM where
     (<*>) (HandlerM f) (HandlerM h) = HandlerM \req resp -> do
         res   <- h req resp
         trans <- f req resp
         return $ trans res
 
-instance applicativeHandlerM :: Applicative (HandlerM e) where
+instance applicativeHandlerM :: Applicative HandlerM where
     pure x = HandlerM \_ _ -> return x
 
-instance bindHandlerM :: Bind (HandlerM e) where
+instance bindHandlerM :: Bind HandlerM where
     (>>=) (HandlerM h) f = HandlerM \req resp -> do
-            (HandlerM g) <- h req resp
-            g req resp
+        (HandlerM g) <- liftM1 f $ h req resp
+        g req resp
 
-instance monadHandlerM :: Monad (HandlerM e)
+instance monadHandlerM :: Monad HandlerM
 
-withHandler :: forall e. HandlerM e Unit -> Request -> Response -> Eff e Unit
+withHandler :: Handler -> Request -> Response -> ExpressM Unit
 withHandler (HandlerM h) = h
+
+liftExpress :: forall a. ExpressM a -> HandlerM a
+liftExpress act = HandlerM \_ _ -> act
 
 -- Request --
 
@@ -55,7 +58,7 @@ status :: Number -> Handler
 status val = HandlerM \_ resp ->
     intlRespStatus resp val
 
-getHeader :: forall a. (ReadForeign a) => String -> HandlerExp (Either String a)
+getHeader :: forall a. (ReadForeign a) => String -> HandlerM (Either String a)
 getHeader field = HandlerM \_ resp ->
     intlRespGetHeader resp field
 
