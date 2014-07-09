@@ -1,6 +1,6 @@
 {
-    "name": "bro",
-    "version": "0.2.0",
+    "name": "purescript-express",
+    "version": "0.0.1",
     "dependencies": {
         "express": "4.x",
         "logfmt": "1.x"
