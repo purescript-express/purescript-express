@@ -2,7 +2,6 @@ module Node.Express.Handler
     ( HandlerM()
     , Handler()
     , withHandler
-    , liftExpress
     , status
     , getHeader, setHeader, setContentType
     , setCookie, clearCookie
@@ -49,9 +48,6 @@ instance monadEffHandlerM :: MonadEff HandlerM where
 
 withHandler :: Handler -> Request -> Response -> ExpressM Unit
 withHandler (HandlerM h) = h
-
-liftExpress :: forall a. ExpressM a -> HandlerM a
-liftExpress act = HandlerM \_ _ -> act
 
 -- Request --
 

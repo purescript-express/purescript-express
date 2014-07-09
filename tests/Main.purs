@@ -17,16 +17,17 @@ indexHandler = do
 
 logger1 :: ExpressM Unit -> Handler
 logger1 next = do
-    liftEff (trace "Logger 1 got request")
+    liftEff $ trace "Logger 1 got request"
     liftEff next
 
 logger2 :: ExpressM Unit -> Handler
 logger2 next = do
-    liftEff (trace "Logger 2 got request")
+    liftEff $ trace "Logger 2 got request"
     liftEff next
 
 appSetup :: App
 appSetup = do
+    liftEff $ trace "Setting up"
     use logger1
     use logger2
     get "/" indexHandler
