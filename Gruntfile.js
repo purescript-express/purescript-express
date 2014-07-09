@@ -19,7 +19,7 @@ module.exports = function(grunt) {
         },
 
         pscMake: ["<%=libFiles%>"],
-        dotPsci: ["<%=appFiles%>"],
+        dotPsci: ["<%=libFiles%>"],
 
         psc: {
             tests: {
