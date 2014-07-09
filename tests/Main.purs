@@ -4,6 +4,7 @@ import Debug.Trace
 import Data.Either
 import Data.Foreign.EasyFFI
 import Control.Monad.Trans
+import Control.Monad.Eff.Class
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
@@ -11,16 +12,23 @@ import Node.Express.Handler
 
 indexHandler :: Handler
 indexHandler = do
-    liftExpress (liftEff $ trace "Answering")
+    liftEff $ trace "Answering"
     json { test: "OK" }
 
-logger :: ExpressM Unit -> Handler
-logger next = do
-    liftExpress (liftEff (trace "Got request") >>= \_ -> next)
+logger1 :: ExpressM Unit -> Handler
+logger1 next = do
+    liftEff (trace "Logger 1 got request")
+    liftEff next
+
+logger2 :: ExpressM Unit -> Handler
+logger2 next = do
+    liftEff (trace "Logger 2 got request")
+    liftEff next
 
 appSetup :: App
 appSetup = do
-    use logger
+    use logger1
+    use logger2
     get "/" indexHandler
 
 main = do

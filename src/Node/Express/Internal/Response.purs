@@ -3,6 +3,7 @@ module Node.Express.Internal.Response where
 import Data.Foreign.EasyFFI
 import Data.Foreign
 import Data.Either
+import Control.Monad.Eff.Class
 import Node.Express.Types
 
 

@@ -10,6 +10,7 @@ import Data.Foreign
 import Data.Either
 import Data.String.Regex
 import Control.Monad.Eff
+import Control.Monad.Eff.Class
 
 import Node.Express.Types
 import Node.Express.Internal.App
@@ -19,25 +20,28 @@ import Node.Express.Handler
 data AppM a = AppM (Application -> ExpressM a)
 type App = AppM Unit
 
-instance appFunctor :: Functor AppM where
+instance functorAppM :: Functor AppM where
     (<$>) f (AppM h) = AppM \app -> liftM1 f $ h app
 
-instance appApply :: Apply AppM where
+instance applyAppM :: Apply AppM where
     (<*>) (AppM f) (AppM h) = AppM \app -> do
         res <- h app
         trans <- f app
         return $ trans res
 
-instance appApplicative :: Applicative AppM where
+instance applicativeAppM :: Applicative AppM where
     pure x = AppM \_ -> return x
 
-instance appBind :: Bind AppM where
+instance bindAppM :: Bind AppM where
     (>>=) (AppM h) f = AppM \app -> do
         res <- h app
         case f res of
              AppM g -> g app
 
-instance appMonad :: Monad AppM
+instance monadAppM :: Monad AppM
+
+instance monadEffAppM :: MonadEff AppM where
+    liftEff act = AppM \_ -> liftEff act
 
 listen :: forall e. App -> Number -> (Event -> Eff e Unit) -> ExpressM Unit
 listen (AppM act) port cb = do

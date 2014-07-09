@@ -14,6 +14,7 @@ module Node.Express.Handler
 import Data.Either
 import Data.Foreign
 import Control.Monad.Eff
+import Control.Monad.Eff.Class
 import Control.Monad.Trans
 import Node.Express.Types
 import Node.Express.Internal.Response
@@ -42,6 +43,9 @@ instance bindHandlerM :: Bind HandlerM where
         g req resp
 
 instance monadHandlerM :: Monad HandlerM
+
+instance monadEffHandlerM :: MonadEff HandlerM where
+    liftEff act = HandlerM \_ _ -> liftEff act
 
 withHandler :: Handler -> Request -> Response -> ExpressM Unit
 withHandler (HandlerM h) = h
