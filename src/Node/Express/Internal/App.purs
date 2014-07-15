@@ -38,14 +38,19 @@ intlAppSetProp ::
 intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"
 
+class Route a
+instance routeString :: Route String
+instance routeRegex :: Route Regex
+
 intlAppHttp ::
+    forall r. (Route r) =>
     Application
     -> String
-    -> Regex
-    -> (Request -> Response -> ExpressM Unit)
+    -> r
+    -> (Request -> Response -> ExpressM Unit -> ExpressM Unit)
     -> ExpressM Unit
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
-    "app[method](route, function(req, resp) { cb(req)(resp)(); })"
+    "app[method](route, function(req, resp, next) { cb(req)(resp)(next)(); })"
 
 intlAppListen ::
     forall e.

@@ -19,7 +19,6 @@ intlRespGetHeader ::
 intlRespGetHeader resp field = do
     let getHeaderRaw = unsafeForeignFunction ["resp", "field", ""] "resp.get(field);"
     val <- getHeaderRaw resp field
-    liftEff (Debug.Trace.print val)
     return $ parseForeign read val
 
 intlRespSetHeader :: forall a. Response -> String -> a -> ExpressM Unit

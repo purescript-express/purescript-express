@@ -8,7 +8,6 @@ module Node.Express.App
 
 import Data.Foreign
 import Data.Either
-import Data.String.Regex
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 
@@ -49,32 +48,34 @@ listen (AppM act) port cb = do
     act app
     intlAppListen app port cb
 
-use :: (ExpressM Unit -> Handler) -> App
+use :: Handler -> App
 use middleware = AppM \app ->
-    intlAppUse app (\req resp next -> withHandler (middleware next) req resp)
+    intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
 getProp :: forall a. (ReadForeign a) => String -> AppM (Either String a)
-getProp name = AppM \app -> intlAppGetProp app name
+getProp name = AppM \app ->
+    intlAppGetProp app name
 
 setProp :: forall a. String -> a -> App
-setProp name val = AppM \app -> intlAppSetProp app name val
+setProp name val = AppM \app ->
+    intlAppSetProp app name val
 
-http :: String -> String -> Handler -> App
+http :: forall r. (Route r) => String -> r -> Handler -> App
 http method route handler = AppM \app ->
-    intlAppHttp app method (regex route "") $ withHandler handler
+    intlAppHttp app method route $ withHandler handler
 
-get :: String -> Handler -> App
+get :: forall r. (Route r) => r -> Handler -> App
 get = http "get"
 
-post :: String -> Handler -> App
+post :: forall r. (Route r) => r -> Handler -> App
 post = http "post"
 
-put :: String -> Handler -> App
+put :: forall r. (Route r) => r -> Handler -> App
 put = http "put"
 
-delete :: String -> Handler -> App
+delete :: forall r. (Route r) => r -> Handler -> App
 delete = http "delete"
 
-all :: String -> Handler -> App
+all :: forall r. (Route r) => r -> Handler -> App
 all = http "all"
 
