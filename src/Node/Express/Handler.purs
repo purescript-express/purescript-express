@@ -5,7 +5,7 @@ module Node.Express.Handler
     , params
     , getRequestHeader
     , status
-    , getHeader, setHeader, setContentType
+    , getResponseHeader, setResponseHeader, setContentType
     , setCookie, clearCookie
     , send, json, jsonp
     , redirect, location
@@ -71,12 +71,12 @@ status :: Number -> Handler
 status val = HandlerM \_ resp _ ->
     intlRespStatus resp val
 
-getHeader :: forall a. (ReadForeign a) => String -> HandlerM (Either String a)
-getHeader field = HandlerM \_ resp _ -> do
+getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Either String a)
+getResponseHeader field = HandlerM \_ resp _ -> do
     intlRespGetHeader resp field
 
-setHeader :: forall a. String -> a -> Handler
-setHeader field val = HandlerM \_ resp _ ->
+setResponseHeader :: forall a. String -> a -> Handler
+setResponseHeader field val = HandlerM \_ resp _ ->
     intlRespSetHeader resp field val
 
 setCookie :: forall o. String -> String -> { | o } -> Handler
