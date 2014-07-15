@@ -38,45 +38,14 @@ intlAppSetProp ::
 intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"
 
-intlAppHttpGet ::
+intlAppHttp ::
     Application
+    -> String
     -> Regex
     -> (Request -> Response -> ExpressM Unit)
     -> ExpressM Unit
-intlAppHttpGet = unsafeForeignProcedure ["app", "route", "cb", ""]
-    "app.get(route, function(req, resp) { cb(req)(resp)(); })"
-
-intlAppHttpPost ::
-    Application
-    -> Regex
-    -> (Request -> Response -> ExpressM Unit)
-    -> ExpressM Unit
-intlAppHttpPost = unsafeForeignProcedure ["app", "route", "cb", ""]
-    "app.post(route, function(req, resp) { cb(req)(resp)(); })"
-
-intlAppHttpPut ::
-    Application
-    -> Regex
-    -> (Request -> Response -> ExpressM Unit)
-    -> ExpressM Unit
-intlAppHttpPut = unsafeForeignProcedure ["app", "route", "cb", ""]
-    "app.put(route, function(req, resp) { cb(req)(resp)(); })"
-
-intlAppHttpDelete ::
-    Application
-    -> Regex
-    -> (Request -> Response -> ExpressM Unit)
-    -> ExpressM Unit
-intlAppHttpDelete = unsafeForeignProcedure ["app", "route", "cb", ""]
-    "app.delete(route, function(req, resp) { cb(req)(resp)(); })"
-
-intlAppHttpAll ::
-    Application
-    -> Regex
-    -> (Request -> Response -> ExpressM Unit)
-    -> ExpressM Unit
-intlAppHttpAll = unsafeForeignProcedure ["app", "route", "cb", ""]
-    "app.all(route, function(req, resp) { cb(req)(resp)(); })"
+intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
+    "app[method](route, function(req, resp) { cb(req)(resp)(); })"
 
 intlAppListen ::
     forall e.

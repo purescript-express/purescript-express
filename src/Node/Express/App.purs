@@ -3,7 +3,7 @@ module Node.Express.App
     , App()
     , listen, use
     , getProp, setProp
-    , get, post, put, delete
+    , http, get, post, put, delete, all
     ) where
 
 import Data.Foreign
@@ -59,23 +59,22 @@ getProp name = AppM \app -> intlAppGetProp app name
 setProp :: forall a. String -> a -> App
 setProp name val = AppM \app -> intlAppSetProp app name val
 
+http :: String -> String -> Handler -> App
+http method route handler = AppM \app ->
+    intlAppHttp app method (regex route "") $ withHandler handler
+
 get :: String -> Handler -> App
-get route handler = AppM \app ->
-    intlAppHttpGet app (regex route "") $ withHandler handler
+get = http "get"
 
 post :: String -> Handler -> App
-post route handler = AppM \app ->
-    intlAppHttpPost app (regex route "") $ withHandler handler
+post = http "post"
 
 put :: String -> Handler -> App
-put route handler = AppM \app ->
-    intlAppHttpPut app (regex route "") $ withHandler handler
+put = http "put"
 
 delete :: String -> Handler -> App
-delete route handler = AppM \app ->
-    intlAppHttpDelete app (regex route "") $ withHandler handler
+delete = http "delete"
 
 all :: String -> Handler -> App
-all route handler = AppM \app ->
-    intlAppHttpAll app (regex route "") $ withHandler handler
+all = http "all"
 
