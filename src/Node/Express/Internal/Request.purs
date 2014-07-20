@@ -69,3 +69,4 @@ intlReqHasType req type_ = do
     val <- liftM1 (eitherToMaybe <<< parseForeign read) (getter req type_)
     return $ fromMaybe false val
 
+-- TODO: query!!, route!!, ip, ips, path, host, fresh, stale, xhr, protocol, secure?, subdomains, originalUrl
