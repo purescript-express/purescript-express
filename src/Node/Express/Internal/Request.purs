@@ -26,6 +26,7 @@ intlReqParam req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.param(name)"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
 
+
 intlReqGetCookie ::
     Request -> String -> ExpressM (Maybe String)
 intlReqGetCookie req name = do
@@ -38,6 +39,7 @@ intlReqGetSignedCookie req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.signedCookies[name]"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
 
+
 intlReqGetHeader ::
     forall a. (ReadForeign a) =>
     Request -> String -> ExpressM (Maybe a)
@@ -45,4 +47,25 @@ intlReqGetHeader req field = do
     let getter = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req field)
 
+
+intlReqAccepts :: Request -> String -> ExpressM (Maybe String)
+intlReqAccepts req types = do
+    let getter = unsafeForeignFunction ["req", "types", ""] "req.accepts(types);"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req types)
+
+intlReqAcceptsCharset :: Request -> String -> ExpressM (Maybe String)
+intlReqAcceptsCharset req charset = do
+    let getter = unsafeForeignFunction ["req", "charset", ""] "req.acceptsCharset(charset);"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req charset)
+
+intlReqAcceptsLanguage :: Request -> String -> ExpressM (Maybe String)
+intlReqAcceptsLanguage req language = do
+    let getter = unsafeForeignFunction ["req", "language", ""] "req.acceptsLanguage(language);"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req language)
+
+intlReqHasType :: Request -> String -> ExpressM Boolean
+intlReqHasType req type_ = do
+    let getter = unsafeForeignFunction ["req", "type", ""] "req.is(type);"
+    val <- liftM1 (eitherToMaybe <<< parseForeign read) (getter req type_)
+    return $ fromMaybe false val
 

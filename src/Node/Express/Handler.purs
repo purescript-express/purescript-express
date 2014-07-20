@@ -5,11 +5,12 @@ module Node.Express.Handler
     , params, param
     , getCookie, getSignedCookie
     , getRequestHeader
-    , status
+    , accepts, acceptsCharset, acceptsLanguage, hasType
+    , setStatus
     , getResponseHeader, setResponseHeader, setContentType
     , setCookie, clearCookie
-    , send, json, jsonp
-    , redirect, location
+    , send, sendJson, sendJsonp
+    , redirect, setLocation
     ) where
 
 
@@ -77,11 +78,27 @@ getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getRequestHeader field = HandlerM \req _ _ ->
     intlReqGetHeader req field
 
+accepts :: String -> HandlerM (Maybe String)
+accepts types = HandlerM \req _ _ ->
+    intlReqAccepts req types
+
+acceptsCharset :: String -> HandlerM (Maybe String)
+acceptsCharset charset = HandlerM \req _ _ ->
+    intlReqAcceptsCharset req charset
+
+acceptsLanguage :: String -> HandlerM (Maybe String)
+acceptsLanguage language = HandlerM \req _ _ ->
+    intlReqAcceptsLanguage req language
+
+hasType :: String -> HandlerM Boolean
+hasType type_ = HandlerM \req _ _ ->
+    intlReqHasType req type_
+
 -- Response --
 
-status :: Number -> Handler
-status val = HandlerM \_ resp _ ->
-    intlRespStatus resp val
+setStatus :: Number -> Handler
+setStatus val = HandlerM \_ resp _ ->
+    intlRespSetStatus resp val
 
 getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
@@ -103,21 +120,22 @@ send :: forall a. a -> Handler
 send data_ = HandlerM \_ resp _ ->
     intlRespSend resp data_
 
-json :: forall a. a -> Handler
-json data_ = HandlerM \_ resp _ ->
-    intlRespJson resp data_
+sendJson :: forall a. a -> Handler
+sendJson data_ = HandlerM \_ resp _ ->
+    intlRespSendJson resp data_
 
-jsonp :: forall a. a -> Handler
-jsonp data_ = HandlerM \_ resp _ ->
-    intlRespJsonp resp data_
+sendJsonp :: forall a. a -> Handler
+sendJsonp data_ = HandlerM \_ resp _ ->
+    intlRespSendJsonp resp data_
 
 redirect :: String -> Handler
 redirect url = HandlerM \_ resp _ ->
     intlRespRedirect resp url
 
-location :: String -> Handler
-location url = HandlerM \_ resp _ ->
-    intlRespLocation resp url
+setLocation :: String -> Handler
+setLocation url = HandlerM \_ resp _ ->
+    intlRespSetLocation resp url
 
 setContentType :: String -> Handler
-setContentType t = HandlerM \_ resp _ -> intlRespType resp t
+setContentType t = HandlerM \_ resp _ ->
+    intlRespType resp t

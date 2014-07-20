@@ -8,9 +8,14 @@ import Node.Express.Internal.Utils
 import Node.Express.Types
 
 
-intlRespStatus :: Response -> Number -> ExpressM Unit
-intlRespStatus = unsafeForeignProcedure ["resp", "code", ""]
+intlRespSetStatus :: Response -> Number -> ExpressM Unit
+intlRespSetStatus = unsafeForeignProcedure ["resp", "code", ""]
     "resp.status(code);"
+
+intlRespType :: Response -> String -> ExpressM Unit
+intlRespType = unsafeForeignProcedure ["resp", "t", ""]
+    "resp.type(t)"
+
 
 intlRespGetHeader ::
     forall a. (ReadForeign a) =>
@@ -22,6 +27,7 @@ intlRespGetHeader resp field = do
 intlRespSetHeader :: forall a. Response -> String -> a -> ExpressM Unit
 intlRespSetHeader = unsafeForeignProcedure ["resp", "field", "val", ""]
     "resp.set(field, val);"
+
 
 intlRespSetCookie ::
     forall opts.
@@ -37,28 +43,25 @@ intlRespClearCookie = unsafeForeignProcedure
     ["resp", "name", "opts", ""]
     "resp.clearCookie(name, opts);"
 
+
 intlRespSend :: forall a. Response -> a -> ExpressM Unit
 intlRespSend = unsafeForeignProcedure ["resp", "data", ""]
     "resp.send(data)"
 
-intlRespJson :: forall a. Response -> a -> ExpressM Unit
-intlRespJson = unsafeForeignProcedure ["resp", "data", ""]
+intlRespSendJson :: forall a. Response -> a -> ExpressM Unit
+intlRespSendJson = unsafeForeignProcedure ["resp", "data", ""]
     "resp.json(data)"
 
-intlRespJsonp :: forall a. Response -> a -> ExpressM Unit
-intlRespJsonp = unsafeForeignProcedure ["resp", "data", ""]
+intlRespSendJsonp :: forall a. Response -> a -> ExpressM Unit
+intlRespSendJsonp = unsafeForeignProcedure ["resp", "data", ""]
     "resp.jsonp(data)"
 
 intlRespRedirect :: Response -> String -> ExpressM Unit
 intlRespRedirect = unsafeForeignProcedure ["resp", "url", ""]
     "resp.redirect(url)"
 
-intlRespLocation :: Response -> String -> ExpressM Unit
-intlRespLocation = unsafeForeignProcedure ["resp", "url", ""]
+intlRespSetLocation :: Response -> String -> ExpressM Unit
+intlRespSetLocation = unsafeForeignProcedure ["resp", "url", ""]
     "resp.location(url)"
-
-intlRespType :: Response -> String -> ExpressM Unit
-intlRespType = unsafeForeignProcedure ["resp", "t", ""]
-    "resp.type(t)"
 
 -- TODO: foramt, attachment, sendfile, download, links

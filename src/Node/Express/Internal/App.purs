@@ -33,6 +33,7 @@ intlAppSetProp ::
 intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"
 
+
 class Route a
 instance routeString :: Route String
 instance routeRegex  :: Route Regex
