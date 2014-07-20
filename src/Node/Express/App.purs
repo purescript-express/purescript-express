@@ -7,7 +7,7 @@ module Node.Express.App
     ) where
 
 import Data.Foreign
-import Data.Either
+import Data.Maybe
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 
@@ -52,7 +52,7 @@ use :: Handler -> App
 use middleware = AppM \app ->
     intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
-getProp :: forall a. (ReadForeign a) => String -> AppM (Either String a)
+getProp :: forall a. (ReadForeign a) => String -> AppM (Maybe a)
 getProp name = AppM \app ->
     intlAppGetProp app name
 

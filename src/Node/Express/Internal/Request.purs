@@ -1,8 +1,9 @@
 module Node.Express.Internal.Request where
 
-import Data.Either
+import Data.Maybe
 import Data.Foreign
 import Data.Foreign.EasyFFI
+import Node.Express.Internal.Utils
 import Node.Express.Types
 
 
@@ -12,21 +13,36 @@ instance requestParamNumber :: RequestParam Number
 
 intlReqParams ::
     forall a. (RequestParam a) =>
-    Request
-    -> a
-    -> ExpressM (Either String String)
-intlReqParams req param = do
+    Request -> a -> ExpressM (Maybe String)
+intlReqParams req name = do
     let getter :: forall a. Request -> a -> ExpressM Foreign
-        getter = unsafeForeignFunction ["req", "param", ""] "req.params[param]"
-    val <- getter req param
-    return $ parseForeign read val
+        getter = unsafeForeignFunction ["req", "name", ""] "req.params[name]"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
+
+intlReqParam ::
+    forall a. (ReadForeign a) =>
+    Request -> String -> ExpressM (Maybe a)
+intlReqParam req name = do
+    let getter = unsafeForeignFunction ["req", "name", ""] "req.param(name)"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
+
+intlReqGetCookie ::
+    Request -> String -> ExpressM (Maybe String)
+intlReqGetCookie req name = do
+    let getter = unsafeForeignFunction ["req", "name", ""] "req.cookies[name]"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
+
+intlReqGetSignedCookie ::
+    Request -> String -> ExpressM (Maybe String)
+intlReqGetSignedCookie req name = do
+    let getter = unsafeForeignFunction ["req", "name", ""] "req.signedCookies[name]"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
 
 intlReqGetHeader ::
     forall a. (ReadForeign a) =>
-    Request
-    -> String
-    -> ExpressM (Either String a)
+    Request -> String -> ExpressM (Maybe a)
 intlReqGetHeader req field = do
-    let getHeaderRaw = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
-    val <- getHeaderRaw req field
-    return $ parseForeign read val
+    let getter = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req field)
+
+

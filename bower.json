@@ -14,9 +14,8 @@
     "purescript-foreign"              : "*",
     "purescript-arrays"               : "*",
     "purescript-maybe"                : "*",
-    "purescript-foldable-traversable" : "*",
+    "purescript-either"               : "*",
     "purescript-strings"              : "*",
-    "purescript-easy-ffi"             : "*",
-    "purescript-transformers"         : "*"
+    "purescript-easy-ffi"             : "*"
   }
 }

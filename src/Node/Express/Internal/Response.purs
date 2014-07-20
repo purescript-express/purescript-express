@@ -2,8 +2,9 @@ module Node.Express.Internal.Response where
 
 import Data.Foreign.EasyFFI
 import Data.Foreign
-import Data.Either
+import Data.Maybe
 import Control.Monad.Eff.Class
+import Node.Express.Internal.Utils
 import Node.Express.Types
 
 
@@ -13,13 +14,10 @@ intlRespStatus = unsafeForeignProcedure ["resp", "code", ""]
 
 intlRespGetHeader ::
     forall a. (ReadForeign a) =>
-    Response
-    -> String
-    -> ExpressM (Either String a)
+    Response -> String -> ExpressM (Maybe a)
 intlRespGetHeader resp field = do
     let getHeaderRaw = unsafeForeignFunction ["resp", "field", ""] "resp.get(field);"
-    val <- getHeaderRaw resp field
-    return $ parseForeign read val
+    liftM1 (eitherToMaybe <<< parseForeign read) (getHeaderRaw resp field)
 
 intlRespSetHeader :: forall a. Response -> String -> a -> ExpressM Unit
 intlRespSetHeader = unsafeForeignProcedure ["resp", "field", "val", ""]
@@ -27,21 +25,14 @@ intlRespSetHeader = unsafeForeignProcedure ["resp", "field", "val", ""]
 
 intlRespSetCookie ::
     forall opts.
-    Response
-    -> String
-    -> String
-    -> { | opts }
-    -> ExpressM Unit
+    Response -> String -> String -> { | opts } -> ExpressM Unit
 intlRespSetCookie = unsafeForeignProcedure
     ["resp", "name", "value", "opts", ""]
     "resp.cookie(name, value, opts);"
 
 intlRespClearCookie ::
     forall opts.
-    Response
-    -> String
-    -> { | opts }
-    -> ExpressM Unit
+    Response -> String -> { | opts } -> ExpressM Unit
 intlRespClearCookie = unsafeForeignProcedure
     ["resp", "name", "opts", ""]
     "resp.clearCookie(name, opts);"

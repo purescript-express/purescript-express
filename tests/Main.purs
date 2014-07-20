@@ -1,10 +1,8 @@
 module Main where
 
 import Debug.Trace
-import Data.Either
 import Data.String.Regex
 import Data.Foreign.EasyFFI
-import Control.Monad.Trans
 import Control.Monad.Eff.Class
 import Node.Express.Types
 import Node.Express.App

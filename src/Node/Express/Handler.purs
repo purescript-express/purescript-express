@@ -2,7 +2,8 @@ module Node.Express.Handler
     ( HandlerM()
     , Handler()
     , withHandler, next
-    , params
+    , params, param
+    , getCookie, getSignedCookie
     , getRequestHeader
     , status
     , getResponseHeader, setResponseHeader, setContentType
@@ -12,11 +13,10 @@ module Node.Express.Handler
     ) where
 
 
-import Data.Either
+import Data.Maybe
 import Data.Foreign
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
-import Control.Monad.Trans
 import Node.Express.Types
 import Node.Express.Internal.Response
 import Node.Express.Internal.Request
@@ -57,11 +57,23 @@ next = HandlerM \_ _ nxt -> nxt
 
 -- Request --
 
-params :: forall a. (RequestParam a) => a -> HandlerM (Either String String)
+params :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 params name = HandlerM \req _ _ ->
     intlReqParams req name
 
-getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Either String a)
+param :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+param name = HandlerM \req _ _ ->
+    intlReqParam req name
+
+getCookie :: String -> HandlerM (Maybe String)
+getCookie name = HandlerM \req _ _ ->
+    intlReqGetCookie req name
+
+getSignedCookie :: String -> HandlerM (Maybe String)
+getSignedCookie name = HandlerM \req _ _ ->
+    intlReqGetSignedCookie req name
+
+getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getRequestHeader field = HandlerM \req _ _ ->
     intlReqGetHeader req field
 
@@ -71,7 +83,7 @@ status :: Number -> Handler
 status val = HandlerM \_ resp _ ->
     intlRespStatus resp val
 
-getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Either String a)
+getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
     intlRespGetHeader resp field
 
@@ -88,19 +100,24 @@ clearCookie name opts = HandlerM \_ resp _ ->
     intlRespClearCookie resp name opts
 
 send :: forall a. a -> Handler
-send data_ = HandlerM \_ resp _ -> intlRespSend resp data_
+send data_ = HandlerM \_ resp _ ->
+    intlRespSend resp data_
 
 json :: forall a. a -> Handler
-json data_ = HandlerM \_ resp _ -> intlRespJson resp data_
+json data_ = HandlerM \_ resp _ ->
+    intlRespJson resp data_
 
 jsonp :: forall a. a -> Handler
-jsonp data_ = HandlerM \_ resp _ -> intlRespJsonp resp data_
+jsonp data_ = HandlerM \_ resp _ ->
+    intlRespJsonp resp data_
 
 redirect :: String -> Handler
-redirect url = HandlerM \_ resp _ -> intlRespRedirect resp url
+redirect url = HandlerM \_ resp _ ->
+    intlRespRedirect resp url
 
 location :: String -> Handler
-location url = HandlerM \_ resp _ -> intlRespLocation resp url
+location url = HandlerM \_ resp _ ->
+    intlRespLocation resp url
 
 setContentType :: String -> Handler
 setContentType t = HandlerM \_ resp _ -> intlRespType resp t
