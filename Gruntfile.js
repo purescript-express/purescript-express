@@ -32,18 +32,33 @@ module.exports = function(grunt) {
             },
         },
 
-        execute: {
+        express: {
             tests: {
-                src: ['tmp/tests.js'],
+                options: {
+                    script: 'tmp/tests.js',
+                    background: false,
+                },
+            },
+        },
+
+        watch: {
+            tests: {
+                files: ["<%=testsFiles%>"],
+                tasks: ["express:tests:stop", "default"],
+                options: {
+                    interrupt: true,
+                    atBegin: true,
+                },
             },
         },
     });
 
+    grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-purescript");
-    grunt.loadNpmTasks("grunt-execute");
+    grunt.loadNpmTasks("grunt-express-server");
 
     grunt.registerTask("make", ["pscMake", "dotPsci"]);
-    grunt.registerTask("test", ["clean:tests", "psc:tests", "execute:tests"]);
-    grunt.registerTask("default", ["test", "make"]);
+    grunt.registerTask("test", ["clean:tests", "psc:tests", "express:tests"]);
+    grunt.registerTask("default", ["make", "test"]);
 };
