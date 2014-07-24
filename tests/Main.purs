@@ -46,7 +46,7 @@ appSetup = do
     use logger1
     use logger2
     all "*" globalHandler
-    get (regex "/([0-9]+)" "") regexParamHandler
+    get (regex "/([0-9]+)" $ parseFlags "") regexParamHandler
     get "/:name" namedParamHandler
     get "/" indexHandler
 
