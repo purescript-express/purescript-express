@@ -44,7 +44,7 @@ module.exports = function(grunt) {
         watch: {
             tests: {
                 files: ["<%=testsFiles%>"],
-                tasks: ["express:tests:stop", "default"],
+                tasks: ["clean:lib", "clean:tests", "make", "psc:tests", "express:tests:stop", "express:tests"],
                 options: {
                     interrupt: true,
                     atBegin: true,
