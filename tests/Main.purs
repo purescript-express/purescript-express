@@ -20,13 +20,14 @@ indexHandler = do
 
 regexParamHandler :: Handler
 regexParamHandler = do
-    p1 <- params 0
+    p1 <- getRouteParam 0
     liftEff $ print p1
     send "regex"
 
 namedParamHandler :: Handler
 namedParamHandler = do
-    pn <- params "name"
+    getRoute >>= (liftEff <<< trace)
+    pn <- getRouteParam "name"
     liftEff $ print pn
     send "named"
 

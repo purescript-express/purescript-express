@@ -2,7 +2,8 @@ module Node.Express.Handler
     ( HandlerM()
     , Handler()
     , withHandler, next
-    , params, param
+    , getRouteParam, getParam
+    , getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
     , accepts, acceptsCharset, acceptsLanguage, hasType
@@ -58,13 +59,17 @@ next = HandlerM \_ _ nxt -> nxt
 
 -- Request --
 
-params :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
-params name = HandlerM \req _ _ ->
-    intlReqParams req name
+getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
+getRouteParam name = HandlerM \req _ _ ->
+    intlReqRouteParam req name
 
-param :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
-param name = HandlerM \req _ _ ->
+getParam :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getParam name = HandlerM \req _ _ ->
     intlReqParam req name
+
+getRoute :: HandlerM String
+getRoute = HandlerM \req _ _ ->
+    intlReqRoute req
 
 getCookie :: String -> HandlerM (Maybe String)
 getCookie name = HandlerM \req _ _ ->

@@ -11,10 +11,10 @@ class RequestParam a
 instance requestParamString :: RequestParam String
 instance requestParamNumber :: RequestParam Number
 
-intlReqParams ::
+intlReqRouteParam ::
     forall a. (RequestParam a) =>
     Request -> a -> ExpressM (Maybe String)
-intlReqParams req name = do
+intlReqRouteParam req name = do
     let getter :: forall a. Request -> a -> ExpressM Foreign
         getter = unsafeForeignFunction ["req", "name", ""] "req.params[name]"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
@@ -25,6 +25,10 @@ intlReqParam ::
 intlReqParam req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.param(name)"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
+
+intlReqRoute ::
+    Request -> ExpressM String
+intlReqRoute = unsafeForeignFunction ["req", ""] "req.route.path"
 
 
 intlReqGetCookie ::
@@ -69,4 +73,4 @@ intlReqHasType req type_ = do
     val <- liftM1 (eitherToMaybe <<< parseForeign read) (getter req type_)
     return $ fromMaybe false val
 
--- TODO: query!!, route!!, ip, ips, path, host, fresh, stale, xhr, protocol, secure?, subdomains, originalUrl
+-- TODO: query!!, ip, ips, path, host, fresh, stale, xhr, protocol, secure?, subdomains, originalUrl
