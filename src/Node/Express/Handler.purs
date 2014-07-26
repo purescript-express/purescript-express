@@ -2,11 +2,17 @@ module Node.Express.Handler
     ( HandlerM()
     , Handler()
     , withHandler, next
+    -- Request
     , getRouteParam, getParam
     , getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
     , accepts, acceptsCharset, acceptsLanguage, hasType
+    , getRemoteIp, getRemoteIps, getPath, getHost, getSubdomains
+    , isFresh, isStale
+    , isXhr, getProtocol
+    , getUrl, getOriginalUrl
+    -- Response
     , setStatus
     , getResponseHeader, setResponseHeader, setContentType
     , setCookie, clearCookie
@@ -98,6 +104,50 @@ acceptsLanguage language = HandlerM \req _ _ ->
 hasType :: String -> HandlerM Boolean
 hasType type_ = HandlerM \req _ _ ->
     intlReqHasType req type_
+
+getRemoteIp :: HandlerM String
+getRemoteIp = HandlerM \req _ _ ->
+    intlReqGetRemoteIp req
+
+getRemoteIps :: HandlerM [String]
+getRemoteIps = HandlerM \req _ _ ->
+    intlReqGetRemoteIps req
+
+getPath :: HandlerM String
+getPath = HandlerM \req _ _ ->
+    intlReqGetPath req
+
+getHost :: HandlerM String
+getHost = HandlerM \req _ _ ->
+    intlReqGetHost req
+
+getSubdomains :: HandlerM [String]
+getSubdomains = HandlerM \req _ _ ->
+    intlReqGetSubdomains req
+
+isFresh :: HandlerM Boolean
+isFresh = HandlerM \req _ _ ->
+    intlReqIsFresh req
+
+isStale :: HandlerM Boolean
+isStale = HandlerM \req _ _ ->
+    intlReqIsStale req
+
+isXhr :: HandlerM Boolean
+isXhr = HandlerM \req _ _ ->
+    intlReqIsXhr req
+
+getProtocol :: HandlerM (Maybe Protocol)
+getProtocol = HandlerM \req _ _ ->
+    intlReqGetProtocol req
+
+getUrl :: HandlerM String
+getUrl = HandlerM \req _ _ ->
+    intlReqGetUrl req
+
+getOriginalUrl :: HandlerM String
+getOriginalUrl = HandlerM \req _ _ ->
+    intlReqGetOriginalUrl req
 
 -- Response --
 

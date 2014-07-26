@@ -73,4 +73,43 @@ intlReqHasType req type_ = do
     val <- liftM1 (eitherToMaybe <<< parseForeign read) (getter req type_)
     return $ fromMaybe false val
 
--- TODO: query!!, ip, ips, path, host, fresh, stale, xhr, protocol, secure?, subdomains, originalUrl
+
+intlReqGetRemoteIp :: Request -> ExpressM String
+intlReqGetRemoteIp = unsafeForeignFunction ["req", ""] "req.ip"
+
+intlReqGetRemoteIps :: Request -> ExpressM [String]
+intlReqGetRemoteIps = unsafeForeignFunction ["req", ""] "req.ips"
+
+intlReqGetPath :: Request -> ExpressM String
+intlReqGetPath = unsafeForeignFunction ["req", ""] "req.path"
+
+intlReqGetHost :: Request -> ExpressM String
+intlReqGetHost = unsafeForeignFunction ["req", ""] "req.host"
+
+intlReqGetSubdomains :: Request -> ExpressM [String]
+intlReqGetSubdomains = unsafeForeignFunction ["req", ""] "req.subdomains"
+
+
+intlReqIsFresh :: Request -> ExpressM Boolean
+intlReqIsFresh = unsafeForeignFunction ["req", ""] "req.fresh"
+
+intlReqIsStale :: Request -> ExpressM Boolean
+intlReqIsStale = unsafeForeignFunction ["req", ""] "req.stale"
+
+
+intlReqIsXhr :: Request -> ExpressM Boolean
+intlReqIsXhr = unsafeForeignFunction ["req", ""] "req.xhr"
+
+intlReqGetProtocol :: Request -> ExpressM (Maybe Protocol)
+intlReqGetProtocol req = do
+    let getter = unsafeForeignFunction ["req", ""] "req.protocol"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req)
+
+
+intlReqGetUrl :: Request -> ExpressM String
+intlReqGetUrl = unsafeForeignFunction ["req", ""] "req.url"
+
+intlReqGetOriginalUrl :: Request -> ExpressM String
+intlReqGetOriginalUrl = unsafeForeignFunction ["req", ""] "req.originalUrl"
+
+-- TODO: query!!

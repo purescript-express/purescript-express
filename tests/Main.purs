@@ -11,6 +11,8 @@ import Node.Express.Handler
 
 globalHandler :: Handler
 globalHandler = do
+    getUrl >>= (liftEff <<< trace)
+    getOriginalUrl >>= (liftEff <<< trace)
     liftEff $ trace "Answering..."
     next
 
