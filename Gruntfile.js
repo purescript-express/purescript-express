@@ -14,7 +14,7 @@ module.exports = function(grunt) {
         ],
 
         clean: {
-            lib: ["js", "externs"],
+            lib: ["output"],
             tests: ["tmp"],
         },
 
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-purescript");
     grunt.loadNpmTasks("grunt-express-server");
 
-    grunt.registerTask("make", ["pscMake", "dotPsci"]);
+    grunt.registerTask("make", ["clean:lib", "pscMake", "dotPsci"]);
     grunt.registerTask("test", ["clean:tests", "psc:tests", "express:tests"]);
     grunt.registerTask("default", ["make", "test"]);
 };
