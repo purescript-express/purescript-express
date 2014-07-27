@@ -19,6 +19,7 @@ module Node.Express.Handler
     , setCookie, clearCookie
     , send, sendJson, sendJsonp
     , redirect, setLocation
+    , sendFile, sendFileExt, download, downloadExt
     ) where
 
 
@@ -209,3 +210,19 @@ setLocation url = HandlerM \_ resp _ ->
 setContentType :: String -> Handler
 setContentType t = HandlerM \_ resp _ ->
     intlRespType resp t
+
+sendFile :: String -> Handler
+sendFile path = HandlerM \_ resp _ ->
+    intlRespSendFile resp path {} (\_ -> return unit)
+
+sendFileExt :: forall o. String -> { | o } -> (Error -> ExpressM Unit) -> Handler
+sendFileExt path opts callback = HandlerM \_ resp _ ->
+    intlRespSendFile resp path opts callback
+
+download :: String -> Handler
+download path = HandlerM \_ resp _ ->
+    intlRespDownload resp path "" (\_ -> return unit)
+
+downloadExt :: String -> String -> (Error -> ExpressM Unit) -> Handler
+downloadExt path filename callback = HandlerM \_ resp _ ->
+    intlRespDownload resp path filename callback

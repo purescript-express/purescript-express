@@ -56,10 +56,11 @@ appSetup :: App
 appSetup = do
     liftEff $ trace "Setting up"
     use logger1
-    useAt "/:name" logger2
+    useAt "/123" logger2
     useOnParam "name" routeParamProcessor
     all "*" globalHandler
     get (regex "/([0-9]+)" $ parseFlags "") regexParamHandler
+    get "/tests.js" (sendFile "tmp/tests.js")
     get "/:name" namedParamHandler
     get "/" indexHandler
 

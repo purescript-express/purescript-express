@@ -69,4 +69,20 @@ intlRespSetAttachment :: Response -> String -> ExpressM Unit
 intlRespSetAttachment = unsafeForeignProcedure ["resp", "filename", ""]
     "resp.attachment(filename)"
 
--- TODO: sendfile, download, links
+intlRespSendFile ::
+    forall opts.
+    Response -> String -> { | opts } -> (Error -> ExpressM Unit) -> ExpressM Unit
+intlRespSendFile = unsafeForeignProcedure
+    ["resp", "path", "opts", "cb", ""]
+    "resp.sendfile(path, opts, function(err) { return cb(err)(); })"
+
+intlRespDownload ::
+    Response -> String -> String -> (Error -> ExpressM Unit) -> ExpressM Unit
+intlRespDownload = unsafeForeignProcedure
+    ["resp", "path", "name", "cb", ""]
+    "if (name === \"\") { \
+    \   resp.download(path, function(err) { return cb(err)(); }); \
+    \ } else { \
+    \   resp.download(path, name, function(err) { return cb(err)(); }); \
+    \ }"
+

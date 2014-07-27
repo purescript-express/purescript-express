@@ -42,7 +42,8 @@ instance monadAppM :: Monad AppM
 instance monadEffAppM :: MonadEff AppM where
     liftEff act = AppM \_ -> liftEff act
 
-listen :: forall e. App -> Number -> (Event -> Eff e Unit) -> ExpressM Unit
+
+listen :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 listen (AppM act) port cb = do
     app <- intlMkApplication
     act app
@@ -52,7 +53,7 @@ use :: Handler -> App
 use middleware = AppM \app ->
     intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
-useAt :: String -> Handler -> App
+useAt :: Path -> Handler -> App
 useAt route middleware = AppM \app ->
     intlAppUseAt app route (\req resp nxt -> withHandler middleware req resp nxt)
 
@@ -71,22 +72,22 @@ setProp name val = AppM \app ->
     intlAppSetProp app name val
 
 
-http :: forall r. (Route r) => String -> r -> Handler -> App
+http :: forall r. (Route r) => Method -> r -> Handler -> App
 http method route handler = AppM \app ->
-    intlAppHttp app method route $ withHandler handler
+    intlAppHttp app (show method) route $ withHandler handler
 
 get :: forall r. (Route r) => r -> Handler -> App
-get = http "get"
+get = http GET
 
 post :: forall r. (Route r) => r -> Handler -> App
-post = http "post"
+post = http POST
 
 put :: forall r. (Route r) => r -> Handler -> App
-put = http "put"
+put = http PUT
 
 delete :: forall r. (Route r) => r -> Handler -> App
-delete = http "delete"
+delete = http DELETE
 
 all :: forall r. (Route r) => r -> Handler -> App
-all = http "all"
+all = http ALL
 

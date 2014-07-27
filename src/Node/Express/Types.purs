@@ -10,17 +10,18 @@ import Control.Monad.Eff.Class
 
 
 foreign import data Express :: !
-foreign import data Application :: *
-foreign import data Event :: *
-foreign import data Response :: *
-foreign import data Request :: *
-
 
 type ExpressM a = forall e. Eff (express :: Express | e) a
 
 instance monadEffExpressM :: MonadEff (Eff e) where
     liftEff = unsafeInterleaveEff
 
+
+foreign import data Application :: *
+foreign import data Event :: *
+foreign import data Error :: *
+foreign import data Response :: *
+foreign import data Request :: *
 
 data Protocol = Http | Https
 
@@ -31,10 +32,21 @@ instance readForeignProtocol :: ReadForeign Protocol where
              Right "https" -> Right Https
              _ -> Left "Unknown protocol"
 
+data Method = ALL | GET | POST | PUT | DELETE
+
+instance showMethod :: Show Method where
+    show ALL    = "all"
+    show GET    = "get"
+    show POST   = "post"
+    show PUT    = "put"
+    show DELETE = "delete"
+
+type Port = Number
+type Path = String
 
 class Route a
-instance routeString :: Route String
-instance routeRegex  :: Route Regex
+instance routePath  :: Route String
+instance routeRegex :: Route Regex
 
 class RequestParam a
 instance requestParamString :: RequestParam String
