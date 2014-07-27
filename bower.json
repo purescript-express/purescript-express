@@ -16,6 +16,7 @@
     "purescript-maybe"                : "*",
     "purescript-either"               : "*",
     "purescript-strings"              : "*",
-    "purescript-easy-ffi"             : "*"
+    "purescript-easy-ffi"             : "*",
+    "purescript-control"              : "*"
   }
 }

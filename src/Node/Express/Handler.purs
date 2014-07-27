@@ -7,7 +7,7 @@ module Node.Express.Handler
     , getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
-    , accepts, acceptsCharset, acceptsLanguage, hasType
+    , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
     , getRemoteIp, getRemoteIps, getPath, getHost, getSubdomains
     , isFresh, isStale
     , isXhr, getProtocol
@@ -26,6 +26,7 @@ import Data.Maybe
 import Data.Foreign
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad
 import Node.Express.Types
 import Node.Express.Internal.Response
 import Node.Express.Internal.Request
@@ -93,6 +94,11 @@ getRequestHeader field = HandlerM \req _ _ ->
 accepts :: String -> HandlerM (Maybe String)
 accepts types = HandlerM \req _ _ ->
     intlReqAccepts req types
+
+ifAccepts :: String -> Handler -> Handler
+ifAccepts type_ act = do
+    isAccepted <- (liftM1 (maybe false (const true)) $ accepts type_)
+    when isAccepted act
 
 acceptsCharset :: String -> HandlerM (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->

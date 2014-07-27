@@ -69,4 +69,4 @@ intlRespSetAttachment :: Response -> String -> ExpressM Unit
 intlRespSetAttachment = unsafeForeignProcedure ["resp", "filename", ""]
     "resp.attachment(filename)"
 
--- TODO: format!!, sendfile, download, links
+-- TODO: sendfile, download, links
