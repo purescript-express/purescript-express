@@ -54,8 +54,7 @@ intlAppUse = unsafeForeignProcedure ["app", "mw", ""]
     "app.use(function(req, resp, next) { return mw(req)(resp)(next)(); });"
 
 intlAppUseAt ::
-    forall r. (Route r) =>
-    Application -> r -> HandlerFn -> ExpressM Unit
+    Application -> String -> HandlerFn -> ExpressM Unit
 intlAppUseAt = unsafeForeignProcedure ["app", "route", "mw", ""]
     "app.use(route, function(req, resp, next) { return mw(req)(resp)(next)(); });"
 

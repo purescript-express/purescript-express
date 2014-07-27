@@ -52,7 +52,7 @@ use :: Handler -> App
 use middleware = AppM \app ->
     intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
-useAt :: forall r. (Route r) => r -> Handler -> App
+useAt :: String -> Handler -> App
 useAt route middleware = AppM \app ->
     intlAppUseAt app route (\req resp nxt -> withHandler middleware req resp nxt)
 
