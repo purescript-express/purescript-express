@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listen, use
+    , listen, use, useAt, useOnParam
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -52,13 +52,24 @@ use :: Handler -> App
 use middleware = AppM \app ->
     intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
+useAt :: forall r. (Route r) => r -> Handler -> App
+useAt route middleware = AppM \app ->
+    intlAppUseAt app route (\req resp nxt -> withHandler middleware req resp nxt)
+
+useOnParam :: String -> (String -> Handler) -> App
+useOnParam param handler = AppM \app ->
+    intlAppUseOnParam app param
+        (\val req resp nxt -> withHandler (handler val) req resp nxt)
+
+
 getProp :: forall a. (ReadForeign a) => String -> AppM (Maybe a)
 getProp name = AppM \app ->
     intlAppGetProp app name
 
-setProp :: forall a. String -> a -> App
+setProp :: forall a. (ReadForeign a) => String -> a -> App
 setProp name val = AppM \app ->
     intlAppSetProp app name val
+
 
 http :: forall r. (Route r) => String -> r -> Handler -> App
 http method route handler = AppM \app ->

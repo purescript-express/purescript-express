@@ -7,10 +7,6 @@ import Node.Express.Internal.Utils
 import Node.Express.Types
 
 
-class RequestParam a
-instance requestParamString :: RequestParam String
-instance requestParamNumber :: RequestParam Number
-
 intlReqRouteParam ::
     forall a. (RequestParam a) =>
     Request -> a -> ExpressM (Maybe String)
@@ -111,5 +107,27 @@ intlReqGetUrl = unsafeForeignFunction ["req", ""] "req.url"
 
 intlReqGetOriginalUrl :: Request -> ExpressM String
 intlReqGetOriginalUrl = unsafeForeignFunction ["req", ""] "req.originalUrl"
+
+
+intlReqPutUserData ::
+    forall a. (ReadForeign a) =>
+    Request -> String -> a -> ExpressM Unit
+intlReqPutUserData = unsafeForeignProcedure ["req", "key", "data", ""]
+    "if (req.userData === undefined) { \
+    \    req.userData = {}; \
+    \} \
+    \req.userData[key] = data;"
+
+intlReqGetUserData ::
+    forall a. (ReadForeign a) =>
+    Request -> String -> ExpressM (Maybe a)
+intlReqGetUserData req key = do
+    let getter = unsafeForeignProcedure ["req", "key", ""]
+            "if (req.userData === undefined) { \
+            \   return undefined; \
+            \} \
+            \return req.userData[key];"
+    liftM1 (eitherToMaybe <<< parseForeign read) (getter req key)
+
 
 -- TODO: query!!

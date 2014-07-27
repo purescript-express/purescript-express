@@ -64,4 +64,9 @@ intlRespSetLocation :: Response -> String -> ExpressM Unit
 intlRespSetLocation = unsafeForeignProcedure ["resp", "url", ""]
     "resp.location(url)"
 
--- TODO: format, attachment, sendfile, download, links, locals?, render?
+
+intlRespSetAttachment :: Response -> String -> ExpressM Unit
+intlRespSetAttachment = unsafeForeignProcedure ["resp", "filename", ""]
+    "resp.attachment(filename)"
+
+-- TODO: format!!, sendfile, download, links

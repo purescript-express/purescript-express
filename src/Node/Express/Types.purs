@@ -3,6 +3,7 @@ module Node.Express.Types where
 import Data.Foreign
 import Data.Either
 import Data.Foreign.EasyFFI
+import Data.String.Regex
 import Control.Monad.Eff
 import Control.Monad.Eff.Unsafe
 import Control.Monad.Eff.Class
@@ -26,7 +27,15 @@ data Protocol = Http | Https
 instance readForeignProtocol :: ReadForeign Protocol where
     read = ForeignParser \foreign_ ->
         case parseForeign read foreign_ of
-             Right "http" -> Right Http
+             Right "http"  -> Right Http
              Right "https" -> Right Https
              _ -> Left "Unknown protocol"
 
+
+class Route a
+instance routeString :: Route String
+instance routeRegex  :: Route Regex
+
+class RequestParam a
+instance requestParamString :: RequestParam String
+instance requestParamNumber :: RequestParam Number

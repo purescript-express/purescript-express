@@ -3,6 +3,7 @@ module Main where
 import Debug.Trace
 import Data.String.Regex
 import Data.Foreign.EasyFFI
+import Data.Maybe
 import Control.Monad.Eff.Class
 import Node.Express.Types
 import Node.Express.App
@@ -24,14 +25,22 @@ regexParamHandler :: Handler
 regexParamHandler = do
     p1 <- getRouteParam 0
     liftEff $ print p1
+    userKnown <- (getUserData "userKnown") :: HandlerM (Maybe Boolean)
+    liftEff $ print userKnown
     send "regex"
 
 namedParamHandler :: Handler
 namedParamHandler = do
     getRoute >>= (liftEff <<< trace)
-    pn <- getRouteParam "name"
-    liftEff $ print pn
+    (getRouteParam "name") >>= (liftEff <<< print)
+    userKnown <- (getUserData "userKnown") :: HandlerM (Maybe Boolean)
+    liftEff $ print userKnown
     send "named"
+
+routeParamProcessor :: String -> Handler
+routeParamProcessor value = do
+    putUserData "userKnown" (value == "me")
+    next
 
 logger1 :: Handler
 logger1 = do
@@ -47,7 +56,8 @@ appSetup :: App
 appSetup = do
     liftEff $ trace "Setting up"
     use logger1
-    use logger2
+    useAt "/:name" logger2
+    useOnParam "name" routeParamProcessor
     all "*" globalHandler
     get (regex "/([0-9]+)" $ parseFlags "") regexParamHandler
     get "/:name" namedParamHandler
