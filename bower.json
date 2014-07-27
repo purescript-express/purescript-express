@@ -1,14 +1,21 @@
 {
   "name": "purescript-express",
-  "version": "0.0.1",
   "homepage": "https://github.com/dancingrobot84/purescript-express",
-  "license": "BSD3",
+  "description": "Purescript wrapper around Express.js",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "purescript"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "externs",
-    "js"
+    "output",
+    "tests",
+    "tmp",
+    "Gruntfile.js",
+    "package.json",
+    "bower.json"
   ],
   "dependencies": {
     "purescript-foreign"              : "*",
@@ -17,6 +24,7 @@
     "purescript-either"               : "*",
     "purescript-strings"              : "*",
     "purescript-easy-ffi"             : "*",
-    "purescript-control"              : "*"
+    "purescript-control"              : "*",
+    "purescript-parsing"              : "*"
   }
 }
