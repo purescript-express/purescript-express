@@ -129,5 +129,4 @@ intlReqGetUserData req key = do
             \return req.userData[key];"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req key)
 
-
 -- TODO: query!!
