@@ -8,7 +8,6 @@ import Control.Monad.Eff.Class
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
-import Node.Express.Internal.QueryStringParser
 
 
 globalHandler :: Handler
@@ -20,6 +19,8 @@ globalHandler = do
 
 indexHandler :: Handler
 indexHandler = do
+    vals <- getQueryParams "params"
+    liftEff $ print vals
     send "index"
 
 regexParamHandler :: Handler

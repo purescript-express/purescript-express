@@ -90,5 +90,5 @@ module.exports = function(grunt) {
     grunt.registerTask("make", ["clean:lib", "pscMake", "dotPsci"]);
     grunt.registerTask("test", ["clean:tests", "make", "psc:tests", "execute:tests"]);
     grunt.registerTask("example", ["clean:example", "make", "psc:example", "express:example"]);
-    grunt.registerTask("default", ["make", "test"]);
+    grunt.registerTask("default", ["test"]);
 };

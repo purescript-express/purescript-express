@@ -1,10 +1,12 @@
 module Node.Express.Internal.Request where
 
 import Data.Maybe
+import Data.Either
 import Data.Foreign
 import Data.Foreign.EasyFFI
 import Node.Express.Internal.Utils
 import Node.Express.Types
+import Node.Express.Internal.QueryString
 
 
 intlReqRouteParam ::
@@ -21,6 +23,14 @@ intlReqParam ::
 intlReqParam req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.param(name)"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req name)
+
+intlReqQueryParams :: Request -> ExpressM [Param]
+intlReqQueryParams req = do
+    let getter = unsafeForeignFunction ["req", ""] "req.url.split('?')[1] || ''"
+    query <- getter req
+    case parse query of
+        Left _ -> return []
+        Right params -> return params
 
 intlReqRoute ::
     Request -> ExpressM String

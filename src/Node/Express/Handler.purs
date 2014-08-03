@@ -3,7 +3,7 @@ module Node.Express.Handler
     , Handler()
     , withHandler, next
     -- Request
-    , getRouteParam, getParam
+    , getRouteParam, getParam, getQueryParam, getQueryParams
     , getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
@@ -31,6 +31,7 @@ import Control.Monad
 import Node.Express.Types
 import Node.Express.Internal.Response
 import Node.Express.Internal.Request
+import Node.Express.Internal.QueryString
 
 
 data HandlerM a = HandlerM (Request -> Response -> ExpressM Unit -> ExpressM a)
@@ -75,6 +76,16 @@ getRouteParam name = HandlerM \req _ _ ->
 getParam :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getParam name = HandlerM \req _ _ ->
     intlReqParam req name
+
+getQueryParam :: String -> HandlerM (Maybe String)
+getQueryParam name = HandlerM \req _ _ -> do
+    params <- intlReqQueryParams req
+    return $ getOne params name
+
+getQueryParams :: String -> HandlerM [String]
+getQueryParams name = HandlerM \req _ _ -> do
+    params <- intlReqQueryParams req
+    return $ getAll params name
 
 getRoute :: HandlerM String
 getRoute = HandlerM \req _ _ ->
