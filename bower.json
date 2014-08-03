@@ -3,6 +3,7 @@
   "homepage": "https://github.com/dancingrobot84/purescript-express",
   "description": "Purescript wrapper around Express.js",
   "license": "BSD-3-Clause",
+  "version": "0.1.0",
   "keywords": [
     "purescript"
   ],

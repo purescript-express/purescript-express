@@ -1,7 +1,7 @@
 {
     "name": "purescript-express",
     "repository": "https://github.com/dancingrobot84/purescript-express",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "dependencies": {
         "express": "4.x",
         "logfmt": "1.x"
