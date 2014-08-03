@@ -13,9 +13,15 @@ module.exports = function(grunt) {
             "<%=libFiles%>",
         ],
 
+        exampleFiles: [
+            "example/*.purs",
+            "<%=libFiles%>",
+        ],
+
         clean: {
             lib: ["output"],
-            tests: ["tmp"],
+            tests: ["output/tests.js"],
+            example: ["output/example.js"],
         },
 
         pscMake: ["<%=libFiles%>"],
@@ -28,23 +34,45 @@ module.exports = function(grunt) {
                     main: true,
                 },
                 src: ["<%=testsFiles%>"],
-                dest: "tmp/tests.js",
+                dest: "output/tests.js",
+            },
+            example: {
+                options: {
+                    module: ["Main"],
+                    main: true,
+                },
+                src: ["<%=exampleFiles%>"],
+                dest: "output/example.js",
             },
         },
 
         express: {
-            tests: {
+            example: {
                 options: {
-                    script: 'tmp/tests.js',
+                    script: 'output/example.js',
                     background: false,
                 },
+            },
+        },
+
+        execute: {
+            tests: {
+                src: ["output/tests.js"],
             },
         },
 
         watch: {
             tests: {
                 files: ["<%=testsFiles%>"],
-                tasks: ["clean:lib", "clean:tests", "make", "psc:tests", "express:tests:stop", "express:tests"],
+                tasks: ["clean:tests", "make", "psc:tests", "execute:tests"],
+                options: {
+                    interrupt: true,
+                    atBegin: true,
+                },
+            },
+            example: {
+                files: ["<%=exampleFiles%>"],
+                tasks: ["clean:example", "make", "psc:example", "express:stop:example", "express:example"],
                 options: {
                     interrupt: true,
                     atBegin: true,
@@ -57,8 +85,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-purescript");
     grunt.loadNpmTasks("grunt-express-server");
+    grunt.loadNpmTasks("grunt-execute");
 
     grunt.registerTask("make", ["clean:lib", "pscMake", "dotPsci"]);
-    grunt.registerTask("test", ["clean:tests", "psc:tests", "express:tests"]);
+    grunt.registerTask("test", ["clean:tests", "make", "psc:tests", "execute:tests"]);
+    grunt.registerTask("example", ["clean:example", "make", "psc:example", "express:example"]);
     grunt.registerTask("default", ["make", "test"]);
 };

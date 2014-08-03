@@ -1,70 +1,36 @@
 module Main where
 
 import Debug.Trace
-import Data.String.Regex
-import Data.Foreign.EasyFFI
-import Data.Maybe
-import Control.Monad.Eff.Class
-import Node.Express.Types
-import Node.Express.App
-import Node.Express.Handler
+import Data.Either
+import Data.Foldable (for_)
+import Control.Monad.Eff
+import Node.Express.Internal.QueryStringParser
 
 
-globalHandler :: Handler
-globalHandler = do
-    getUrl >>= (liftEff <<< trace)
-    getOriginalUrl >>= (liftEff <<< trace)
-    liftEff $ trace "Answering..."
-    next
+type Test a b = { input :: a, output :: b }
 
-indexHandler :: Handler
-indexHandler = do
-    send "index"
 
-regexParamHandler :: Handler
-regexParamHandler = do
-    p1 <- getRouteParam 0
-    liftEff $ print p1
-    userKnown <- (getUserData "userKnown") :: HandlerM (Maybe Boolean)
-    liftEff $ print userKnown
-    send "regex"
+doTest :: forall a b e. (Show b, Eq b)
+       => (Test a b -> b) -> Test a b -> Eff ( trace :: Trace | e) Unit
+doTest testFn test =
+    let result = testFn test
+        printPassed = trace "PASSED"
+        printFailed =
+            trace ("FAILED\n\tExpected: \""
+                  ++ show test.output
+                  ++ "\"\n\tGot: \""
+                  ++ show result
+                  ++ "\"")
+    in if result /= test.output then printFailed else printPassed
 
-namedParamHandler :: Handler
-namedParamHandler = do
-    getRoute >>= (liftEff <<< trace)
-    (getRouteParam "name") >>= (liftEff <<< print)
-    userKnown <- (getUserData "userKnown") :: HandlerM (Maybe Boolean)
-    liftEff $ print userKnown
-    send "named"
-
-routeParamProcessor :: String -> Handler
-routeParamProcessor value = do
-    putUserData "userKnown" (value == "me")
-    next
-
-logger1 :: Handler
-logger1 = do
-    liftEff $ trace "Logger 1 got request"
-    next
-
-logger2 :: Handler
-logger2 = do
-    liftEff $ trace "Logger 2 got request"
-    next
-
-appSetup :: App
-appSetup = do
-    liftEff $ trace "Setting up"
-    use logger1
-    useAt "/123" logger2
-    useOnParam "name" routeParamProcessor
-    all "*" globalHandler
-    get (regex "/([0-9]+)" $ parseFlags "") regexParamHandler
-    get "/tests.js" (sendFile "tmp/tests.js")
-    get "/:name" namedParamHandler
-    get "/" indexHandler
+queryParserTests =
+    [ {input: "a=b",        output: Right [Param "a" "b"]}
+    , {input: "a=b&b=c",    output: Right [Param "a" "b", Param "b" "c"]}
+    , {input: "a[123]=&b=", output: Right [Param "a[123]" "", Param "b" ""]}
+    , {input: "",           output: Right []}
+    , {input: "a=b%20c",    output: Right [Param "a" "b c"]}
+    , {input: "a=b+c",      output: Right [Param "a" "b c"]}
+    ]
 
 main = do
-    port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
-    listen appSetup port \_ ->
-        trace $ "Listening on " ++ show port
+    for_ queryParserTests (doTest (\t -> parse t.input))

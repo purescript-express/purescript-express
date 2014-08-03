@@ -25,6 +25,7 @@
     "purescript-strings"              : "*",
     "purescript-easy-ffi"             : "*",
     "purescript-control"              : "*",
-    "purescript-parsing"              : "*"
+    "purescript-parsing"              : "*",
+    "purescript-foldable-traversable" : "*"
   }
 }
