@@ -12,7 +12,6 @@ module Node.Express.Handler
     , isFresh, isStale
     , isXhr, getProtocol
     , getUrl, getOriginalUrl
-    , putUserData, getUserData
     -- Response
     , setStatus
     , getResponseHeader, setResponseHeader, setContentType
@@ -167,14 +166,6 @@ getUrl = HandlerM \req _ _ ->
 getOriginalUrl :: HandlerM String
 getOriginalUrl = HandlerM \req _ _ ->
     intlReqGetOriginalUrl req
-
-putUserData :: forall a. (ReadForeign a) => String -> a -> Handler
-putUserData key val = HandlerM \req _ _ ->
-    intlReqPutUserData req key val
-
-getUserData :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
-getUserData key = HandlerM \req _ _ ->
-    intlReqGetUserData req key
 
 -- Response --
 
