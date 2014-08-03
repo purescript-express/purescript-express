@@ -72,7 +72,7 @@ module.exports = function(grunt) {
             },
             example: {
                 files: ["<%=exampleFiles%>"],
-                tasks: ["clean:example", "make", "psc:example", "express:stop:example", "express:example"],
+                tasks: ["clean:example", "make", "psc:example", "express:example:stop", "express:example"],
                 options: {
                     interrupt: true,
                     atBegin: true,
