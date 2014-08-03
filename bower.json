@@ -18,6 +18,7 @@
     "bower.json"
   ],
   "dependencies": {
+    "purescript-transformers"         : "0.0.4",
     "purescript-foreign"              : "*",
     "purescript-arrays"               : "*",
     "purescript-maybe"                : "*",
