@@ -11,6 +11,10 @@ import Control.Monad.Eff.Class
 
 foreign import data Express :: !
 
+--| General monad, indicates that we're dealing with
+--  express.js related functions
+--  Applications should use HandlerM and AppM primarily
+--  and ExpressM in rare cases
 type ExpressM a = forall e. Eff (express :: Express | e) a
 
 instance monadEffExpressM :: MonadEff (Eff e) where
@@ -23,6 +27,10 @@ foreign import data Error :: *
 foreign import data Response :: *
 foreign import data Request :: *
 
+error :: String -> Error
+error = unsafeForeignFunction ["msg"] "new Error(msg);"
+
+
 data Protocol = Http | Https
 
 instance readForeignProtocol :: ReadForeign Protocol where
@@ -31,6 +39,7 @@ instance readForeignProtocol :: ReadForeign Protocol where
              Right "http"  -> Right Http
              Right "https" -> Right Https
              _ -> Left "Unknown protocol"
+
 
 data Method = ALL | GET | POST | PUT | DELETE
 
@@ -41,12 +50,13 @@ instance showMethod :: Show Method where
     show PUT    = "put"
     show DELETE = "delete"
 
+
 type Port = Number
 type Path = String
 
-class Route a
-instance routePath  :: Route String
-instance routeRegex :: Route Regex
+class RoutePattern a
+instance routePath  :: RoutePattern String
+instance routeRegex :: RoutePattern Regex
 
 class RequestParam a
 instance requestParamString :: RequestParam String

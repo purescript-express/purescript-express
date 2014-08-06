@@ -1,3 +1,4 @@
+-- Patience you must have, my young padawan. This module leave you must --
 module Node.Express.Internal.App where
 
 import Data.Function
@@ -7,6 +8,7 @@ import Data.Maybe
 import Control.Monad.Eff
 import Node.Express.Types
 import Node.Express.Internal.Utils
+import Node.Express.Handler
 
 
 foreign import express "var express = require('express')" :: Unit
@@ -16,7 +18,6 @@ foreign import intlMkApplication
     \    return express();\
     \}"
     :: ExpressM Application
-
 
 intlAppGetProp ::
     forall a. (ReadForeign a) =>
@@ -36,7 +37,7 @@ intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
 type HandlerFn = Request -> Response -> ExpressM Unit -> ExpressM Unit
 
 intlAppHttp ::
-    forall r. (Route r) =>
+    forall r. (RoutePattern r) =>
     Application -> String -> r -> HandlerFn -> ExpressM Unit
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
@@ -60,6 +61,11 @@ intlAppUseAt = unsafeForeignProcedure ["app", "route", "mw", ""]
 
 intlAppUseOnParam ::
     Application -> String -> (String -> HandlerFn) -> ExpressM Unit
-intlAppUseOnParam = unsafeForeignFunction ["app", "name", "cb", ""]
+intlAppUseOnParam = unsafeForeignProcedure ["app", "name", "cb", ""]
     "app.param(name, function(req, resp, next, val) { return cb(val)(req)(resp)(next)(); })"
+
+intlAppUseOnError ::
+    Application -> (Error -> HandlerFn) -> ExpressM Unit
+intlAppUseOnError = unsafeForeignProcedure ["app", "cb", ""]
+    "app.use(function(err, req, resp, next) { return cb(err)(req)(resp)(next)(); })"
 
