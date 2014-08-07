@@ -121,7 +121,6 @@ getSignedCookie name = HandlerM \req _ _ ->
 
 -- TODO: create union containing all possible header params
 -- TODO: is it necessary to use ReadForeign? Will String be sufficient?
-
 --| Get request header param.
 getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
 getRequestHeader field = HandlerM \req _ _ ->
@@ -233,7 +232,6 @@ setCookie name val opts = HandlerM \_ resp _ ->
     intlRespSetCookie resp name val opts
 
 -- TODO: is options really necessary? Docs have only 'path' option example
-
 --| Clear cookie.
 --  See http://expressjs.com/4x/api.html#res.clearCookie
 clearCookie :: forall o. String -> { | o } -> Handler
@@ -256,7 +254,6 @@ sendJsonp data_ = HandlerM \_ resp _ ->
     intlRespSendJsonp resp data_
 
 -- TODO: add custom status redirect
-
 --| Redirect to the given URL setting status to 302.
 redirect :: String -> Handler
 redirect url = HandlerM \_ resp _ ->

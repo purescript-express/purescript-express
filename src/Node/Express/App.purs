@@ -52,7 +52,6 @@ listen (AppM act) port cb = do
     intlAppListen app port cb
 
 -- TODO: implement 'useExternal' for non-Handler middlewares
-
 --| Use specified middleware handler.
 use :: Handler -> App
 use middleware = AppM \app ->
