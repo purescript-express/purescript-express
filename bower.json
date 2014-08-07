@@ -13,10 +13,12 @@
     "bower_components",
     "output",
     "tests",
-    "tmp",
+    "example",
     "Gruntfile.js",
     "package.json",
-    "bower.json"
+    "bower.json",
+    "README.md",
+    "DOCS.md"
   ],
   "dependencies": {
     "purescript-transformers"         : "0.0.4",
