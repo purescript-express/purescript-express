@@ -12,9 +12,9 @@ import Control.Monad.Eff.Class
 foreign import data Express :: !
 
 --| General monad, indicates that we're dealing with
---  express.js related functions
+--  express.js related functions.
 --  Applications should use HandlerM and AppM primarily
---  and ExpressM in rare cases
+--  and ExpressM in rare cases.
 type ExpressM a = forall e. Eff (express :: Express | e) a
 
 instance monadEffExpressM :: MonadEff (Eff e) where
@@ -27,9 +27,13 @@ foreign import data Error :: *
 foreign import data Response :: *
 foreign import data Request :: *
 
+--| Create new error and set its message.
 error :: String -> Error
 error = unsafeForeignFunction ["msg"] "new Error(msg);"
 
+--| Extract message from error
+getErrorMsg :: Error -> String
+getErrorMsg = unsafeForeignFunction ["err"] "err.message;"
 
 data Protocol = Http | Https
 

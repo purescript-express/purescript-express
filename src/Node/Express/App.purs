@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listen, use, useAt, useOnParam
+    , listen, use, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -16,7 +16,7 @@ import Node.Express.Internal.App
 import Node.Express.Handler
 
 
---| Monad responsible for application related operations (initial setup mostly)
+--| Monad responsible for application related operations (initial setup mostly).
 data AppM a = AppM (Application -> ExpressM a)
 type App = AppM Unit
 
@@ -44,7 +44,7 @@ instance monadEffAppM :: MonadEff AppM where
     liftEff act = AppM \_ -> liftEff act
 
 
---| Run application on spcified port and execute callback after launch
+--| Run application on specified port and execute callback after launch.
 listen :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 listen (AppM act) port cb = do
     app <- intlMkApplication
@@ -53,63 +53,63 @@ listen (AppM act) port cb = do
 
 -- TODO: implement 'useExternal' for non-Handler middlewares
 
---| Use specified middleware handler
+--| Use specified middleware handler.
 use :: Handler -> App
 use middleware = AppM \app ->
     intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
 
---| Use specified middleware only on requests matching path
+--| Use specified middleware only on requests matching path.
 useAt :: Path -> Handler -> App
 useAt route middleware = AppM \app ->
     intlAppUseAt app route (\req resp nxt -> withHandler middleware req resp nxt)
 
---| Process route param with specified handler
+--| Process route param with specified handler.
 useOnParam :: String -> (String -> Handler) -> App
 useOnParam param handler = AppM \app ->
     intlAppUseOnParam app param
         (\val req resp nxt -> withHandler (handler val) req resp nxt)
 
---| Use error handler. Probably this should be the last middleware to attach
+--| Use error handler. Probably this should be the last middleware to attach.
 useOnError :: (Error -> Handler) -> App
 useOnError handler = AppM \app ->
     intlAppUseOnError app (\err req resp nxt -> withHandler (handler err) req resp nxt)
 
 
---| Get application property
+--| Get application property.
 -- See http://expressjs.com/4x/api.html#app-settings
 getProp :: forall a. (ReadForeign a) => String -> AppM (Maybe a)
 getProp name = AppM \app ->
     intlAppGetProp app name
 
---| Set application property
+--| Set application property.
 -- See http://expressjs.com/4x/api.html#app-settings
 setProp :: forall a. (ReadForeign a) => String -> a -> App
 setProp name val = AppM \app ->
     intlAppSetProp app name val
 
 
---| Bind specified handler to handle request matching route and method
+--| Bind specified handler to handle request matching route and method.
 http :: forall r. (RoutePattern r) => Method -> r -> Handler -> App
 http method route handler = AppM \app ->
     intlAppHttp app (show method) route $ withHandler handler
 
---| Shortcut for `http GET`
+--| Shortcut for `http GET`.
 get :: forall r. (RoutePattern r) => r -> Handler -> App
 get = http GET
 
---| Shortcut for `http POST`
+--| Shortcut for `http POST`.
 post :: forall r. (RoutePattern r) => r -> Handler -> App
 post = http POST
 
---| Shortcut for `http PUT`
+--| Shortcut for `http PUT`.
 put :: forall r. (RoutePattern r) => r -> Handler -> App
 put = http PUT
 
---| Shortcut for `http DELETE`
+--| Shortcut for `http DELETE`.
 delete :: forall r. (RoutePattern r) => r -> Handler -> App
 delete = http DELETE
 
---| Shortcut for `http ALL` (match on any http method)
+--| Shortcut for `http ALL` (match on any http method).
 all :: forall r. (RoutePattern r) => r -> Handler -> App
 all = http ALL
 

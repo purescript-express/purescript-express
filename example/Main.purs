@@ -54,6 +54,11 @@ logger = do
     liftEff $ trace (">>> " ++ url)
     next
 
+errorHandler :: Error -> Handler
+errorHandler err = do
+    setStatus 400
+    sendJson {error: getErrorMsg err}
+
 help = { name: "Todo example"
        , purpose: "To present a subset of purescript-express package capabilities"
        , howToUse:
@@ -66,11 +71,6 @@ help = { name: "Todo example"
        , forkMe: "https://github.com/dancingrobot84/purescript-express"
        }
 
-errorHandler :: Number -> String -> Handler
-errorHandler status msg = do
-    setStatus status
-    sendJson {error: msg}
-
 indexHandler :: Handler
 indexHandler = sendJson help
 
@@ -82,7 +82,7 @@ listTodosHandler = do
 createTodoHandler :: Handler
 createTodoHandler = do
     descParam <- getQueryParam "desc"
-    maybe (errorHandler 400 "Description is required") handleNewTodo descParam
+    maybe (nextThrow $ error "Description is required") handleNewTodo descParam
   where
     handleNewTodo desc = do
         newId <- liftEff $ addTodo todos { desc: desc, isDone: false }
@@ -92,8 +92,8 @@ updateTodoHandler :: Handler
 updateTodoHandler = do
     idParam <- getRouteParam "id"
     descParam <- getQueryParam "desc"
-    maybe (errorHandler 400 "Id is required") (\id ->
-        maybe (errorHandler 400 "Description is required") (handleUpdateTodo id) descParam) idParam
+    maybe (nextThrow $ error "Id is required") (\id ->
+        maybe (nextThrow $ error "Description is required") (handleUpdateTodo id) descParam) idParam
   where
     handleUpdateTodo id desc = do
         liftEff $ updateTodo todos (parseNumber id) desc
@@ -102,7 +102,7 @@ updateTodoHandler = do
 deleteTodoHandler :: Handler
 deleteTodoHandler = do
     idParam <- getRouteParam "id"
-    maybe (errorHandler 400 "Id is required") handleDeleteTodo idParam
+    maybe (nextThrow $ error "Id is required") handleDeleteTodo idParam
   where
     handleDeleteTodo id = do
         liftEff $ deleteTodo todos (parseNumber id)
@@ -111,7 +111,7 @@ deleteTodoHandler = do
 doTodoHandler :: Handler
 doTodoHandler = do
     idParam <- getRouteParam "id"
-    maybe (errorHandler 400 "Id is required") handleDoTodo idParam
+    maybe (nextThrow $ error "Id is required") handleDoTodo idParam
   where
     handleDoTodo id = do
         liftEff $ setDone todos (parseNumber id)
@@ -128,6 +128,7 @@ appSetup = do
     get "/update/:id" updateTodoHandler
     get "/delete/:id" deleteTodoHandler
     get "/done/:id" doTodoHandler
+    useOnError errorHandler
 
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
