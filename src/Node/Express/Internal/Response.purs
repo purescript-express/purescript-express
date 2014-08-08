@@ -57,9 +57,9 @@ intlRespSendJsonp :: forall a. Response -> a -> ExpressM Unit
 intlRespSendJsonp = unsafeForeignProcedure ["resp", "data", ""]
     "resp.jsonp(data)"
 
-intlRespRedirect :: Response -> String -> ExpressM Unit
-intlRespRedirect = unsafeForeignProcedure ["resp", "url", ""]
-    "resp.redirect(url)"
+intlRespRedirect :: Response -> Number -> String -> ExpressM Unit
+intlRespRedirect = unsafeForeignProcedure ["resp", "status", "url", ""]
+    "resp.redirect(status, url)"
 
 intlRespSetLocation :: Response -> String -> ExpressM Unit
 intlRespSetLocation = unsafeForeignProcedure ["resp", "url", ""]

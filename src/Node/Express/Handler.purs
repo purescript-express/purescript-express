@@ -249,11 +249,14 @@ sendJsonp :: forall a. a -> Handler
 sendJsonp data_ = HandlerM \_ resp _ ->
     intlRespSendJsonp resp data_
 
--- TODO: add custom status redirect
 --| Redirect to the given URL setting status to 302.
 redirect :: String -> Handler
-redirect url = HandlerM \_ resp _ ->
-    intlRespRedirect resp url
+redirect = redirectWithStatus 302
+
+--| Redirect to the given URL using custom status.
+redirectWithStatus :: Number -> String -> Handler
+redirectWithStatus status url = HandlerM \_ resp _ ->
+    intlRespRedirect resp status url
 
 --| Set Location header.
 setLocation :: String -> Handler
