@@ -465,4 +465,3 @@ class MonadEff m where
 class Default a where
 	 def :: a
 ```
-

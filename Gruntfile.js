@@ -18,6 +18,12 @@ module.exports = function(grunt) {
             "<%=libFiles%>",
         ],
 
+        documentedFiles: [
+            "src/Node/Express/*.purs",
+            "src/Control/Monad/Eff/Class.purs",
+            "src/Data/Default.purs",
+        ],
+
         clean: {
             lib: ["output"],
             tests: ["output/tests.js"],
@@ -30,7 +36,7 @@ module.exports = function(grunt) {
         psc: {
             tests: {
                 options: {
-                    module: ["Main"],
+                    modules: ["Main"],
                     main: true,
                 },
                 src: ["<%=testsFiles%>"],
@@ -77,6 +83,13 @@ module.exports = function(grunt) {
                     interrupt: true,
                     atBegin: true,
                 },
+            },
+        },
+
+        docgen: {
+            docs: {
+                src: "<%=documentedFiles%>",
+                dest: "DOCS.md",
             },
         },
     });
