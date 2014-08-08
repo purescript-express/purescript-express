@@ -2,8 +2,6 @@
 cabal.sandbox.config
 bower_components
 node_modules
-js
 .psci
 .psci_modules
-tmp
 output
