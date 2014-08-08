@@ -1,12 +1,13 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listen, use, useAt, useOnParam, useOnError
+    , listen, use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
 
 import Data.Foreign
+import Data.Function
 import Data.Maybe
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
@@ -51,27 +52,33 @@ listen (AppM act) port cb = do
     act app
     intlAppListen app port cb
 
--- TODO: implement 'useExternal' for non-Handler middlewares
 --| Use specified middleware handler.
 use :: Handler -> App
 use middleware = AppM \app ->
-    intlAppUse app (\req resp nxt -> withHandler middleware req resp nxt)
+    intlAppUse app $ withHandler middleware
+
+--| Use any function as middleware.
+--  Introduced to ease usage of a bunch of external
+--  middleware written for express.js.
+--  See http://expressjs.com/4x/api.html#middleware
+useExternal :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit) -> App
+useExternal fn = AppM \app ->
+    intlAppUseExternal app fn
 
 --| Use specified middleware only on requests matching path.
 useAt :: Path -> Handler -> App
 useAt route middleware = AppM \app ->
-    intlAppUseAt app route (\req resp nxt -> withHandler middleware req resp nxt)
+    intlAppUseAt app route $ withHandler middleware
 
 --| Process route param with specified handler.
 useOnParam :: String -> (String -> Handler) -> App
 useOnParam param handler = AppM \app ->
-    intlAppUseOnParam app param
-        (\val req resp nxt -> withHandler (handler val) req resp nxt)
+    intlAppUseOnParam app param (withHandler <<< handler)
 
 --| Use error handler. Probably this should be the last middleware to attach.
 useOnError :: (Error -> Handler) -> App
 useOnError handler = AppM \app ->
-    intlAppUseOnError app (\err req resp nxt -> withHandler (handler err) req resp nxt)
+    intlAppUseOnError app (withHandler <<< handler)
 
 
 --| Get application property.
