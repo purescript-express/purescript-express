@@ -120,9 +120,8 @@ getSignedCookie name = HandlerM \req _ _ ->
     intlReqGetSignedCookie req name
 
 -- TODO: create union containing all possible header params
--- TODO: is it necessary to use ReadForeign? Will String be sufficient?
 --| Get request header param.
-getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getRequestHeader :: String -> HandlerM (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
     intlReqGetHeader req field
 

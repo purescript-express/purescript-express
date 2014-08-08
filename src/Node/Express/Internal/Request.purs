@@ -52,8 +52,7 @@ intlReqGetSignedCookie req name = do
 
 
 intlReqGetHeader ::
-    forall a. (ReadForeign a) =>
-    Request -> String -> ExpressM (Maybe a)
+    Request -> String -> ExpressM (Maybe String)
 intlReqGetHeader req field = do
     let getter = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
     liftM1 (eitherToMaybe <<< parseForeign read) (getter req field)
