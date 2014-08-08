@@ -40,6 +40,14 @@ use :: Handler -> App
  Use specified middleware handler.
 
 ```haskell
+useExternal :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit) -> App
+```
+ Use any function as middleware.
+  Introduced to ease usage of a bunch of external
+  middleware written for express.js.
+  See http://expressjs.com/4x/api.html#middleware
+
+```haskell
 useAt :: Path -> Handler -> App
 ```
  Use specified middleware only on requests matching path.
@@ -182,7 +190,7 @@ getSignedCookie :: String -> HandlerM (Maybe String)
  Get signed cookie param by its key.
 
 ```haskell
-getRequestHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getRequestHeader :: String -> HandlerM (Maybe String)
 ```
  Get request header param.
 
@@ -228,7 +236,7 @@ getPath :: HandlerM String
  Return request URL pathname.
 
 ```haskell
-getHost :: HandlerM String
+getHostname :: HandlerM String
 ```
  Return Host header field.
 
@@ -283,16 +291,14 @@ setResponseHeader :: forall a. String -> a -> Handler
  Set response header value.
 
 ```haskell
-setCookie :: forall o. String -> String -> {  | o } -> Handler
+setCookie :: String -> String -> CookieOptions -> Handler
 ```
  Set cookie by its name using specified options (maxAge, path, etc).
-  See http://expressjs.com/4x/api.html#res.cookie
 
 ```haskell
-clearCookie :: forall o. String -> {  | o } -> Handler
+clearCookie :: String -> String -> Handler
 ```
  Clear cookie.
-  See http://expressjs.com/4x/api.html#res.clearCookie
 
 ```haskell
 send :: forall a. a -> Handler
@@ -393,6 +399,15 @@ type Port = Number
 ```haskell
 type Path = String
 ```
+```haskell
+data CookieOptions
+	 CookieOptions :: { path :: String, signed :: Boolean, maxAge :: Number } -> CookieOptions
+```
+ Cookie options
+  - maxAge -- time in msecs
+  - signed -- use secret to sign if true
+  - path   -- cookie path
+
 ### Typeclasses
 ```haskell
 class RoutePattern a where
@@ -422,6 +437,9 @@ instance requestParamString :: RequestParam String
 ```haskell
 instance requestParamNumber :: RequestParam Number
 ```
+```haskell
+instance defaultCookieOptions :: Default CookieOptions
+```
 ### Values
 ```haskell
 error :: String -> Error
@@ -433,4 +451,18 @@ getErrorMsg :: Error -> String
 ```
  Extract message from error
 
+
+## Control.Monad.Eff.Class
+### Typeclasses
+```haskell
+class MonadEff m where
+	 liftEff :: forall e a. Eff e a -> m a
+```
+
+## Data.Default
+### Typeclasses
+```haskell
+class Default a where
+	 def :: a
+```
 
