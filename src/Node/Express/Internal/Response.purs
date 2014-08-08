@@ -75,7 +75,7 @@ intlRespSendFile ::
     Response -> String -> { | opts } -> (Error -> ExpressM Unit) -> ExpressM Unit
 intlRespSendFile = unsafeForeignProcedure
     ["resp", "path", "opts", "cb", ""]
-    "resp.sendfile(path, opts, function(err) { return cb(err)(); })"
+    "resp.sendFile(path, opts, function(err) { return cb(err)(); })"
 
 intlRespDownload ::
     Response -> String -> String -> (Error -> ExpressM Unit) -> ExpressM Unit

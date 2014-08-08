@@ -89,8 +89,8 @@ intlReqGetRemoteIps = unsafeForeignFunction ["req", ""] "req.ips"
 intlReqGetPath :: Request -> ExpressM String
 intlReqGetPath = unsafeForeignFunction ["req", ""] "req.path"
 
-intlReqGetHost :: Request -> ExpressM String
-intlReqGetHost = unsafeForeignFunction ["req", ""] "req.host"
+intlReqGetHostname :: Request -> ExpressM String
+intlReqGetHostname = unsafeForeignFunction ["req", ""] "req.hostname"
 
 intlReqGetSubdomains :: Request -> ExpressM [String]
 intlReqGetSubdomains = unsafeForeignFunction ["req", ""] "req.subdomains"

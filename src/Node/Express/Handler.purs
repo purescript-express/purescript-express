@@ -8,7 +8,7 @@ module Node.Express.Handler
     , getCookie, getSignedCookie
     , getRequestHeader
     , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
-    , getRemoteIp, getRemoteIps, getPath, getHost, getSubdomains
+    , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
     , isFresh, isStale
     , isXhr, getProtocol
     , getUrl, getOriginalUrl
@@ -24,6 +24,7 @@ module Node.Express.Handler
 
 import Data.Maybe
 import Data.Foreign
+import Data.Foreign.EasyFFI
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad
@@ -119,7 +120,6 @@ getSignedCookie :: String -> HandlerM (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
     intlReqGetSignedCookie req name
 
--- TODO: create union containing all possible header params
 --| Get request header param.
 getRequestHeader :: String -> HandlerM (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
@@ -168,9 +168,9 @@ getPath = HandlerM \req _ _ ->
     intlReqGetPath req
 
 --| Return Host header field.
-getHost :: HandlerM String
-getHost = HandlerM \req _ _ ->
-    intlReqGetHost req
+getHostname :: HandlerM String
+getHostname = HandlerM \req _ _ ->
+    intlReqGetHostname req
 
 --| Return array of subdomains.
 getSubdomains :: HandlerM [String]
@@ -270,8 +270,9 @@ setContentType t = HandlerM \_ resp _ ->
 
 --| Send file by its path.
 sendFile :: String -> Handler
-sendFile path = HandlerM \_ resp _ ->
-    intlRespSendFile resp path {} (\_ -> return unit)
+sendFile path = sendFileExt path {root: pwd} (\_ -> return unit)
+  where
+    pwd = unsafeForeignFunction [] "process.cwd()"
 
 --| Send file by its path using specified options and error handler.
 --  See http://expressjs.com/4x/api.html#res.sendfile
@@ -281,8 +282,7 @@ sendFileExt path opts callback = HandlerM \_ resp _ ->
 
 --| Transfer file as an attachment (will prompt user to download).
 download :: String -> Handler
-download path = HandlerM \_ resp _ ->
-    intlRespDownload resp path "" (\_ -> return unit)
+download path = downloadExt path "" (\_ -> return unit)
 
 --| Transfer file as an attachment using specified filename and error handler.
 downloadExt :: String -> String -> (Error -> ExpressM Unit) -> Handler
