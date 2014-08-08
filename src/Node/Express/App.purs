@@ -48,6 +48,8 @@ instance monadEffAppM :: MonadEff AppM where
 --| Run application on specified port and execute callback after launch.
 listen :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 listen (AppM act) port cb = do
+    pure express -- DO NOT DELETE THIS LINE
+    -- Otherwise call to 'require(express)' may be optimized out
     app <- intlMkApplication
     act app
     intlAppListen app port cb
