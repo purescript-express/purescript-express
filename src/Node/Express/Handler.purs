@@ -225,17 +225,14 @@ setResponseHeader field val = HandlerM \_ resp _ ->
     intlRespSetHeader resp field val
 
 --| Set cookie by its name using specified options (maxAge, path, etc).
---  See http://expressjs.com/4x/api.html#res.cookie
-setCookie :: forall o. String -> String -> { | o } -> Handler
+setCookie :: String -> String -> CookieOptions -> Handler
 setCookie name val opts = HandlerM \_ resp _ ->
     intlRespSetCookie resp name val opts
 
--- TODO: is options really necessary? Docs have only 'path' option example
 --| Clear cookie.
---  See http://expressjs.com/4x/api.html#res.clearCookie
-clearCookie :: forall o. String -> { | o } -> Handler
-clearCookie name opts = HandlerM \_ resp _ ->
-    intlRespClearCookie resp name opts
+clearCookie :: String -> String -> Handler
+clearCookie name path = HandlerM \_ resp _ ->
+    intlRespClearCookie resp name path
 
 --| Send a response. Could be object, string, buffer, etc.
 send :: forall a. a -> Handler

@@ -4,6 +4,7 @@ import Data.Foreign
 import Data.Either
 import Data.Foreign.EasyFFI
 import Data.String.Regex
+import Data.Default
 import Control.Monad.Eff
 import Control.Monad.Eff.Unsafe
 import Control.Monad.Eff.Class
@@ -65,3 +66,13 @@ instance routeRegex :: RoutePattern Regex
 class RequestParam a
 instance requestParamString :: RequestParam String
 instance requestParamNumber :: RequestParam Number
+
+--| Cookie options
+--  - maxAge -- time in msecs
+--  - signed -- use secret to sign if true
+--  - path   -- cookie path
+data CookieOptions = CookieOptions { maxAge :: Number, signed :: Boolean, path :: String }
+
+instance defaultCookieOptions :: Default CookieOptions where
+    def = CookieOptions { maxAge: oneYear, signed: false, path: "/" }
+      where oneYear = 365 * 24 * 60 * 60 * 1000

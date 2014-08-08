@@ -31,18 +31,18 @@ intlRespSetHeader = unsafeForeignProcedure ["resp", "field", "val", ""]
 
 
 intlRespSetCookie ::
-    forall opts.
-    Response -> String -> String -> { | opts } -> ExpressM Unit
-intlRespSetCookie = unsafeForeignProcedure
-    ["resp", "name", "value", "opts", ""]
-    "resp.cookie(name, value, opts);"
+    Response -> String -> String -> CookieOptions -> ExpressM Unit
+intlRespSetCookie resp name value (CookieOptions opts) =
+    let setter = unsafeForeignProcedure
+                    ["resp", "name", "value", "opts", ""]
+                    "resp.cookie(name, value, opts);"
+    in setter resp name value opts
 
 intlRespClearCookie ::
-    forall opts.
-    Response -> String -> { | opts } -> ExpressM Unit
+    Response -> String -> String -> ExpressM Unit
 intlRespClearCookie = unsafeForeignProcedure
-    ["resp", "name", "opts", ""]
-    "resp.clearCookie(name, opts);"
+    ["resp", "name", "path", ""]
+    "resp.clearCookie(name, {path: path || '/'});"
 
 
 intlRespSend :: forall a. Response -> a -> ExpressM Unit
