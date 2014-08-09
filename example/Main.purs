@@ -82,40 +82,39 @@ listTodosHandler = do
 createTodoHandler :: Handler
 createTodoHandler = do
     descParam <- getQueryParam "desc"
-    maybe (nextThrow $ error "Description is required") handleNewTodo descParam
-  where
-    handleNewTodo desc = do
-        newId <- liftEff $ addTodo todos { desc: desc, isDone: false }
-        sendJson {status: "Created", id: newId}
+    case descParam of
+        Nothing -> nextThrow $ error "Description is required"
+        Just desc -> do
+            newId <- liftEff $ addTodo todos { desc: desc, isDone: false }
+            sendJson {status: "Created", id: newId}
 
 updateTodoHandler :: Handler
 updateTodoHandler = do
     idParam <- getRouteParam "id"
     descParam <- getQueryParam "desc"
-    maybe (nextThrow $ error "Id is required") (\id ->
-        maybe (nextThrow $ error "Description is required") (handleUpdateTodo id) descParam) idParam
-  where
-    handleUpdateTodo id desc = do
-        liftEff $ updateTodo todos (parseNumber id) desc
-        sendJson {status: "Updated"}
+    case [idParam, descParam] of
+        [Just id, Just desc] -> do
+            liftEff $ updateTodo todos (parseNumber id) desc
+            sendJson {status: "Updated"}
+        _ -> nextThrow $ error "Id and Description are required"
 
 deleteTodoHandler :: Handler
 deleteTodoHandler = do
     idParam <- getRouteParam "id"
-    maybe (nextThrow $ error "Id is required") handleDeleteTodo idParam
-  where
-    handleDeleteTodo id = do
-        liftEff $ deleteTodo todos (parseNumber id)
-        sendJson {status: "Deleted"}
+    case idParam of
+        Nothing -> nextThrow $ error "Id is required"
+        Just id -> do
+            liftEff $ deleteTodo todos (parseNumber id)
+            sendJson {status: "Deleted"}
 
 doTodoHandler :: Handler
 doTodoHandler = do
     idParam <- getRouteParam "id"
-    maybe (nextThrow $ error "Id is required") handleDoTodo idParam
-  where
-    handleDoTodo id = do
-        liftEff $ setDone todos (parseNumber id)
-        sendJson {status: "Done"}
+    case idParam of
+        Nothing -> nextThrow $ error "Id is required"
+        Just id -> do
+            liftEff $ setDone todos (parseNumber id)
+            sendJson {status: "Done"}
 
 appSetup :: App
 appSetup = do

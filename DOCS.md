@@ -400,7 +400,7 @@ type Port = Number
 type Path = String
 ```
 ```haskell
-data CookieOptions
+newtype CookieOptions
 	 CookieOptions :: { path :: String, signed :: Boolean, maxAge :: Number } -> CookieOptions
 ```
  Cookie options
