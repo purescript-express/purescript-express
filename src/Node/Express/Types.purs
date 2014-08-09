@@ -71,7 +71,7 @@ instance requestParamNumber :: RequestParam Number
 --  - maxAge -- time in msecs
 --  - signed -- use secret to sign if true
 --  - path   -- cookie path
-data CookieOptions = CookieOptions { maxAge :: Number, signed :: Boolean, path :: String }
+newtype CookieOptions = CookieOptions { maxAge :: Number, signed :: Boolean, path :: String }
 
 instance defaultCookieOptions :: Default CookieOptions where
     def = CookieOptions { maxAge: oneYear, signed: false, path: "/" }
