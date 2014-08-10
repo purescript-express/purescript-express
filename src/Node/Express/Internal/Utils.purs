@@ -3,6 +3,7 @@ module Node.Express.Internal.Utils where
 import Data.Either
 import Data.Maybe
 import Data.Foreign.EasyFFI
+import Control.Monad.Eff.Exception
 import Node.Express.Types
 
 

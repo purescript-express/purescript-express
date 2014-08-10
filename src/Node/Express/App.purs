@@ -11,6 +11,7 @@ import Data.Function
 import Data.Maybe
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Exception
 
 import Node.Express.Types
 import Node.Express.Internal.App

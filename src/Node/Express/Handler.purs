@@ -27,6 +27,7 @@ import Data.Foreign
 import Data.Foreign.EasyFFI
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Exception
 import Control.Monad
 import Node.Express.Types
 import Node.Express.Internal.Utils

@@ -4,8 +4,9 @@ import Debug.Trace
 import Data.Maybe
 import Data.Array (map, range, zipWith, length)
 import Data.Foreign.EasyFFI
-import Control.Monad.Eff.Class
 import Control.Monad.Eff
+import Control.Monad.Eff.Class
+import Control.Monad.Eff.Exception
 import Control.Monad.ST
 import Node.Express.Types
 import Node.Express.App
@@ -57,7 +58,7 @@ logger = do
 errorHandler :: Error -> Handler
 errorHandler err = do
     setStatus 400
-    sendJson {error: getErrorMsg err}
+    sendJson {error: message err}
 
 help = { name: "Todo example"
        , purpose: "To present a subset of purescript-express package capabilities"

@@ -372,9 +372,6 @@ foreign data Application :: *
 foreign data Event :: *
 ```
 ```haskell
-foreign data Error :: *
-```
-```haskell
 foreign data Response :: *
 ```
 ```haskell
@@ -440,17 +437,6 @@ instance requestParamNumber :: RequestParam Number
 ```haskell
 instance defaultCookieOptions :: Default CookieOptions
 ```
-### Values
-```haskell
-error :: String -> Error
-```
- Create new error and set its message.
-
-```haskell
-getErrorMsg :: Error -> String
-```
- Extract message from error
-
 
 ## Control.Monad.Eff.Class
 ### Typeclasses

@@ -6,6 +6,7 @@ import Data.Foreign
 import Data.Foreign.EasyFFI
 import Data.Maybe
 import Control.Monad.Eff
+import Control.Monad.Eff.Exception
 import Node.Express.Types
 import Node.Express.Internal.Utils
 import Node.Express.Handler

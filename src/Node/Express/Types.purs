@@ -24,17 +24,8 @@ instance monadEffExpressM :: MonadEff (Eff e) where
 
 foreign import data Application :: *
 foreign import data Event :: *
-foreign import data Error :: *
 foreign import data Response :: *
 foreign import data Request :: *
-
---| Create new error and set its message.
-error :: String -> Error
-error = unsafeForeignFunction ["msg"] "new Error(msg);"
-
---| Extract message from error
-getErrorMsg :: Error -> String
-getErrorMsg = unsafeForeignFunction ["err"] "err.message;"
 
 data Protocol = Http | Https
 

@@ -30,6 +30,7 @@
     "purescript-easy-ffi"             : "*",
     "purescript-control"              : "*",
     "purescript-parsing"              : "*",
-    "purescript-foldable-traversable" : "*"
+    "purescript-foldable-traversable" : "*",
+    "purescript-exceptions"           : "*"
   }
 }
