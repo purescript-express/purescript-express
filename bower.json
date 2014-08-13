@@ -21,7 +21,7 @@
     "DOCS.md"
   ],
   "dependencies": {
-    "purescript-transformers"         : "0.0.4",
+    "purescript-transformers"         : "*",
     "purescript-foreign"              : "*",
     "purescript-arrays"               : "*",
     "purescript-maybe"                : "*",

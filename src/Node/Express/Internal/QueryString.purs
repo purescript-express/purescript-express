@@ -8,6 +8,7 @@ module Node.Express.Internal.QueryString
 import Data.Either
 import Data.Maybe
 import Data.String
+import Control.Alternative
 import Text.Parsing.Parser
 import Text.Parsing.Parser.Combinators
 import Text.Parsing.Parser.String
@@ -44,7 +45,7 @@ queryString = sepBy param (string "&")
 
 param :: Parser String Param
 param = do
-    name <- liftM1 (decode <<< joinWith "") $ many1 $ satisfy (\s -> s /= "=")
+    name <- liftM1 (decode <<< joinWith "") $ some $ satisfy (\s -> s /= "=")
     string "="
     val  <- liftM1 (decode <<< joinWith "") $ many $ satisfy (\s -> s /= "&")
     return $ Param name val
