@@ -1,6 +1,7 @@
 module Node.Express.Types where
 
 import Data.Foreign
+import Data.Foreign.Class
 import Data.Either
 import Data.Foreign.EasyFFI
 import Data.String.Regex
@@ -29,12 +30,11 @@ foreign import data Request :: *
 
 data Protocol = Http | Https
 
-instance readForeignProtocol :: ReadForeign Protocol where
-    read = ForeignParser \foreign_ ->
-        case parseForeign read foreign_ of
-             Right "http"  -> Right Http
-             Right "https" -> Right Https
-             _ -> Left "Unknown protocol"
+instance isForeignProtocol :: IsForeign Protocol where
+    read value = case readString value of
+        Right "http"  -> Right Http
+        Right "https" -> Right Https
+        _ -> Left $ JSONError "Unknown protocol"
 
 
 data Method = ALL | GET | POST | PUT | DELETE

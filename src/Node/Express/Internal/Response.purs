@@ -2,7 +2,7 @@
 module Node.Express.Internal.Response where
 
 import Data.Foreign.EasyFFI
-import Data.Foreign
+import Data.Foreign.Class
 import Data.Maybe
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
@@ -20,11 +20,11 @@ intlRespType = unsafeForeignProcedure ["resp", "t", ""]
 
 
 intlRespGetHeader ::
-    forall a. (ReadForeign a) =>
+    forall a. (IsForeign a) =>
     Response -> String -> ExpressM (Maybe a)
 intlRespGetHeader resp field = do
     let getHeaderRaw = unsafeForeignFunction ["resp", "field", ""] "resp.get(field);"
-    liftM1 (eitherToMaybe <<< parseForeign read) (getHeaderRaw resp field)
+    liftM1 (eitherToMaybe <<< read) (getHeaderRaw resp field)
 
 intlRespSetHeader :: forall a. Response -> String -> a -> ExpressM Unit
 intlRespSetHeader = unsafeForeignProcedure ["resp", "field", "val", ""]

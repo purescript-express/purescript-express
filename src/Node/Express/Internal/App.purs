@@ -3,6 +3,7 @@ module Node.Express.Internal.App where
 
 import Data.Function
 import Data.Foreign
+import Data.Foreign.Class
 import Data.Foreign.EasyFFI
 import Data.Maybe
 import Control.Monad.Eff
@@ -21,15 +22,15 @@ foreign import intlMkApplication
     :: ExpressM Application
 
 intlAppGetProp ::
-    forall a. (ReadForeign a) =>
+    forall a. (IsForeign a) =>
     Application -> String -> ExpressM (Maybe a)
 intlAppGetProp app name = do
     let getter :: Application -> String -> ExpressM Foreign
         getter = unsafeForeignFunction ["app", "name", ""] "app.get(name)"
-    liftM1 (eitherToMaybe <<< parseForeign read) (getter app name)
+    liftM1 (eitherToMaybe <<< read) (getter app name)
 
 intlAppSetProp ::
-    forall a. (ReadForeign a) =>
+    forall a. (IsForeign a) =>
     Application -> String -> a -> ExpressM Unit
 intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"

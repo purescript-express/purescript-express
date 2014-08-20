@@ -6,7 +6,7 @@ module Node.Express.App
     , http, get, post, put, delete, all
     ) where
 
-import Data.Foreign
+import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
 import Control.Monad.Eff
@@ -86,13 +86,13 @@ useOnError handler = AppM \app ->
 
 --| Get application property.
 -- See http://expressjs.com/4x/api.html#app-settings
-getProp :: forall a. (ReadForeign a) => String -> AppM (Maybe a)
+getProp :: forall a. (IsForeign a) => String -> AppM (Maybe a)
 getProp name = AppM \app ->
     intlAppGetProp app name
 
 --| Set application property.
 -- See http://expressjs.com/4x/api.html#app-settings
-setProp :: forall a. (ReadForeign a) => String -> a -> App
+setProp :: forall a. (IsForeign a) => String -> a -> App
 setProp name val = AppM \app ->
     intlAppSetProp app name val
 

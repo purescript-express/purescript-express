@@ -63,13 +63,13 @@ useOnError :: (Error -> Handler) -> App
  Use error handler. Probably this should be the last middleware to attach.
 
 ```haskell
-getProp :: forall a. (ReadForeign a) => String -> AppM (Maybe a)
+getProp :: forall a. (IsForeign a) => String -> AppM (Maybe a)
 ```
  Get application property.
  See http://expressjs.com/4x/api.html#app-settings
 
 ```haskell
-setProp :: forall a. (ReadForeign a) => String -> a -> App
+setProp :: forall a. (IsForeign a) => String -> a -> App
 ```
  Set application property.
  See http://expressjs.com/4x/api.html#app-settings
@@ -158,7 +158,7 @@ getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
   route.
 
 ```haskell
-getParam :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 ```
  Get param regardless its origin.
 
@@ -281,7 +281,7 @@ setStatus :: Number -> Handler
  Set status code.
 
 ```haskell
-getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getResponseHeader :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 ```
  Return response header value.
 
@@ -417,7 +417,7 @@ class RequestParam a where
 instance monadEffExpressM :: MonadEff (Eff e)
 ```
 ```haskell
-instance readForeignProtocol :: ReadForeign Protocol
+instance isForeignProtocol :: IsForeign Protocol
 ```
 ```haskell
 instance showMethod :: Show Method

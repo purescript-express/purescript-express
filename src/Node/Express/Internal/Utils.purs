@@ -7,7 +7,7 @@ import Control.Monad.Eff.Exception
 import Node.Express.Types
 
 
-eitherToMaybe :: forall a. Either String a -> Maybe a
+eitherToMaybe :: forall a e. Either e a -> Maybe a
 eitherToMaybe (Left _)  = Nothing
 eitherToMaybe (Right v) = Just v
 

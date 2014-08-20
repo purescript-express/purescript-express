@@ -23,7 +23,7 @@ module Node.Express.Handler
 
 
 import Data.Maybe
-import Data.Foreign
+import Data.Foreign.Class
 import Data.Foreign.EasyFFI
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
@@ -88,7 +88,7 @@ getRouteParam name = HandlerM \req _ _ ->
     intlReqRouteParam req name
 
 --| Get param regardless its origin.
-getParam :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 getParam name = HandlerM \req _ _ ->
     intlReqParam req name
 
@@ -216,7 +216,7 @@ setStatus val = HandlerM \_ resp _ ->
     intlRespSetStatus resp val
 
 --| Return response header value.
-getResponseHeader :: forall a. (ReadForeign a) => String -> HandlerM (Maybe a)
+getResponseHeader :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
     intlRespGetHeader resp field
 
