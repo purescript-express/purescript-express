@@ -1,7 +1,7 @@
 module Node.Express.Handler
     ( HandlerM()
     , Handler()
-    , withHandler, next, nextThrow
+    , withHandler, capture, next, nextThrow
     -- Request
     , getRouteParam, getParam, getQueryParam, getQueryParams
     , getRoute
@@ -64,8 +64,22 @@ instance monadEffHandlerM :: MonadEff HandlerM where
     liftEff act = HandlerM \_ _ _ -> liftEff act
 
 
-withHandler :: Handler -> Request -> Response -> ExpressM Unit -> ExpressM Unit
+withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
 withHandler (HandlerM h) = h
+
+-- | Generate a closure from a function capturing current request and response
+--   It is intended to use with async functions like `fs.readFile`
+--   Example:
+--      ```
+--      fileReadHandler :: Handler
+--      fileReadHandler = do
+--          callback <- capture $ \data ->
+--              send data
+--          fs.readFile("some_file.txt", callback)
+--      ```
+capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
+capture fn = HandlerM \req resp nxt ->
+    return $ \params -> withHandler (fn params) req resp nxt
 
 --| Call next handler/middleware in a chain.
 next :: Handler
