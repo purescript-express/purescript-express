@@ -67,16 +67,16 @@ instance monadEffHandlerM :: MonadEff HandlerM where
 withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
 withHandler (HandlerM h) = h
 
--- | Generate a closure from a function capturing current request and response
---   It is intended to use with async functions like `fs.readFile`
---   Example:
---      ```
+--| Generate a closure from a function capturing current request and response.
+--  It is intended to use with async functions like `fs.readFile`.
+--  Example:
+--
 --      fileReadHandler :: Handler
 --      fileReadHandler = do
 --          callback <- capture $ \data ->
 --              send data
 --          fs.readFile("some_file.txt", callback)
---      ```
+--
 capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
 capture fn = HandlerM \req resp nxt ->
     return $ \params -> withHandler (fn params) req resp nxt

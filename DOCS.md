@@ -136,8 +136,22 @@ instance monadEffHandlerM :: MonadEff HandlerM
 ```
 ### Values
 ```haskell
-withHandler :: Handler -> Request -> Response -> ExpressM Unit -> ExpressM Unit
+withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
 ```
+```haskell
+capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
+```
+ Generate a closure from a function capturing current request and response.
+  It is intended to use with async functions like `fs.readFile`.
+  Example:
+
+      fileReadHandler :: Handler
+      fileReadHandler = do
+          callback <- capture $ \data ->
+              send data
+          fs.readFile("some_file.txt", callback)
+
+
 ```haskell
 next :: Handler
 ```
