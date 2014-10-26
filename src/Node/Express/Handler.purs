@@ -14,7 +14,7 @@ module Node.Express.Handler
     , getUrl, getOriginalUrl
     -- Response
     , setStatus
-    , getResponseHeader, setResponseHeader, setContentType
+    , getResponseHeader, setResponseHeader, headersSent, setContentType
     , setCookie, clearCookie
     , send, sendJson, sendJsonp
     , redirect, setLocation
@@ -238,6 +238,11 @@ getResponseHeader field = HandlerM \_ resp _ -> do
 setResponseHeader :: forall a. String -> a -> Handler
 setResponseHeader field val = HandlerM \_ resp _ ->
     intlRespSetHeader resp field val
+
+--| Check if headers have been sent already
+headersSent :: HandlerM Boolean
+headersSent = HandlerM \_ resp _ ->
+    intlRespHeadersSent resp
 
 --| Set cookie by its name using specified options (maxAge, path, etc).
 setCookie :: String -> String -> CookieOptions -> Handler

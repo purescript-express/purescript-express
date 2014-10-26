@@ -86,3 +86,8 @@ intlRespDownload = unsafeForeignProcedure
     \   resp.download(path, name, function(err) { return cb(err)(); }); \
     \ }"
 
+intlRespHeadersSent ::
+    Response -> ExpressM Boolean
+intlRespHeadersSent = unsafeForeignFunction ["resp", ""]
+    "resp.headersSent"
+
