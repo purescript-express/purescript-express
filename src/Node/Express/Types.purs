@@ -46,6 +46,13 @@ instance showMethod :: Show Method where
     show PUT    = "put"
     show DELETE = "delete"
 
+instance isForeignMethod :: IsForeign Method where
+    read value = case readString value of
+        Right "GET"    -> Right GET
+        Right "POST"   -> Right POST
+        Right "PUT"    -> Right PUT
+        Right "DELETE" -> Right DELETE
+        _ -> Left $ JSONError "Unknown HTTP method"
 
 type Port = Number
 type Path = String

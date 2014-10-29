@@ -112,10 +112,14 @@ intlReqGetProtocol req = do
     let getter = unsafeForeignFunction ["req", ""] "req.protocol"
     liftM1 (eitherToMaybe <<< read) (getter req)
 
+intlReqGetMethod :: Request -> ExpressM (Maybe Method)
+intlReqGetMethod req = do
+    let getter = unsafeForeignFunction ["req", ""] "req.method"
+    liftM1 (eitherToMaybe <<< read) (getter req)
+
 
 intlReqGetUrl :: Request -> ExpressM String
 intlReqGetUrl = unsafeForeignFunction ["req", ""] "req.url"
 
 intlReqGetOriginalUrl :: Request -> ExpressM String
 intlReqGetOriginalUrl = unsafeForeignFunction ["req", ""] "req.originalUrl"
-

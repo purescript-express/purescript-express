@@ -10,7 +10,7 @@ module Node.Express.Handler
     , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
     , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
     , isFresh, isStale
-    , isXhr, getProtocol
+    , isXhr, getProtocol, getMethod
     , getUrl, getOriginalUrl
     -- Response
     , setStatus
@@ -211,6 +211,11 @@ isXhr = HandlerM \req _ _ ->
 getProtocol :: HandlerM (Maybe Protocol)
 getProtocol = HandlerM \req _ _ ->
     intlReqGetProtocol req
+
+--| Return request HTTP method
+getMethod :: HandlerM (Maybe Method)
+getMethod = HandlerM \req _ _ ->
+    intlReqGetMethod req
 
 --| Return request URL (may be modified by other handlers/middleware).
 getUrl :: HandlerM String
