@@ -80,11 +80,13 @@ intlRespDownload ::
     Response -> String -> String -> (Error -> ExpressM Unit) -> ExpressM Unit
 intlRespDownload = unsafeForeignProcedure
     ["resp", "path", "name", "cb", ""]
-    "if (name === \"\") { \
-    \   resp.download(path, function(err) { return cb(err)(); }); \
-    \ } else { \
-    \   resp.download(path, name, function(err) { return cb(err)(); }); \
-    \ }"
+    """
+    if (name === "") {
+        resp.download(path, function(err) { return cb(err)(); });
+    } else {
+        resp.download(path, name, function(err) { return cb(err)(); });
+    }
+    """
 
 intlRespHeadersSent ::
     Response -> ExpressM Boolean

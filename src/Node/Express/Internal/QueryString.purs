@@ -51,10 +51,12 @@ param = do
     return $ Param name val
 
 foreign import decode
-    "function decode(str) {\
-    \   try {\
-    \       return decodeURIComponent(str.replace(/\\+/g, ' '));\
-    \   } catch(err) {\
-    \       return str;\
-    \   }\
-    \}" :: String -> String
+    """
+    function decode(str) {
+        try {
+            return decodeURIComponent(str.replace(/\+/g, ' '));
+        } catch(err) {
+            return str;
+        }
+    }
+    """ :: String -> String
