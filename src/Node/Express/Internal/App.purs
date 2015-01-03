@@ -13,12 +13,13 @@ import Node.Express.Internal.Utils
 import Node.Express.Handler
 
 
-foreign import express "var express = require('express')" :: Unit
-
 foreign import intlMkApplication
-    "function intlMkApplication() {\
-    \    return express();\
-    \}"
+    """
+    function intlMkApplication() {
+        var express = module.require('express');
+        return express();
+    }
+    """
     :: ExpressM Application
 
 intlAppGetProp ::
@@ -44,11 +45,23 @@ intlAppHttp ::
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
 
-intlAppListen ::
+foreign import intlAppListenHttp
+    """
+    function intlAppListenHttp(app) {
+        return function(port) {
+            return function(cb) {
+                return function() {
+                    var http = module.require('http');
+                    http.createServer(app).listen(port, function(e) {
+                        return cb(e)();
+                    });
+                }
+            }
+        }
+    }
+    """::
     forall e.
     Application -> Number -> (Event -> Eff e Unit) -> ExpressM Unit
-intlAppListen = unsafeForeignProcedure ["app", "port", "cb", ""]
-    "app.listen(port, function(e) { return cb(e)(); });"
 
 
 intlAppUse ::

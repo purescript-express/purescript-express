@@ -132,5 +132,5 @@ appSetup = do
 
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
-    listen appSetup port \_ ->
+    listenHttp appSetup port \_ ->
         trace $ "Listening on " ++ show port
