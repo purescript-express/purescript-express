@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, use, useExternal, useAt, useOnParam, useOnError
+    , listenHttp, listenHttps, use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -47,11 +47,20 @@ instance monadEffAppM :: MonadEff AppM where
 
 
 --| Run application on specified port and execute callback after launch.
+--  HTTP version
 listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 listenHttp (AppM act) port cb = do
     app <- intlMkApplication
     act app
     intlAppListenHttp app port cb
+
+--| Run application on specified port and execute callback after launch.
+--  HTTPS version
+listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+listenHttps (AppM act) port opts cb = do
+    app <- intlMkApplication
+    act app
+    intlAppListenHttps app port opts cb
 
 --| Use specified middleware handler.
 use :: Handler -> App

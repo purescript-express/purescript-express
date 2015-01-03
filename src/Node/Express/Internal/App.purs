@@ -63,6 +63,26 @@ foreign import intlAppListenHttp
     forall e.
     Application -> Number -> (Event -> Eff e Unit) -> ExpressM Unit
 
+foreign import intlAppListenHttps
+    """
+    function intlAppListenHttps(app) {
+        return function(port) {
+            return function(opts) {
+                return function(cb) {
+                    return function() {
+                        var https = module.require('https');
+                        https.createServer(opts, app).listen(port, function(e) {
+                            return cb(e)();
+                        });
+                    }
+                }
+            }
+        }
+    }
+    """::
+    forall opts e.
+    Application -> Number -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+
 
 intlAppUse ::
     Application -> HandlerFn -> ExpressM Unit
