@@ -2,7 +2,7 @@
     "name": "purescript-express",
     "repository": "https://github.com/dancingrobot84/purescript-express",
     "dependencies": {
-        "express": "4.x"
+        "express": "~4.11.0"
     },
     "devDependencies": {
         "grunt": "~0.4.5",

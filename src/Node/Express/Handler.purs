@@ -3,7 +3,7 @@ module Node.Express.Handler
     , Handler()
     , withHandler, capture, next, nextThrow
     -- Request
-    , getRouteParam, getParam, getQueryParam, getQueryParams
+    , getRouteParam, getQueryParam, getQueryParams, getBodyParam
     , getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
@@ -101,10 +101,10 @@ getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     intlReqRouteParam req name
 
---| Get param regardless its origin.
-getParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
-getParam name = HandlerM \req _ _ ->
-    intlReqParam req name
+--| Get param from request's body.
+getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getBodyParam name = HandlerM \req _ _ ->
+    intlReqBodyParam req name
 
 --| Get param from query string (part of URL behind '?').
 --  If there are multiple params having equal keys

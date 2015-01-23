@@ -19,11 +19,11 @@ intlReqRouteParam req name = do
         getter = unsafeForeignFunction ["req", "name", ""] "req.params[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
-intlReqParam ::
+intlReqBodyParam ::
     forall a. (IsForeign a) =>
     Request -> String -> ExpressM (Maybe a)
-intlReqParam req name = do
-    let getter = unsafeForeignFunction ["req", "name", ""] "req.param(name)"
+intlReqBodyParam req name = do
+    let getter = unsafeForeignFunction ["req", "name", ""] "req.body[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
 intlReqQueryParams :: Request -> ExpressM [Param]
