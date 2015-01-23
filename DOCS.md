@@ -30,9 +30,16 @@ instance monadEffAppM :: MonadEff AppM
 ```
 ### Values
 ```haskell
-listen :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
+listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 ```
 >  Run application on specified port and execute callback after launch.
+>   HTTP version
+
+```haskell
+listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+```
+>  Run application on specified port and execute callback after launch.
+>   HTTPS version
 
 ```haskell
 use :: Handler -> App
@@ -172,9 +179,9 @@ getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 >   route.
 
 ```haskell
-getParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 ```
->  Get param regardless its origin.
+>  Get param from request's body.
 
 ```haskell
 getQueryParam :: String -> HandlerM (Maybe String)
@@ -278,6 +285,11 @@ isXhr :: HandlerM Boolean
 getProtocol :: HandlerM (Maybe Protocol)
 ```
 >  Return request protocol.
+
+```haskell
+getMethod :: HandlerM (Maybe Method)
+```
+>  Return request HTTP method
 
 ```haskell
 getUrl :: HandlerM String
@@ -408,6 +420,10 @@ data Method
 	 POST :: Method
 	 PUT :: Method
 	 DELETE :: Method
+	 OPTIONS :: Method
+	 HEAD :: Method
+	 TRACE :: Method
+	 CustomMethod :: String -> Method
 ```
 ```haskell
 type Port = Number
@@ -440,6 +456,9 @@ instance isForeignProtocol :: IsForeign Protocol
 ```
 ```haskell
 instance showMethod :: Show Method
+```
+```haskell
+instance isForeignMethod :: IsForeign Method
 ```
 ```haskell
 instance routePath :: RoutePattern String
