@@ -1,491 +1,815 @@
 # Module Documentation
-## Node.Express.App
-### Types
-```haskell
+
+## Module Node.Express.App
+
+#### `AppM`
+
+``` purescript
 data AppM a
 ```
->  Monad responsible for application related operations (initial setup mostly).
 
-```haskell
+Monad responsible for application related operations (initial setup mostly).
+
+#### `App`
+
+``` purescript
 type App = AppM Unit
 ```
-### Instances
-```haskell
+
+
+#### `functorAppM`
+
+``` purescript
 instance functorAppM :: Functor AppM
 ```
-```haskell
+
+
+#### `applyAppM`
+
+``` purescript
 instance applyAppM :: Apply AppM
 ```
-```haskell
+
+
+#### `applicativeAppM`
+
+``` purescript
 instance applicativeAppM :: Applicative AppM
 ```
-```haskell
+
+
+#### `bindAppM`
+
+``` purescript
 instance bindAppM :: Bind AppM
 ```
-```haskell
+
+
+#### `monadAppM`
+
+``` purescript
 instance monadAppM :: Monad AppM
 ```
-```haskell
+
+
+#### `monadEffAppM`
+
+``` purescript
 instance monadEffAppM :: MonadEff AppM
 ```
-### Values
-```haskell
+
+
+#### `listenHttp`
+
+``` purescript
 listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 ```
->  Run application on specified port and execute callback after launch.
->   HTTP version
 
-```haskell
+Run application on specified port and execute callback after launch.
+HTTP version
+
+#### `listenHttps`
+
+``` purescript
 listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
 ```
->  Run application on specified port and execute callback after launch.
->   HTTPS version
 
-```haskell
+Run application on specified port and execute callback after launch.
+HTTPS version
+
+#### `use`
+
+``` purescript
 use :: Handler -> App
 ```
->  Use specified middleware handler.
 
-```haskell
+Use specified middleware handler.
+
+#### `useExternal`
+
+``` purescript
 useExternal :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit) -> App
 ```
->  Use any function as middleware.
->   Introduced to ease usage of a bunch of external
->   middleware written for express.js.
->   See http://expressjs.com/4x/api.html#middleware
 
-```haskell
+Use any function as middleware.
+Introduced to ease usage of a bunch of external
+middleware written for express.js.
+See http://expressjs.com/4x/api.html#middleware
+
+#### `useAt`
+
+``` purescript
 useAt :: Path -> Handler -> App
 ```
->  Use specified middleware only on requests matching path.
 
-```haskell
+Use specified middleware only on requests matching path.
+
+#### `useOnParam`
+
+``` purescript
 useOnParam :: String -> (String -> Handler) -> App
 ```
->  Process route param with specified handler.
 
-```haskell
+Process route param with specified handler.
+
+#### `useOnError`
+
+``` purescript
 useOnError :: (Error -> Handler) -> App
 ```
->  Use error handler. Probably this should be the last middleware to attach.
 
-```haskell
+Use error handler. Probably this should be the last middleware to attach.
+
+#### `getProp`
+
+``` purescript
 getProp :: forall a. (IsForeign a) => String -> AppM (Maybe a)
 ```
->  Get application property.
->  See http://expressjs.com/4x/api.html#app-settings
 
-```haskell
+Get application property.
+See http://expressjs.com/4x/api.html#app-settings
+
+#### `setProp`
+
+``` purescript
 setProp :: forall a. (IsForeign a) => String -> a -> App
 ```
->  Set application property.
->  See http://expressjs.com/4x/api.html#app-settings
 
-```haskell
+Set application property.
+See http://expressjs.com/4x/api.html#app-settings
+
+#### `http`
+
+``` purescript
 http :: forall r. (RoutePattern r) => Method -> r -> Handler -> App
 ```
->  Bind specified handler to handle request matching route and method.
 
-```haskell
+Bind specified handler to handle request matching route and method.
+
+#### `get`
+
+``` purescript
 get :: forall r. (RoutePattern r) => r -> Handler -> App
 ```
->  Shortcut for `http GET`.
 
-```haskell
+Shortcut for `http GET`.
+
+#### `post`
+
+``` purescript
 post :: forall r. (RoutePattern r) => r -> Handler -> App
 ```
->  Shortcut for `http POST`.
 
-```haskell
+Shortcut for `http POST`.
+
+#### `put`
+
+``` purescript
 put :: forall r. (RoutePattern r) => r -> Handler -> App
 ```
->  Shortcut for `http PUT`.
 
-```haskell
+Shortcut for `http PUT`.
+
+#### `delete`
+
+``` purescript
 delete :: forall r. (RoutePattern r) => r -> Handler -> App
 ```
->  Shortcut for `http DELETE`.
 
-```haskell
+Shortcut for `http DELETE`.
+
+#### `all`
+
+``` purescript
 all :: forall r. (RoutePattern r) => r -> Handler -> App
 ```
->  Shortcut for `http ALL` (match on any http method).
+
+Shortcut for `http ALL` (match on any http method).
 
 
-## Node.Express.Handler
-### Types
-```haskell
+## Module Node.Express.Handler
+
+#### `HandlerM`
+
+``` purescript
 data HandlerM a
 ```
->  Monad responsible for handling single request.
 
-```haskell
+Monad responsible for handling single request.
+
+#### `Handler`
+
+``` purescript
 type Handler = HandlerM Unit
 ```
-### Instances
-```haskell
+
+
+#### `functorHandlerM`
+
+``` purescript
 instance functorHandlerM :: Functor HandlerM
 ```
-```haskell
+
+
+#### `applyHandlerM`
+
+``` purescript
 instance applyHandlerM :: Apply HandlerM
 ```
-```haskell
+
+
+#### `applicativeHandlerM`
+
+``` purescript
 instance applicativeHandlerM :: Applicative HandlerM
 ```
-```haskell
+
+
+#### `bindHandlerM`
+
+``` purescript
 instance bindHandlerM :: Bind HandlerM
 ```
-```haskell
+
+
+#### `monadHandlerM`
+
+``` purescript
 instance monadHandlerM :: Monad HandlerM
 ```
-```haskell
+
+
+#### `monadEffHandlerM`
+
+``` purescript
 instance monadEffHandlerM :: MonadEff HandlerM
 ```
-### Values
-```haskell
+
+
+#### `withHandler`
+
+``` purescript
 withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
 ```
-```haskell
+
+
+#### `capture`
+
+``` purescript
 capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
 ```
->  Generate a closure from a function capturing current request and response.
->   It is intended to use with async functions like `fs.readFile`.
->   Example:
-> 
->       fileReadHandler :: Handler
->       fileReadHandler = do
->           callback <- capture $ \data ->
->               send data
->           fs.readFile("some_file.txt", callback)
-> 
 
-```haskell
+Generate a closure from a function capturing current request and response.
+It is intended to use with async functions like `fs.readFile`.
+Example:
+
+    fileReadHandler :: Handler
+    fileReadHandler = do
+        callback <- capture $ \data ->
+            send data
+        fs.readFile("some_file.txt", callback)
+
+
+#### `next`
+
+``` purescript
 next :: Handler
 ```
->  Call next handler/middleware in a chain.
 
-```haskell
+Call next handler/middleware in a chain.
+
+#### `nextThrow`
+
+``` purescript
 nextThrow :: Error -> Handler
 ```
->  Call next handler/middleware and pass error to it.
 
-```haskell
+Call next handler/middleware and pass error to it.
+
+#### `getRouteParam`
+
+``` purescript
 getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 ```
->  Get route param value. If it is named route, e.g `/user/:id` then
->   `getRouteParam "id"` return matched part of route. If it is
->   regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
->   part that matched `(\d+)` and `getRouteParam 0` return whole
->   route.
 
-```haskell
+#### `getBodyParam`
+
+``` purescript
 getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 ```
->  Get param from request's body.
 
-```haskell
+Get param from request's body.
+NOTE: Not parsed by default, you must attach proper middleware
+      See http://expressjs.com/4x/api.html#req.body
+
+#### `getQueryParam`
+
+``` purescript
 getQueryParam :: String -> HandlerM (Maybe String)
 ```
->  Get param from query string (part of URL behind '?').
->   If there are multiple params having equal keys
->   return the first one.
 
-```haskell
+Get param from query string (part of URL behind '?').
+If there are multiple params having equal keys
+return the first one.
+
+#### `getQueryParams`
+
+``` purescript
 getQueryParams :: String -> HandlerM [String]
 ```
->  Get all params from query string having specified key.
 
-```haskell
+Get all params from query string having specified key.
+
+#### `getRoute`
+
+``` purescript
 getRoute :: HandlerM String
 ```
->  Return route that matched this request.
 
-```haskell
+Return route that matched this request.
+
+#### `getCookie`
+
+``` purescript
 getCookie :: String -> HandlerM (Maybe String)
 ```
->  Get cookie param by its key.
 
-```haskell
+Get cookie param by its key.
+
+#### `getSignedCookie`
+
+``` purescript
 getSignedCookie :: String -> HandlerM (Maybe String)
 ```
->  Get signed cookie param by its key.
 
-```haskell
+Get signed cookie param by its key.
+
+#### `getRequestHeader`
+
+``` purescript
 getRequestHeader :: String -> HandlerM (Maybe String)
 ```
->  Get request header param.
 
-```haskell
+Get request header param.
+
+#### `accepts`
+
+``` purescript
 accepts :: String -> HandlerM (Maybe String)
 ```
->  Check if specified response type will be accepted by a client.
 
-```haskell
+Check if specified response type will be accepted by a client.
+
+#### `ifAccepts`
+
+``` purescript
 ifAccepts :: String -> Handler -> Handler
 ```
->  Execute specified handler if client accepts specified response type.
 
-```haskell
+Execute specified handler if client accepts specified response type.
+
+#### `acceptsCharset`
+
+``` purescript
 acceptsCharset :: String -> HandlerM (Maybe String)
 ```
->  Check if specified charset is accepted.
 
-```haskell
+Check if specified charset is accepted.
+
+#### `acceptsLanguage`
+
+``` purescript
 acceptsLanguage :: String -> HandlerM (Maybe String)
 ```
->  Check if specified language is accepted.
 
-```haskell
+Check if specified language is accepted.
+
+#### `hasType`
+
+``` purescript
 hasType :: String -> HandlerM Boolean
 ```
->  Check if request's Content-Type field matches type.
->   See http://expressjs.com/4x/api.html#req.is
 
-```haskell
+Check if request's Content-Type field matches type.
+See http://expressjs.com/4x/api.html#req.is
+
+#### `getRemoteIp`
+
+``` purescript
 getRemoteIp :: HandlerM String
 ```
->  Return remote or upstream address.
 
-```haskell
+Return remote or upstream address.
+
+#### `getRemoteIps`
+
+``` purescript
 getRemoteIps :: HandlerM [String]
 ```
->  Return list of X-Forwarded-For proxies if any.
 
-```haskell
+Return list of X-Forwarded-For proxies if any.
+
+#### `getPath`
+
+``` purescript
 getPath :: HandlerM String
 ```
->  Return request URL pathname.
 
-```haskell
+Return request URL pathname.
+
+#### `getHostname`
+
+``` purescript
 getHostname :: HandlerM String
 ```
->  Return Host header field.
 
-```haskell
+Return Host header field.
+
+#### `getSubdomains`
+
+``` purescript
 getSubdomains :: HandlerM [String]
 ```
->  Return array of subdomains.
 
-```haskell
+Return array of subdomains.
+
+#### `isFresh`
+
+``` purescript
 isFresh :: HandlerM Boolean
 ```
->  Check that Last-Modified and/or ETag still matches.
 
-```haskell
+Check that Last-Modified and/or ETag still matches.
+
+#### `isStale`
+
+``` purescript
 isStale :: HandlerM Boolean
 ```
->  Check that Last-Modified and/or ETag do not match.
 
-```haskell
+Check that Last-Modified and/or ETag do not match.
+
+#### `isXhr`
+
+``` purescript
 isXhr :: HandlerM Boolean
 ```
->  Check if request was issued by XMLHttpRequest.
 
-```haskell
+Check if request was issued by XMLHttpRequest.
+
+#### `getProtocol`
+
+``` purescript
 getProtocol :: HandlerM (Maybe Protocol)
 ```
->  Return request protocol.
 
-```haskell
+Return request protocol.
+
+#### `getMethod`
+
+``` purescript
 getMethod :: HandlerM (Maybe Method)
 ```
->  Return request HTTP method
 
-```haskell
+Return request HTTP method
+
+#### `getUrl`
+
+``` purescript
 getUrl :: HandlerM String
 ```
->  Return request URL (may be modified by other handlers/middleware).
 
-```haskell
+Return request URL (may be modified by other handlers/middleware).
+
+#### `getOriginalUrl`
+
+``` purescript
 getOriginalUrl :: HandlerM String
 ```
->  Return request original URL.
 
-```haskell
+Return request original URL.
+
+#### `setStatus`
+
+``` purescript
 setStatus :: Number -> Handler
 ```
->  Set status code.
 
-```haskell
+#### `getResponseHeader`
+
+``` purescript
 getResponseHeader :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 ```
->  Return response header value.
 
-```haskell
+Return response header value.
+
+#### `setResponseHeader`
+
+``` purescript
 setResponseHeader :: forall a. String -> a -> Handler
 ```
->  Set response header value.
 
-```haskell
+Set response header value.
+
+#### `headersSent`
+
+``` purescript
 headersSent :: HandlerM Boolean
 ```
->  Check if headers have been sent already
 
-```haskell
+Check if headers have been sent already
+
+#### `setCookie`
+
+``` purescript
 setCookie :: String -> String -> CookieOptions -> Handler
 ```
->  Set cookie by its name using specified options (maxAge, path, etc).
 
-```haskell
+Set cookie by its name using specified options (maxAge, path, etc).
+
+#### `clearCookie`
+
+``` purescript
 clearCookie :: String -> String -> Handler
 ```
->  Clear cookie.
 
-```haskell
+Clear cookie.
+
+#### `send`
+
+``` purescript
 send :: forall a. a -> Handler
 ```
->  Send a response. Could be object, string, buffer, etc.
 
-```haskell
+Send a response. Could be object, string, buffer, etc.
+
+#### `sendJson`
+
+``` purescript
 sendJson :: forall a. a -> Handler
 ```
->  Send a JSON response. Necessary headers are set automatically.
 
-```haskell
+Send a JSON response. Necessary headers are set automatically.
+
+#### `sendJsonp`
+
+``` purescript
 sendJsonp :: forall a. a -> Handler
 ```
->  Send a JSON response with JSONP support.
 
-```haskell
+Send a JSON response with JSONP support.
+
+#### `redirect`
+
+``` purescript
 redirect :: String -> Handler
 ```
->  Redirect to the given URL setting status to 302.
 
-```haskell
+Redirect to the given URL setting status to 302.
+
+#### `setLocation`
+
+``` purescript
 setLocation :: String -> Handler
 ```
->  Set Location header.
 
-```haskell
+Set Location header.
+
+#### `setContentType`
+
+``` purescript
 setContentType :: String -> Handler
 ```
->  Set Content-Type header.
 
-```haskell
+Set Content-Type header.
+
+#### `sendFile`
+
+``` purescript
 sendFile :: String -> Handler
 ```
->  Send file by its path.
 
-```haskell
+Send file by its path.
+
+#### `sendFileExt`
+
+``` purescript
 sendFileExt :: forall o. String -> {  | o } -> (Error -> ExpressM Unit) -> Handler
 ```
->  Send file by its path using specified options and error handler.
->   See http://expressjs.com/4x/api.html#res.sendfile
 
-```haskell
+Send file by its path using specified options and error handler.
+See http://expressjs.com/4x/api.html#res.sendfile
+
+#### `download`
+
+``` purescript
 download :: String -> Handler
 ```
->  Transfer file as an attachment (will prompt user to download).
 
-```haskell
+Transfer file as an attachment (will prompt user to download).
+
+#### `downloadExt`
+
+``` purescript
 downloadExt :: String -> String -> (Error -> ExpressM Unit) -> Handler
 ```
->  Transfer file as an attachment using specified filename and error handler.
+
+Transfer file as an attachment using specified filename and error handler.
 
 
-## Node.Express.Types
-### Types
-```haskell
-foreign data Express :: !
+## Module Node.Express.Types
+
+#### `Express`
+
+``` purescript
+data Express :: !
 ```
-```haskell
+
+
+#### `ExpressM`
+
+``` purescript
 type ExpressM a = forall e. Eff (express :: Express | e) a
 ```
->  General monad, indicates that we're dealing with
->   express.js related functions.
->   Applications should use HandlerM and AppM primarily
->   and ExpressM in rare cases.
 
-```haskell
-foreign data Application :: *
-```
-```haskell
-foreign data Event :: *
-```
-```haskell
-foreign data Response :: *
-```
-```haskell
-foreign data Request :: *
-```
-```haskell
-data Protocol
-	 Http :: Protocol
-	 Https :: Protocol
-```
-```haskell
-data Method
-	 ALL :: Method
-	 GET :: Method
-	 POST :: Method
-	 PUT :: Method
-	 DELETE :: Method
-	 OPTIONS :: Method
-	 HEAD :: Method
-	 TRACE :: Method
-	 CustomMethod :: String -> Method
-```
-```haskell
-type Port = Number
-```
-```haskell
-type Path = String
-```
-```haskell
-newtype CookieOptions
-	 CookieOptions :: { path :: String, signed :: Boolean, maxAge :: Number } -> CookieOptions
-```
->  Cookie options
->   - maxAge -- time in msecs
->   - signed -- use secret to sign if true
->   - path   -- cookie path
+General monad, indicates that we're dealing with
+express.js related functions.
+Applications should use HandlerM and AppM primarily
+and ExpressM in rare cases.
 
-### Typeclasses
-```haskell
-class RoutePattern a where
-```
-```haskell
-class RequestParam a where
-```
-### Instances
-```haskell
+#### `monadEffExpressM`
+
+``` purescript
 instance monadEffExpressM :: MonadEff (Eff e)
 ```
-```haskell
+
+
+#### `Application`
+
+``` purescript
+data Application :: *
+```
+
+
+#### `Event`
+
+``` purescript
+data Event :: *
+```
+
+
+#### `Response`
+
+``` purescript
+data Response :: *
+```
+
+
+#### `Request`
+
+``` purescript
+data Request :: *
+```
+
+
+#### `Protocol`
+
+``` purescript
+data Protocol
+  = Http 
+  | Https 
+```
+
+
+#### `isForeignProtocol`
+
+``` purescript
 instance isForeignProtocol :: IsForeign Protocol
 ```
-```haskell
+
+
+#### `Method`
+
+``` purescript
+data Method
+  = ALL 
+  | GET 
+  | POST 
+  | PUT 
+  | DELETE 
+  | OPTIONS 
+  | HEAD 
+  | TRACE 
+  | CustomMethod String
+```
+
+
+#### `showMethod`
+
+``` purescript
 instance showMethod :: Show Method
 ```
-```haskell
+
+
+#### `isForeignMethod`
+
+``` purescript
 instance isForeignMethod :: IsForeign Method
 ```
-```haskell
+
+
+#### `Port`
+
+``` purescript
+type Port = Number
+```
+
+
+#### `Path`
+
+``` purescript
+type Path = String
+```
+
+
+#### `RoutePattern`
+
+``` purescript
+class RoutePattern a where
+```
+
+
+#### `routePath`
+
+``` purescript
 instance routePath :: RoutePattern String
 ```
-```haskell
+
+
+#### `routeRegex`
+
+``` purescript
 instance routeRegex :: RoutePattern Regex
 ```
-```haskell
+
+
+#### `RequestParam`
+
+``` purescript
+class RequestParam a where
+```
+
+
+#### `requestParamString`
+
+``` purescript
 instance requestParamString :: RequestParam String
 ```
-```haskell
+
+
+#### `requestParamNumber`
+
+``` purescript
 instance requestParamNumber :: RequestParam Number
 ```
-```haskell
+
+
+#### `CookieOptions`
+
+``` purescript
+newtype CookieOptions
+  = CookieOptions { path :: String, signed :: Boolean, maxAge :: Number }
+```
+
+Cookie options
+- maxAge -- time in msecs
+- signed -- use secret to sign if true
+- path   -- cookie path
+
+#### `defaultCookieOptions`
+
+``` purescript
 instance defaultCookieOptions :: Default CookieOptions
 ```
 
-## Control.Monad.Eff.Class
-### Typeclasses
-```haskell
+
+
+## Module Control.Monad.Eff.Class
+
+#### `MonadEff`
+
+``` purescript
 class MonadEff m where
-	 liftEff :: forall e a. Eff e a -> m a
+  liftEff :: forall e a. Eff e a -> m a
 ```
 
-## Data.Default
-### Typeclasses
-```haskell
+
+
+## Module Data.Default
+
+#### `Default`
+
+``` purescript
 class Default a where
-	 def :: a
+  def :: a
 ```

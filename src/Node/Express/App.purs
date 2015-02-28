@@ -47,7 +47,7 @@ instance monadEffAppM :: MonadEff AppM where
 
 
 --| Run application on specified port and execute callback after launch.
---  HTTP version
+--| HTTP version
 listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
 listenHttp (AppM act) port cb = do
     app <- intlMkApplication
@@ -55,7 +55,7 @@ listenHttp (AppM act) port cb = do
     intlAppListenHttp app port cb
 
 --| Run application on specified port and execute callback after launch.
---  HTTPS version
+--| HTTPS version
 listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
 listenHttps (AppM act) port opts cb = do
     app <- intlMkApplication
@@ -68,9 +68,9 @@ use middleware = AppM \app ->
     intlAppUse app $ withHandler middleware
 
 --| Use any function as middleware.
---  Introduced to ease usage of a bunch of external
---  middleware written for express.js.
---  See http://expressjs.com/4x/api.html#middleware
+--| Introduced to ease usage of a bunch of external
+--| middleware written for express.js.
+--| See http://expressjs.com/4x/api.html#middleware
 useExternal :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit) -> App
 useExternal fn = AppM \app ->
     intlAppUseExternal app fn
@@ -92,13 +92,13 @@ useOnError handler = AppM \app ->
 
 
 --| Get application property.
--- See http://expressjs.com/4x/api.html#app-settings
+--| See http://expressjs.com/4x/api.html#app-settings
 getProp :: forall a. (IsForeign a) => String -> AppM (Maybe a)
 getProp name = AppM \app ->
     intlAppGetProp app name
 
 --| Set application property.
--- See http://expressjs.com/4x/api.html#app-settings
+--| See http://expressjs.com/4x/api.html#app-settings
 setProp :: forall a. (IsForeign a) => String -> a -> App
 setProp name val = AppM \app ->
     intlAppSetProp app name val

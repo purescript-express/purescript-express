@@ -68,15 +68,15 @@ withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> E
 withHandler (HandlerM h) = h
 
 --| Generate a closure from a function capturing current request and response.
---  It is intended to use with async functions like `fs.readFile`.
---  Example:
---
---      fileReadHandler :: Handler
---      fileReadHandler = do
---          callback <- capture $ \data ->
---              send data
---          fs.readFile("some_file.txt", callback)
---
+--| It is intended to use with async functions like `fs.readFile`.
+--| Example:
+--|
+--|     fileReadHandler :: Handler
+--|     fileReadHandler = do
+--|         callback <- capture $ \data ->
+--|             send data
+--|         fs.readFile("some_file.txt", callback)
+--|
 capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
 capture fn = HandlerM \req resp nxt ->
     return $ \params -> withHandler (fn params) req resp nxt
@@ -93,22 +93,24 @@ nextThrow err = HandlerM \_ _ nxt ->
 -- Request --
 
 --| Get route param value. If it is named route, e.g `/user/:id` then
---  `getRouteParam "id"` return matched part of route. If it is
---  regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
---  part that matched `(\d+)` and `getRouteParam 0` return whole
---  route.
+--| `getRouteParam "id"` return matched part of route. If it is
+--| regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
+--| part that matched `(\d+)` and `getRouteParam 0` return whole
+--| route.
 getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     intlReqRouteParam req name
 
 --| Get param from request's body.
+--| NOTE: Not parsed by default, you must attach proper middleware
+--|       See http://expressjs.com/4x/api.html#req.body
 getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
 getBodyParam name = HandlerM \req _ _ ->
     intlReqBodyParam req name
 
 --| Get param from query string (part of URL behind '?').
---  If there are multiple params having equal keys
---  return the first one.
+--| If there are multiple params having equal keys
+--| return the first one.
 getQueryParam :: String -> HandlerM (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
     params <- intlReqQueryParams req
@@ -162,7 +164,7 @@ acceptsLanguage language = HandlerM \req _ _ ->
     intlReqAcceptsLanguage req language
 
 --| Check if request's Content-Type field matches type.
---  See http://expressjs.com/4x/api.html#req.is
+--| See http://expressjs.com/4x/api.html#req.is
 hasType :: String -> HandlerM Boolean
 hasType type_ = HandlerM \req _ _ ->
     intlReqHasType req type_
@@ -300,7 +302,7 @@ sendFile path = sendFileExt path {root: pwd} (\_ -> return unit)
     pwd = unsafeForeignFunction [] "process.cwd()"
 
 --| Send file by its path using specified options and error handler.
---  See http://expressjs.com/4x/api.html#res.sendfile
+--| See http://expressjs.com/4x/api.html#res.sendfile
 sendFileExt :: forall o. String -> { | o } -> (Error -> ExpressM Unit) -> Handler
 sendFileExt path opts callback = HandlerM \_ resp _ ->
     intlRespSendFile resp path opts callback
