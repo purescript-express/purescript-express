@@ -23,7 +23,8 @@ intlReqBodyParam ::
     forall a. (IsForeign a) =>
     Request -> String -> ExpressM (Maybe a)
 intlReqBodyParam req name = do
-    let getter = unsafeForeignFunction ["req", "name", ""] "req.body[name]"
+    let getter = unsafeForeignFunction ["req", "name", ""]
+                    "typeof req.body != 'undefined' && req.body[name] || undefined"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
 intlReqQueryParams :: Request -> ExpressM [Param]
