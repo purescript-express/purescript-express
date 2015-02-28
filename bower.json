@@ -34,6 +34,7 @@
   },
   "resolutions": {
     "purescript-arrays": "0.3.x",
-    "purescript-foldable-traversable": "0.2.x"
+    "purescript-foldable-traversable": "0.2.x",
+    "purescript-monoid": "~0.2.0"
   }
 }

@@ -13,11 +13,6 @@ module.exports = function(grunt) {
             "<%=libFiles%>",
         ],
 
-        exampleFiles: [
-            "example/*.purs",
-            "<%=libFiles%>",
-        ],
-
         documentedFiles: [
             "src/Node/Express/*.purs",
             "src/Control/Monad/Eff/Class.purs",
@@ -27,36 +22,30 @@ module.exports = function(grunt) {
         clean: {
             lib: ["output"],
             tests: ["output/tests.js"],
-            example: ["output/example.js"],
+            examples: [
+                "output/JSMiddleware.js",
+                "output/ToDoServer.js",
+            ],
         },
 
         pscMake: ["<%=libFiles%>"],
         dotPsci: ["<%=libFiles%>"],
 
         psc: {
+            options: {
+                modules: ["Main"],
+                main: true,
+            },
             tests: {
-                options: {
-                    modules: ["Main"],
-                    main: true,
-                },
                 src: ["<%=testsFiles%>"],
                 dest: "output/tests.js",
             },
-            example: {
-                options: {
-                    module: ["Main"],
-                    main: true,
-                },
-                src: ["<%=exampleFiles%>"],
-                dest: "output/example.js",
-            },
-        },
-
-        express: {
-            example: {
-                options: {
-                    script: 'output/example.js',
-                    background: false,
+            examples: {
+                files: {
+                    "output/JSMiddleware.js":
+                        ["examples/JSMiddleware.purs", "<%=libFiles%>"],
+                    "output/ToDoServer.js":
+                        ["examples/ToDoServer.purs", "<%=libFiles%>"],
                 },
             },
         },
@@ -71,14 +60,6 @@ module.exports = function(grunt) {
             tests: {
                 files: ["<%=testsFiles%>"],
                 tasks: ["clean:tests", "make", "psc:tests", "execute:tests"],
-                options: {
-                    interrupt: true,
-                    atBegin: true,
-                },
-            },
-            example: {
-                files: ["<%=exampleFiles%>"],
-                tasks: ["clean:example", "make", "psc:example", "express:example:stop", "express:example"],
                 options: {
                     interrupt: true,
                     atBegin: true,
@@ -101,7 +82,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-execute");
 
     grunt.registerTask("make", ["clean:lib", "pscMake", "dotPsci"]);
-    grunt.registerTask("test", ["clean:tests", "make", "psc:tests", "execute:tests"]);
-    grunt.registerTask("example", ["clean:example", "make", "psc:example", "express:example"]);
-    grunt.registerTask("default", ["test"]);
+    grunt.registerTask("test", ["clean:tests", "psc:tests", "execute:tests"]);
+    grunt.registerTask("examples", ["clean:examples", "psc:examples"]);
+    grunt.registerTask("default", ["make", "test"]);
 };
