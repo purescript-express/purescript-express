@@ -1,7 +1,8 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, use, useExternal, useAt, useOnParam, useOnError
+    , listenHttp, listenHttps, apply
+    , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -61,6 +62,10 @@ listenHttps (AppM act) port opts cb = do
     app <- intlMkApplication
     act app
     intlAppListenHttps app port opts cb
+
+--| Apply App actions to existent Express.js application
+apply :: App -> Application -> ExpressM Unit
+apply (AppM act) app = act app
 
 --| Use specified middleware handler.
 use :: Handler -> App
