@@ -20,22 +20,17 @@
     "DOCS.md"
   ],
   "dependencies": {
-    "purescript-transformers": "0.3.x",
-    "purescript-foreign": "0.2.x",
+    "purescript-transformers": "0.5.x",
+    "purescript-foreign": "0.4.x",
     "purescript-arrays": "0.3.x",
     "purescript-maybe": "0.2.x",
     "purescript-either": "0.1.x",
     "purescript-strings": "0.4.x",
     "purescript-easy-ffi": "1.0.x",
     "purescript-control": "0.2.x",
-    "purescript-parsing": "0.1.x",
-    "purescript-foldable-traversable": "0.2.x",
+    "purescript-parsing": "0.3.x",
+    "purescript-foldable-traversable": "0.3.x",
     "purescript-exceptions": "0.2.x",
     "purescript-monad-eff": "0.1.0"
-  },
-  "resolutions": {
-    "purescript-arrays": "0.3.x",
-    "purescript-foldable-traversable": "0.2.x",
-    "purescript-monoid": "~0.2.0"
   }
 }
