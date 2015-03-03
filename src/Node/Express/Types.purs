@@ -19,9 +19,6 @@ foreign import data Express :: !
 --| and ExpressM in rare cases.
 type ExpressM a = forall e. Eff (express :: Express | e) a
 
-instance monadEffExpressM :: MonadEff (Eff e) where
-    liftEff = unsafeInterleaveEff
-
 
 foreign import data Application :: *
 foreign import data Event :: *

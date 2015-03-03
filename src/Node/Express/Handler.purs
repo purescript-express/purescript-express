@@ -28,6 +28,7 @@ import Data.Foreign.EasyFFI
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
+import Control.Monad.Eff.Unsafe
 import Control.Monad
 import Node.Express.Types
 import Node.Express.Internal.Utils
@@ -60,8 +61,8 @@ instance bindHandlerM :: Bind HandlerM where
 
 instance monadHandlerM :: Monad HandlerM
 
-instance monadEffHandlerM :: MonadEff HandlerM where
-    liftEff act = HandlerM \_ _ _ -> liftEff act
+instance monadEffHandlerM :: MonadEff eff HandlerM where
+    liftEff act = HandlerM \_ _ _ -> unsafeInterleaveEff act
 
 
 withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a

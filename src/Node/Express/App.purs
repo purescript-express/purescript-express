@@ -13,6 +13,7 @@ import Data.Maybe
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
+import Control.Monad.Eff.Unsafe
 
 import Node.Express.Types
 import Node.Express.Internal.App
@@ -43,8 +44,8 @@ instance bindAppM :: Bind AppM where
 
 instance monadAppM :: Monad AppM
 
-instance monadEffAppM :: MonadEff AppM where
-    liftEff act = AppM \_ -> liftEff act
+instance monadEffAppM :: MonadEff eff AppM where
+    liftEff act = AppM \_ -> unsafeInterleaveEff act
 
 
 --| Run application on specified port and execute callback after launch.

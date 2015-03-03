@@ -30,7 +30,8 @@
     "purescript-control": "0.2.x",
     "purescript-parsing": "0.1.x",
     "purescript-foldable-traversable": "0.2.x",
-    "purescript-exceptions": "0.2.x"
+    "purescript-exceptions": "0.2.x",
+    "purescript-monad-eff": "0.1.0"
   },
   "resolutions": {
     "purescript-arrays": "0.3.x",
