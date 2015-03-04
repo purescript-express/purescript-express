@@ -78,9 +78,9 @@ withHandler (HandlerM h) = h
 --|             send data
 --|         fs.readFile("some_file.txt", callback)
 --|
-capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
+capture :: forall a b eff. (a -> HandlerM b) -> HandlerM (a -> Eff eff b)
 capture fn = HandlerM \req resp nxt ->
-    return $ \params -> withHandler (fn params) req resp nxt
+    return $ \params -> unsafeInterleaveEff $ withHandler (fn params) req resp nxt
 
 --| Call next handler/middleware in a chain.
 next :: Handler
