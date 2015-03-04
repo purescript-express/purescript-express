@@ -26,6 +26,7 @@ module.exports = function(grunt) {
                 "output/JSMiddleware.js",
                 "output/ToDoServer.js",
                 "output/EmbedApp.js",
+                "output/Capture.js",
             ],
         },
 
@@ -49,6 +50,8 @@ module.exports = function(grunt) {
                         ["examples/ToDoServer.purs", "<%=libFiles%>"],
                     "output/EmbedApp.js":
                         ["examples/EmbedApp.purs", "<%=libFiles%>"],
+                    "output/Capture.js":
+                        ["examples/Capture.purs", "<%=libFiles%>"],
                 },
             },
         },

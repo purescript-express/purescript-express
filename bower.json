@@ -32,5 +32,8 @@
     "purescript-foldable-traversable": "0.3.x",
     "purescript-exceptions": "0.2.x",
     "purescript-monad-eff": "0.1.0"
+  },
+  "devDependencies": {
+    "purescript-node-fs": "0.4.x"
   }
 }
