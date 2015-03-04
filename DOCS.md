@@ -55,7 +55,7 @@ instance monadAppM :: Monad AppM
 #### `monadEffAppM`
 
 ``` purescript
-instance monadEffAppM :: MonadEff AppM
+instance monadEffAppM :: MonadEff eff AppM
 ```
 
 
@@ -76,6 +76,14 @@ listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> Ex
 
 Run application on specified port and execute callback after launch.
 HTTPS version
+
+#### `apply`
+
+``` purescript
+apply :: App -> Application -> ExpressM Unit
+```
+
+Apply App actions to existent Express.js application
 
 #### `use`
 
@@ -242,7 +250,7 @@ instance monadHandlerM :: Monad HandlerM
 #### `monadEffHandlerM`
 
 ``` purescript
-instance monadEffHandlerM :: MonadEff HandlerM
+instance monadEffHandlerM :: MonadEff eff HandlerM
 ```
 
 
@@ -256,7 +264,7 @@ withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> E
 #### `capture`
 
 ``` purescript
-capture :: forall a b. (a -> HandlerM b) -> HandlerM (a -> ExpressM b)
+capture :: forall a b eff. (a -> HandlerM b) -> HandlerM (a -> Eff eff b)
 ```
 
 Generate a closure from a function capturing current request and response.
@@ -637,13 +645,6 @@ express.js related functions.
 Applications should use HandlerM and AppM primarily
 and ExpressM in rare cases.
 
-#### `monadEffExpressM`
-
-``` purescript
-instance monadEffExpressM :: MonadEff (Eff e)
-```
-
-
 #### `Application`
 
 ``` purescript
@@ -790,17 +791,6 @@ Cookie options
 
 ``` purescript
 instance defaultCookieOptions :: Default CookieOptions
-```
-
-
-
-## Module Control.Monad.Eff.Class
-
-#### `MonadEff`
-
-``` purescript
-class MonadEff m where
-  liftEff :: forall e a. Eff e a -> m a
 ```
 
 
