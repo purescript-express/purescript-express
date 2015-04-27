@@ -87,7 +87,7 @@ next :: Handler
 next = HandlerM \_ _ nxt -> nxt
 
 --| Call next handler/middleware and pass error to it.
-nextThrow :: Error -> Handler
+nextThrow :: forall a. Error -> HandlerM a
 nextThrow err = HandlerM \_ _ nxt ->
     intlNextWithError nxt err
 
