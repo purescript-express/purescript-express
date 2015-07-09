@@ -1,6 +1,7 @@
 -- Think twice before import this into your module, young jedi --
 module Node.Express.Internal.Request where
 
+import Prelude
 import Data.Maybe
 import Data.Either
 import Data.Foreign
@@ -27,7 +28,7 @@ intlReqBodyParam req name = do
                     "typeof req.body != 'undefined' && req.body[name] || undefined"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
-intlReqQueryParams :: Request -> ExpressM [Param]
+intlReqQueryParams :: Request -> ExpressM (Array Param)
 intlReqQueryParams req = do
     let getter = unsafeForeignFunction ["req", ""] "req.url.split('?')[1] || ''"
     query <- getter req
@@ -85,7 +86,7 @@ intlReqHasType req type_ = do
 intlReqGetRemoteIp :: Request -> ExpressM String
 intlReqGetRemoteIp = unsafeForeignFunction ["req", ""] "req.ip"
 
-intlReqGetRemoteIps :: Request -> ExpressM [String]
+intlReqGetRemoteIps :: Request -> ExpressM (Array String)
 intlReqGetRemoteIps = unsafeForeignFunction ["req", ""] "req.ips"
 
 intlReqGetPath :: Request -> ExpressM String
@@ -94,7 +95,7 @@ intlReqGetPath = unsafeForeignFunction ["req", ""] "req.path"
 intlReqGetHostname :: Request -> ExpressM String
 intlReqGetHostname = unsafeForeignFunction ["req", ""] "req.hostname"
 
-intlReqGetSubdomains :: Request -> ExpressM [String]
+intlReqGetSubdomains :: Request -> ExpressM (Array String)
 intlReqGetSubdomains = unsafeForeignFunction ["req", ""] "req.subdomains"
 
 

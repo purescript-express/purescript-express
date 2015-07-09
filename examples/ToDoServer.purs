@@ -1,11 +1,12 @@
-module Main where
+module Examples.ToDoServer where
 
-import Debug.Trace
+import Prelude hiding (apply)
 import Data.Maybe
-import Data.Array (map, range, zipWith, length)
+import Data.Array (range, zipWith, length)
 import Data.Foreign.EasyFFI
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Console (log)
 import Control.Monad.Eff.Exception
 import Control.Monad.ST
 import Node.Express.Types
@@ -14,33 +15,33 @@ import Node.Express.Handler
 
 
 -- Pretend for now that this is our cool database (:
-
-foreign import todos "var todos = [];" :: [Todo]
+todos :: Array Todo
+todos = []
 
 type Todo = { desc :: String, isDone :: Boolean }
 type IndexedTodo = { id :: Number, desc :: String, isDone :: Boolean }
 
-addTodo :: forall e. [Todo] -> Todo -> Eff e Number
+addTodo :: forall e. Array Todo -> Todo -> Eff e Number
 addTodo =
     unsafeForeignFunction ["todos", "todo", ""]
     "todos.push(todo) - 1"
 
-updateTodo :: forall e. [Todo] -> Number -> String -> Eff e Unit
+updateTodo :: forall e. Array Todo -> Number -> String -> Eff e Unit
 updateTodo =
     unsafeForeignProcedure ["todos", "id", "newDesc", ""]
     "(todos[id] || {}).desc = newDesc;"
 
-deleteTodo :: forall e. [Todo] -> Number -> Eff e Unit
+deleteTodo :: forall e. Array Todo -> Number -> Eff e Unit
 deleteTodo =
     unsafeForeignProcedure ["todos", "id", ""]
     "todos.splice(id, 1);"
 
-setDone :: forall e. [Todo] -> Number -> Eff e Unit
+setDone :: forall e. Array Todo -> Number -> Eff e Unit
 setDone =
     unsafeForeignProcedure ["todos", "id", ""]
     "(todos[id] || {}).isDone = true;"
 
-getTodosWithIndexes :: forall e. [Todo] -> Eff e [IndexedTodo]
+getTodosWithIndexes :: forall e. Array Todo -> Eff e (Array IndexedTodo)
 getTodosWithIndexes =
     unsafeForeignFunction ["todos", ""]
     "todos.map(function(t,i) { return { id: i, desc: t.desc, isDone: t.isDone }; });"
@@ -52,7 +53,7 @@ parseNumber = unsafeForeignFunction ["str"] "parseInt(str);"
 logger :: Handler
 logger = do
     url <- getOriginalUrl
-    liftEff $ trace (">>> " ++ url)
+    liftEff $ log (">>> " ++ url)
     next
 
 errorHandler :: Error -> Handler
@@ -119,8 +120,8 @@ doTodoHandler = do
 
 appSetup :: App
 appSetup = do
-    liftEff $ trace "Setting up"
-    setProp "json spaces" 4
+    liftEff $ log "Setting up"
+    setProp "json spaces" 4.0
     use logger
     get "/" indexHandler
     get "/list" listTodosHandler
@@ -133,4 +134,4 @@ appSetup = do
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
     listenHttp appSetup port \_ ->
-        trace $ "Listening on " ++ show port
+        log $ "Listening on " ++ show port

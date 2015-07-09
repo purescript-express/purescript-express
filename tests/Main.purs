@@ -1,22 +1,23 @@
 module Main where
 
-import Debug.Trace
+import Prelude
 import Data.Either
 import Data.Maybe
 import Data.Foldable (for_)
 import Control.Monad.Eff
+import Control.Monad.Eff.Console
 import Node.Express.Internal.QueryString
 
 
 type Test a b = { input :: a, output :: b }
 
 doTest :: forall a b e. (Show b, Eq b)
-       => (Test a b -> b) -> Test a b -> Eff ( trace :: Trace | e) Unit
+       => (Test a b -> b) -> Test a b -> Eff ( console :: CONSOLE | e) Unit
 doTest testFn test =
     let result = testFn test
-        printPassed = trace "✔︎"
+        printPassed = log "✔︎"
         printFailed =
-            trace ("✗\n\tExpected: \""
+            log ("✗\n\tExpected: \""
                   ++ show test.output
                   ++ "\"\n\tGot: \""
                   ++ show result
@@ -35,7 +36,7 @@ queryParserTests =
     ]
 
 -- TODO: find out why this type is not inferring
-queryGetOneTests :: [Test [Param] (Maybe String)]
+queryGetOneTests :: Array (Test (Array Param) (Maybe String))
 queryGetOneTests =
     [ {input: [Param "b" "c"],                  output: Nothing}
     , {input: [],                               output: Nothing}
@@ -52,9 +53,9 @@ queryGetAllTests =
 
 
 main = do
-    trace "Testing parser"
+    log "Testing parser"
     for_ queryParserTests $ doTest (\t -> parse t.input)
-    trace "Testing getters (one value)"
+    log "Testing getters (one value)"
     for_ queryGetOneTests $ doTest (\t -> getOne t.input "a")
-    trace "Testing getters (all values)"
+    log "Testing getters (all values)"
     for_ queryGetAllTests $ doTest (\t -> getAll t.input "a")

@@ -20,20 +20,22 @@
     "DOCS.md"
   ],
   "dependencies": {
-    "purescript-transformers": "0.5.x",
-    "purescript-foreign": "0.4.x",
-    "purescript-arrays": "0.3.x",
-    "purescript-maybe": "0.2.x",
-    "purescript-either": "0.1.x",
-    "purescript-strings": "0.4.x",
-    "purescript-easy-ffi": "1.0.x",
-    "purescript-control": "0.2.x",
-    "purescript-parsing": "0.3.x",
-    "purescript-foldable-traversable": "0.3.x",
-    "purescript-exceptions": "0.2.x",
-    "purescript-monad-eff": "0.1.0"
+    "purescript-transformers": "0.6.x",
+    "purescript-foreign": "0.5.x",
+    "purescript-arrays": "0.4.x",
+    "purescript-maybe": "0.3.x",
+    "purescript-either": "0.2.x",
+    "purescript-strings": "0.5.x",
+    "purescript-easy-ffi": "purescript-0.7-prerelease",
+    "purescript-control": "0.3.x",
+    "purescript-parsing": "0.4.x",
+    "purescript-foldable-traversable": "0.4.x",
+    "purescript-exceptions": "0.3.x",
+    "purescript-eff": "0.1.0",
+    "purescript-lists": "0.7.x"
   },
   "devDependencies": {
-    "purescript-node-fs": "0.4.x"
+    "purescript-console": "0.1.x",
+    "purescript-node-fs": "0.7.1"
   }
 }

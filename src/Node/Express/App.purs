@@ -7,6 +7,7 @@ module Node.Express.App
     , http, get, post, put, delete, all
     ) where
 
+import Prelude hiding (apply)
 import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
@@ -25,10 +26,10 @@ data AppM a = AppM (Application -> ExpressM a)
 type App = AppM Unit
 
 instance functorAppM :: Functor AppM where
-    (<$>) f (AppM h) = AppM \app -> liftM1 f $ h app
+    map f (AppM h) = AppM \app -> liftM1 f $ h app
 
 instance applyAppM :: Apply AppM where
-    (<*>) (AppM f) (AppM h) = AppM \app -> do
+    apply (AppM f) (AppM h) = AppM \app -> do
         res <- h app
         trans <- f app
         return $ trans res
@@ -37,7 +38,7 @@ instance applicativeAppM :: Applicative AppM where
     pure x = AppM \_ -> return x
 
 instance bindAppM :: Bind AppM where
-    (>>=) (AppM h) f = AppM \app -> do
+    bind (AppM h) f = AppM \app -> do
         res <- h app
         case f res of
              AppM g -> g app

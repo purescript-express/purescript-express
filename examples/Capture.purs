@@ -1,10 +1,11 @@
-module Main where
+module Examples.Capture where
 
-import Debug.Trace
+import Prelude hiding (apply)
 import Data.Maybe
 import Data.Either
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Console (log)
 import Control.Monad.Eff.Exception
 import Control.Monad.ST
 import qualified Node.Buffer as B
@@ -32,4 +33,4 @@ appSetup :: App
 appSetup = get  "/" indexHandler
 
 main = do
-    listenHttp appSetup 8080 \_ -> trace $ "Listening on 8080"
+    listenHttp appSetup 8080 \_ -> log $ "Listening on 8080"
