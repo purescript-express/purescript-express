@@ -1,6 +1,7 @@
 -- These are not the FFI wrappers you are looking for --
 module Node.Express.Internal.Response where
 
+import Prelude
 import Data.Foreign.EasyFFI
 import Data.Foreign.Class
 import Data.Maybe
@@ -10,7 +11,7 @@ import Node.Express.Internal.Utils
 import Node.Express.Types
 
 
-intlRespSetStatus :: Response -> Number -> ExpressM Unit
+intlRespSetStatus :: Response -> Int -> ExpressM Unit
 intlRespSetStatus = unsafeForeignProcedure ["resp", "code", ""]
     "resp.status(code);"
 
@@ -56,7 +57,7 @@ intlRespSendJsonp :: forall a. Response -> a -> ExpressM Unit
 intlRespSendJsonp = unsafeForeignProcedure ["resp", "data", ""]
     "resp.jsonp(data)"
 
-intlRespRedirect :: Response -> Number -> String -> ExpressM Unit
+intlRespRedirect :: Response -> Int -> String -> ExpressM Unit
 intlRespRedirect = unsafeForeignProcedure ["resp", "status", "url", ""]
     "resp.redirect(status, url)"
 

@@ -1,6 +1,7 @@
 -- Patience you must have, my young padawan. This module leave you must --
 module Node.Express.Internal.App where
 
+import Prelude
 import Data.Function
 import Data.Foreign
 import Data.Foreign.Class
@@ -13,14 +14,7 @@ import Node.Express.Internal.Utils
 import Node.Express.Handler
 
 
-foreign import intlMkApplication
-    """
-    function intlMkApplication() {
-        var express = module.require('express');
-        return express();
-    }
-    """
-    :: ExpressM Application
+foreign import intlMkApplication :: ExpressM Application
 
 intlAppGetProp ::
     forall a. (IsForeign a) =>
@@ -45,43 +39,11 @@ intlAppHttp ::
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
 
-foreign import intlAppListenHttp
-    """
-    function intlAppListenHttp(app) {
-        return function(port) {
-            return function(cb) {
-                return function() {
-                    var http = module.require('http');
-                    http.createServer(app).listen(port, function(e) {
-                        return cb(e)();
-                    });
-                }
-            }
-        }
-    }
-    """::
-    forall e.
-    Application -> Number -> (Event -> Eff e Unit) -> ExpressM Unit
+foreign import intlAppListenHttp :: forall e.
+    Application -> Int -> (Event -> Eff e Unit) -> ExpressM Unit
 
-foreign import intlAppListenHttps
-    """
-    function intlAppListenHttps(app) {
-        return function(port) {
-            return function(opts) {
-                return function(cb) {
-                    return function() {
-                        var https = module.require('https');
-                        https.createServer(opts, app).listen(port, function(e) {
-                            return cb(e)();
-                        });
-                    }
-                }
-            }
-        }
-    }
-    """::
-    forall opts e.
-    Application -> Number -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+foreign import intlAppListenHttps :: forall opts e.
+    Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
 
 
 intlAppUse ::

@@ -1,5 +1,6 @@
 module Node.Express.Internal.Utils where
 
+import Prelude
 import Data.Either
 import Data.Maybe
 import Data.Foreign.EasyFFI

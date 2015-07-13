@@ -1,5 +1,6 @@
 module Node.Express.Types where
 
+import Prelude
 import Data.Foreign
 import Data.Foreign.Class
 import Data.Either
@@ -59,7 +60,7 @@ instance isForeignMethod :: IsForeign Method where
         Right method    -> Right $ CustomMethod method
         _ -> Left $ JSONError "Unknown HTTP method"
 
-type Port = Number
+type Port = Int
 type Path = String
 
 class RoutePattern a
@@ -74,7 +75,7 @@ instance requestParamNumber :: RequestParam Number
 --| - maxAge -- time in msecs
 --| - signed -- use secret to sign if true
 --| - path   -- cookie path
-newtype CookieOptions = CookieOptions { maxAge :: Number, signed :: Boolean, path :: String }
+newtype CookieOptions = CookieOptions { maxAge :: Int, signed :: Boolean, path :: String }
 
 instance defaultCookieOptions :: Default CookieOptions where
     def = CookieOptions { maxAge: oneYear, signed: false, path: "/" }

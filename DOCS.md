@@ -1,5 +1,3 @@
-# Module Documentation
-
 ## Module Node.Express.App
 
 #### `AppM`
@@ -10,54 +8,21 @@ data AppM a
 
 Monad responsible for application related operations (initial setup mostly).
 
+##### Instances
+``` purescript
+instance functorAppM :: Functor AppM
+instance applyAppM :: Apply AppM
+instance applicativeAppM :: Applicative AppM
+instance bindAppM :: Bind AppM
+instance monadAppM :: Monad AppM
+instance monadEffAppM :: MonadEff eff AppM
+```
+
 #### `App`
 
 ``` purescript
 type App = AppM Unit
 ```
-
-
-#### `functorAppM`
-
-``` purescript
-instance functorAppM :: Functor AppM
-```
-
-
-#### `applyAppM`
-
-``` purescript
-instance applyAppM :: Apply AppM
-```
-
-
-#### `applicativeAppM`
-
-``` purescript
-instance applicativeAppM :: Applicative AppM
-```
-
-
-#### `bindAppM`
-
-``` purescript
-instance bindAppM :: Bind AppM
-```
-
-
-#### `monadAppM`
-
-``` purescript
-instance monadAppM :: Monad AppM
-```
-
-
-#### `monadEffAppM`
-
-``` purescript
-instance monadEffAppM :: MonadEff eff AppM
-```
-
 
 #### `listenHttp`
 
@@ -205,61 +170,27 @@ data HandlerM a
 
 Monad responsible for handling single request.
 
+##### Instances
+``` purescript
+instance functorHandlerM :: Functor HandlerM
+instance applyHandlerM :: Apply HandlerM
+instance applicativeHandlerM :: Applicative HandlerM
+instance bindHandlerM :: Bind HandlerM
+instance monadHandlerM :: Monad HandlerM
+instance monadEffHandlerM :: MonadEff eff HandlerM
+```
+
 #### `Handler`
 
 ``` purescript
 type Handler = HandlerM Unit
 ```
 
-
-#### `functorHandlerM`
-
-``` purescript
-instance functorHandlerM :: Functor HandlerM
-```
-
-
-#### `applyHandlerM`
-
-``` purescript
-instance applyHandlerM :: Apply HandlerM
-```
-
-
-#### `applicativeHandlerM`
-
-``` purescript
-instance applicativeHandlerM :: Applicative HandlerM
-```
-
-
-#### `bindHandlerM`
-
-``` purescript
-instance bindHandlerM :: Bind HandlerM
-```
-
-
-#### `monadHandlerM`
-
-``` purescript
-instance monadHandlerM :: Monad HandlerM
-```
-
-
-#### `monadEffHandlerM`
-
-``` purescript
-instance monadEffHandlerM :: MonadEff eff HandlerM
-```
-
-
 #### `withHandler`
 
 ``` purescript
 withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
 ```
-
 
 #### `capture`
 
@@ -289,7 +220,7 @@ Call next handler/middleware in a chain.
 #### `nextThrow`
 
 ``` purescript
-nextThrow :: Error -> Handler
+nextThrow :: forall a. Error -> HandlerM a
 ```
 
 Call next handler/middleware and pass error to it.
@@ -323,7 +254,7 @@ return the first one.
 #### `getQueryParams`
 
 ``` purescript
-getQueryParams :: String -> HandlerM [String]
+getQueryParams :: String -> HandlerM (Array String)
 ```
 
 Get all params from query string having specified key.
@@ -412,7 +343,7 @@ Return remote or upstream address.
 #### `getRemoteIps`
 
 ``` purescript
-getRemoteIps :: HandlerM [String]
+getRemoteIps :: HandlerM (Array String)
 ```
 
 Return list of X-Forwarded-For proxies if any.
@@ -436,7 +367,7 @@ Return Host header field.
 #### `getSubdomains`
 
 ``` purescript
-getSubdomains :: HandlerM [String]
+getSubdomains :: HandlerM (Array String)
 ```
 
 Return array of subdomains.
@@ -500,7 +431,7 @@ Return request original URL.
 #### `setStatus`
 
 ``` purescript
-setStatus :: Number -> Handler
+setStatus :: Int -> Handler
 ```
 
 #### `getResponseHeader`
@@ -633,7 +564,6 @@ Transfer file as an attachment using specified filename and error handler.
 data Express :: !
 ```
 
-
 #### `ExpressM`
 
 ``` purescript
@@ -651,13 +581,11 @@ and ExpressM in rare cases.
 data Application :: *
 ```
 
-
 #### `Event`
 
 ``` purescript
 data Event :: *
 ```
-
 
 #### `Response`
 
@@ -665,66 +593,51 @@ data Event :: *
 data Response :: *
 ```
 
-
 #### `Request`
 
 ``` purescript
 data Request :: *
 ```
 
-
 #### `Protocol`
 
 ``` purescript
 data Protocol
-  = Http 
-  | Https 
+  = Http
+  | Https
 ```
 
-
-#### `isForeignProtocol`
-
+##### Instances
 ``` purescript
 instance isForeignProtocol :: IsForeign Protocol
 ```
-
 
 #### `Method`
 
 ``` purescript
 data Method
-  = ALL 
-  | GET 
-  | POST 
-  | PUT 
-  | DELETE 
-  | OPTIONS 
-  | HEAD 
-  | TRACE 
+  = ALL
+  | GET
+  | POST
+  | PUT
+  | DELETE
+  | OPTIONS
+  | HEAD
+  | TRACE
   | CustomMethod String
 ```
 
-
-#### `showMethod`
-
+##### Instances
 ``` purescript
 instance showMethod :: Show Method
-```
-
-
-#### `isForeignMethod`
-
-``` purescript
 instance isForeignMethod :: IsForeign Method
 ```
-
 
 #### `Port`
 
 ``` purescript
-type Port = Number
+type Port = Int
 ```
-
 
 #### `Path`
 
@@ -732,54 +645,35 @@ type Port = Number
 type Path = String
 ```
 
-
 #### `RoutePattern`
 
 ``` purescript
-class RoutePattern a where
+class RoutePattern a
 ```
 
-
-#### `routePath`
-
+##### Instances
 ``` purescript
 instance routePath :: RoutePattern String
-```
-
-
-#### `routeRegex`
-
-``` purescript
 instance routeRegex :: RoutePattern Regex
 ```
-
 
 #### `RequestParam`
 
 ``` purescript
-class RequestParam a where
+class RequestParam a
 ```
 
-
-#### `requestParamString`
-
+##### Instances
 ``` purescript
 instance requestParamString :: RequestParam String
-```
-
-
-#### `requestParamNumber`
-
-``` purescript
 instance requestParamNumber :: RequestParam Number
 ```
-
 
 #### `CookieOptions`
 
 ``` purescript
 newtype CookieOptions
-  = CookieOptions { path :: String, signed :: Boolean, maxAge :: Number }
+  = CookieOptions { maxAge :: Int, signed :: Boolean, path :: String }
 ```
 
 Cookie options
@@ -787,12 +681,10 @@ Cookie options
 - signed -- use secret to sign if true
 - path   -- cookie path
 
-#### `defaultCookieOptions`
-
+##### Instances
 ``` purescript
 instance defaultCookieOptions :: Default CookieOptions
 ```
-
 
 
 ## Module Data.Default
@@ -803,3 +695,6 @@ instance defaultCookieOptions :: Default CookieOptions
 class Default a where
   def :: a
 ```
+
+
+

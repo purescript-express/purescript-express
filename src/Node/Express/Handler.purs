@@ -22,6 +22,7 @@ module Node.Express.Handler
     ) where
 
 
+import Prelude
 import Data.Maybe
 import Data.Foreign.Class
 import Data.Foreign.EasyFFI
@@ -42,11 +43,11 @@ type Handler = HandlerM Unit
 
 
 instance functorHandlerM :: Functor HandlerM where
-    (<$>) f (HandlerM h) = HandlerM \req resp nxt ->
+    map f (HandlerM h) = HandlerM \req resp nxt ->
         (h req resp nxt >>= \r -> return $ f r)
 
 instance applyHandlerM :: Apply HandlerM where
-    (<*>) (HandlerM f) (HandlerM h) = HandlerM \req resp nxt -> do
+    apply (HandlerM f) (HandlerM h) = HandlerM \req resp nxt -> do
         res   <- h req resp nxt
         trans <- f req resp nxt
         return $ trans res
@@ -55,7 +56,7 @@ instance applicativeHandlerM :: Applicative HandlerM where
     pure x = HandlerM \_ _ _ -> return x
 
 instance bindHandlerM :: Bind HandlerM where
-    (>>=) (HandlerM h) f = HandlerM \req resp nxt -> do
+    bind (HandlerM h) f = HandlerM \req resp nxt -> do
         (HandlerM g) <- liftM1 f $ h req resp nxt
         g req resp nxt
 
@@ -118,7 +119,7 @@ getQueryParam name = HandlerM \req _ _ -> do
     return $ getOne params name
 
 --| Get all params from query string having specified key.
-getQueryParams :: String -> HandlerM [String]
+getQueryParams :: String -> HandlerM (Array String)
 getQueryParams name = HandlerM \req _ _ -> do
     params <- intlReqQueryParams req
     return $ getAll params name
@@ -176,7 +177,7 @@ getRemoteIp = HandlerM \req _ _ ->
     intlReqGetRemoteIp req
 
 --| Return list of X-Forwarded-For proxies if any.
-getRemoteIps :: HandlerM [String]
+getRemoteIps :: HandlerM (Array String)
 getRemoteIps = HandlerM \req _ _ ->
     intlReqGetRemoteIps req
 
@@ -191,7 +192,7 @@ getHostname = HandlerM \req _ _ ->
     intlReqGetHostname req
 
 --| Return array of subdomains.
-getSubdomains :: HandlerM [String]
+getSubdomains :: HandlerM (Array String)
 getSubdomains = HandlerM \req _ _ ->
     intlReqGetSubdomains req
 
@@ -233,7 +234,7 @@ getOriginalUrl = HandlerM \req _ _ ->
 -- Response --
 
 --| Set status code.
-setStatus :: Number -> Handler
+setStatus :: Int -> Handler
 setStatus val = HandlerM \_ resp _ ->
     intlRespSetStatus resp val
 
@@ -282,7 +283,7 @@ redirect :: String -> Handler
 redirect = redirectWithStatus 302
 
 --| Redirect to the given URL using custom status.
-redirectWithStatus :: Number -> String -> Handler
+redirectWithStatus :: Int -> String -> Handler
 redirectWithStatus status url = HandlerM \_ resp _ ->
     intlRespRedirect resp status url
 
