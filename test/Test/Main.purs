@@ -1,4 +1,4 @@
-module Main where
+module Test.Main where
 
 import Prelude
 import Data.Either

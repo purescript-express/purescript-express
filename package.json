@@ -1,18 +1,6 @@
 {
     "name": "purescript-express",
     "repository": "https://github.com/dancingrobot84/purescript-express",
-    "scripts": {
-        "docs": "psc-docs \"src/**/*.purs\" \"bower_components/*/src/**/*.purs\" --docgen Node.Express.App --docgen Node.Express.Handler --docgen Node.Express.Types --docgen Data.Default > DOCS.md",
-        "build": "psc \"tests/Main.purs\" \"examples/*.purs\" \"src/**/*.purs\" \"bower_components/purescript-*/src/**/*.purs\" -f \"examples/*.js\" -f \"src/**/*.js\" -f \"bower_components/*/src/**/*.js\" -r \"../\"",
-        "postbuild": "npm run docs",
-        "pretest": "npm run build && psc-bundle \"output/Main/index.js\" -o \"output/Main/tests.js\" --main Main",
-        "test": "node output/Main/tests.js",
-        "build-capture": "psc-bundle \"output/Examples.Capture/*.js\" -o \"output/examples/capture.js\" --main Examples.Capture",
-        "build-embedapp": "psc-bundle \"output/Examples.EmbedApp/*.js\" -o \"output/examples/embedapp.js\" --main Examples.EmbedApp",
-        "build-jsmiddleware": "psc-bundle \"output/Examples.JSMiddleware/*.js\" -o \"output/examples/jsmiddleware.js\" --main Examples.JSMiddleware",
-        "build-todoserver": "psc-bundle \"output/Examples.ToDoServer/*.js\" -o \"output/examples/todoserver.js\" --main Examples.ToDoServer",
-        "build-examples": "npm run build && npm run build-capture && npm run build-embedapp && npm run build-jsmiddleware && npm run build-todoserver"
-    },
     "dependencies": {
         "express": "~4.13.0"
     }
