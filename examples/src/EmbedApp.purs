@@ -1,4 +1,4 @@
-module Examples.EmbedApp where
+module EmbedApp where
 
 import Prelude hiding (apply)
 import Control.Monad.Eff

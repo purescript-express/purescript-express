@@ -1,4 +1,4 @@
-module Examples.ToDoServer where
+module ToDoServer where
 
 import Prelude hiding (apply)
 import Data.Maybe
@@ -131,6 +131,7 @@ appSetup = do
     get "/done/:id" doTodoHandler
     useOnError errorHandler
 
+main :: forall e. Eff (express :: Express | e) Unit
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
     listenHttp appSetup port \_ ->

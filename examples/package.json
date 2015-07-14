@@ -1,0 +1,8 @@
+{
+    "name": "purescript-express-examples",
+    "repository": "https://github.com/dancingrobot84/purescript-express/tree/master/examples",
+    "dependencies": {
+        "express": "~4.13.0",
+        "body-parser": "~1.13.2"
+    }
+}

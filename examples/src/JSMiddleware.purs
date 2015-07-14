@@ -1,4 +1,4 @@
-module Examples.JSMiddleware where
+module JSMiddleware where
 
 import Prelude hiding (apply)
 import Data.Maybe
@@ -29,5 +29,6 @@ appSetup = do
     get  "/" indexHandler
     post "/" echoHandler
 
+main :: forall e. Eff (express :: Express | e) Unit
 main = do
     listenHttp appSetup 8080 \_ -> log $ "Listening on 8080"

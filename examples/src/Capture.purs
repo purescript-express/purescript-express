@@ -1,4 +1,4 @@
-module Examples.Capture where
+module Capture where
 
 import Prelude hiding (apply)
 import Data.Maybe
@@ -19,7 +19,7 @@ import Node.Express.Handler
 indexHandler :: Handler
 indexHandler = do
     cb <- capture sendContentsHandler
-    liftEff $ F.readFile "examples/Capture.purs" cb
+    liftEff $ F.readFile "src/Examples/Capture.purs" cb
 
 sendContentsHandler :: Either Error B.Buffer -> Handler
 sendContentsHandler eitherContents =
@@ -32,5 +32,6 @@ sendContentsHandler eitherContents =
 appSetup :: App
 appSetup = get  "/" indexHandler
 
+main :: forall e. Eff (express :: Express | e) Unit
 main = do
     listenHttp appSetup 8080 \_ -> log $ "Listening on 8080"

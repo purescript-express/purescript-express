@@ -1,4 +1,4 @@
-// module Examples.EmbedApp
+// module EmbedApp
 
 exports.realMain = function(attachFn) {
     return function() {
