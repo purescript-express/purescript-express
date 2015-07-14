@@ -687,14 +687,3 @@ instance defaultCookieOptions :: Default CookieOptions
 ```
 
 
-## Module Data.Default
-
-#### `Default`
-
-``` purescript
-class Default a where
-  def :: a
-```
-
-
-

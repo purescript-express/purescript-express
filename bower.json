@@ -32,7 +32,8 @@
     "purescript-foldable-traversable": "0.4.x",
     "purescript-exceptions": "0.3.x",
     "purescript-eff": "0.1.0",
-    "purescript-lists": "0.7.x"
+    "purescript-lists": "0.7.x",
+    "purescript-data-default": "0.1.0"
   },
   "devDependencies": {
     "purescript-console": "0.1.x",
