@@ -12,5 +12,5 @@ eitherToMaybe :: forall a e. Either e a -> Maybe a
 eitherToMaybe (Left _)  = Nothing
 eitherToMaybe (Right v) = Just v
 
-intlNextWithError :: forall a. ExpressM Unit -> Error -> ExpressM a
+intlNextWithError :: forall e a. ExpressM e Unit -> Error -> ExpressM e a
 intlNextWithError = unsafeForeignProcedure ["nxt", "err", ""] "nxt(err);"

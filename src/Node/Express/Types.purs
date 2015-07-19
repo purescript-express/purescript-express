@@ -18,7 +18,7 @@ foreign import data Express :: !
 --| express.js related functions.
 --| Applications should use HandlerM and AppM primarily
 --| and ExpressM in rare cases.
-type ExpressM a = forall e. Eff (express :: Express | e) a
+type ExpressM e a = Eff (express :: Express | e) a
 
 
 foreign import data Application :: *

@@ -38,35 +38,35 @@ import Node.Express.Internal.Request
 import Node.Express.Internal.QueryString
 
 --| Monad responsible for handling single request.
-data HandlerM a = HandlerM (Request -> Response -> ExpressM Unit -> ExpressM a)
-type Handler = HandlerM Unit
+data HandlerM e a = HandlerM (Request -> Response -> ExpressM e Unit -> ExpressM e a)
+type Handler e = HandlerM e Unit
 
 
-instance functorHandlerM :: Functor HandlerM where
+instance functorHandlerM :: Functor (HandlerM e) where
     map f (HandlerM h) = HandlerM \req resp nxt ->
         (h req resp nxt >>= \r -> return $ f r)
 
-instance applyHandlerM :: Apply HandlerM where
+instance applyHandlerM :: Apply (HandlerM e) where
     apply (HandlerM f) (HandlerM h) = HandlerM \req resp nxt -> do
         res   <- h req resp nxt
         trans <- f req resp nxt
         return $ trans res
 
-instance applicativeHandlerM :: Applicative HandlerM where
+instance applicativeHandlerM :: Applicative (HandlerM e) where
     pure x = HandlerM \_ _ _ -> return x
 
-instance bindHandlerM :: Bind HandlerM where
+instance bindHandlerM :: Bind (HandlerM e) where
     bind (HandlerM h) f = HandlerM \req resp nxt -> do
         (HandlerM g) <- liftM1 f $ h req resp nxt
         g req resp nxt
 
-instance monadHandlerM :: Monad HandlerM
+instance monadHandlerM :: Monad (HandlerM e)
 
-instance monadEffHandlerM :: MonadEff eff HandlerM where
+instance monadEffHandlerM :: MonadEff eff (HandlerM eff) where
     liftEff act = HandlerM \_ _ _ -> unsafeInterleaveEff act
 
 
-withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
+withHandler :: forall e a. HandlerM e a -> Request -> Response -> ExpressM e Unit -> ExpressM e a
 withHandler (HandlerM h) = h
 
 --| Generate a closure from a function capturing current request and response.
@@ -79,16 +79,16 @@ withHandler (HandlerM h) = h
 --|             send data
 --|         fs.readFile("some_file.txt", callback)
 --|
-capture :: forall a b eff. (a -> HandlerM b) -> HandlerM (a -> Eff eff b)
+capture :: forall a b eff. (a -> HandlerM eff b) -> HandlerM eff (a -> Eff eff b)
 capture fn = HandlerM \req resp nxt ->
     return $ \params -> unsafeInterleaveEff $ withHandler (fn params) req resp nxt
 
 --| Call next handler/middleware in a chain.
-next :: Handler
+next :: forall e. Handler e
 next = HandlerM \_ _ nxt -> nxt
 
 --| Call next handler/middleware and pass error to it.
-nextThrow :: forall a. Error -> HandlerM a
+nextThrow :: forall e a. Error -> HandlerM e a
 nextThrow err = HandlerM \_ _ nxt ->
     intlNextWithError nxt err
 
@@ -99,221 +99,221 @@ nextThrow err = HandlerM \_ _ nxt ->
 --| regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
 --| part that matched `(\d+)` and `getRouteParam 0` return whole
 --| route.
-getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
+getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM e (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     intlReqRouteParam req name
 
 --| Get param from request's body.
 --| NOTE: Not parsed by default, you must attach proper middleware
 --|       See http://expressjs.com/4x/api.html#req.body
-getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getBodyParam :: forall e a. (IsForeign a) => String -> HandlerM e (Maybe a)
 getBodyParam name = HandlerM \req _ _ ->
     intlReqBodyParam req name
 
 --| Get param from query string (part of URL behind '?').
 --| If there are multiple params having equal keys
 --| return the first one.
-getQueryParam :: String -> HandlerM (Maybe String)
+getQueryParam :: forall e. String -> HandlerM e (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
     params <- intlReqQueryParams req
     return $ getOne params name
 
 --| Get all params from query string having specified key.
-getQueryParams :: String -> HandlerM (Array String)
+getQueryParams :: forall e. String -> HandlerM e (Array String)
 getQueryParams name = HandlerM \req _ _ -> do
     params <- intlReqQueryParams req
     return $ getAll params name
 
 --| Return route that matched this request.
-getRoute :: HandlerM String
+getRoute :: forall e. HandlerM e String
 getRoute = HandlerM \req _ _ ->
     intlReqRoute req
 
 --| Get cookie param by its key.
-getCookie :: String -> HandlerM (Maybe String)
+getCookie :: forall e. String -> HandlerM e (Maybe String)
 getCookie name = HandlerM \req _ _ ->
     intlReqGetCookie req name
 
 --| Get signed cookie param by its key.
-getSignedCookie :: String -> HandlerM (Maybe String)
+getSignedCookie :: forall e. String -> HandlerM e (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
     intlReqGetSignedCookie req name
 
 --| Get request header param.
-getRequestHeader :: String -> HandlerM (Maybe String)
+getRequestHeader :: forall e. String -> HandlerM e (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
     intlReqGetHeader req field
 
 --| Check if specified response type will be accepted by a client.
-accepts :: String -> HandlerM (Maybe String)
+accepts :: forall e. String -> HandlerM e (Maybe String)
 accepts types = HandlerM \req _ _ ->
     intlReqAccepts req types
 
 --| Execute specified handler if client accepts specified response type.
-ifAccepts :: String -> Handler -> Handler
+ifAccepts :: forall e. String -> Handler e -> Handler e
 ifAccepts type_ act = do
     isAccepted <- (liftM1 (maybe false (const true)) $ accepts type_)
     when isAccepted act
 
 --| Check if specified charset is accepted.
-acceptsCharset :: String -> HandlerM (Maybe String)
+acceptsCharset :: forall e. String -> HandlerM e (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->
     intlReqAcceptsCharset req charset
 
 --| Check if specified language is accepted.
-acceptsLanguage :: String -> HandlerM (Maybe String)
+acceptsLanguage :: forall e. String -> HandlerM e (Maybe String)
 acceptsLanguage language = HandlerM \req _ _ ->
     intlReqAcceptsLanguage req language
 
 --| Check if request's Content-Type field matches type.
 --| See http://expressjs.com/4x/api.html#req.is
-hasType :: String -> HandlerM Boolean
+hasType :: forall e. String -> HandlerM e Boolean
 hasType type_ = HandlerM \req _ _ ->
     intlReqHasType req type_
 
 --| Return remote or upstream address.
-getRemoteIp :: HandlerM String
+getRemoteIp :: forall e. HandlerM e String
 getRemoteIp = HandlerM \req _ _ ->
     intlReqGetRemoteIp req
 
 --| Return list of X-Forwarded-For proxies if any.
-getRemoteIps :: HandlerM (Array String)
+getRemoteIps :: forall e. HandlerM e (Array String)
 getRemoteIps = HandlerM \req _ _ ->
     intlReqGetRemoteIps req
 
 --| Return request URL pathname.
-getPath :: HandlerM String
+getPath :: forall e. HandlerM e String
 getPath = HandlerM \req _ _ ->
     intlReqGetPath req
 
 --| Return Host header field.
-getHostname :: HandlerM String
+getHostname :: forall e. HandlerM e String
 getHostname = HandlerM \req _ _ ->
     intlReqGetHostname req
 
 --| Return array of subdomains.
-getSubdomains :: HandlerM (Array String)
+getSubdomains :: forall e. HandlerM e (Array String)
 getSubdomains = HandlerM \req _ _ ->
     intlReqGetSubdomains req
 
 --| Check that Last-Modified and/or ETag still matches.
-isFresh :: HandlerM Boolean
+isFresh :: forall e. HandlerM e Boolean
 isFresh = HandlerM \req _ _ ->
     intlReqIsFresh req
 
 --| Check that Last-Modified and/or ETag do not match.
-isStale :: HandlerM Boolean
+isStale :: forall e. HandlerM e Boolean
 isStale = HandlerM \req _ _ ->
     intlReqIsStale req
 
 --| Check if request was issued by XMLHttpRequest.
-isXhr :: HandlerM Boolean
+isXhr :: forall e. HandlerM e Boolean
 isXhr = HandlerM \req _ _ ->
     intlReqIsXhr req
 
 --| Return request protocol.
-getProtocol :: HandlerM (Maybe Protocol)
+getProtocol :: forall e. HandlerM e (Maybe Protocol)
 getProtocol = HandlerM \req _ _ ->
     intlReqGetProtocol req
 
 --| Return request HTTP method
-getMethod :: HandlerM (Maybe Method)
+getMethod :: forall e. HandlerM e (Maybe Method)
 getMethod = HandlerM \req _ _ ->
     intlReqGetMethod req
 
 --| Return request URL (may be modified by other handlers/middleware).
-getUrl :: HandlerM String
+getUrl :: forall e. HandlerM e String
 getUrl = HandlerM \req _ _ ->
     intlReqGetUrl req
 
 --| Return request original URL.
-getOriginalUrl :: HandlerM String
+getOriginalUrl :: forall e. HandlerM e String
 getOriginalUrl = HandlerM \req _ _ ->
     intlReqGetOriginalUrl req
 
 -- Response --
 
 --| Set status code.
-setStatus :: Int -> Handler
+setStatus :: forall e. Int -> Handler e
 setStatus val = HandlerM \_ resp _ ->
     intlRespSetStatus resp val
 
 --| Return response header value.
-getResponseHeader :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getResponseHeader :: forall e a. (IsForeign a) => String -> HandlerM e (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
     intlRespGetHeader resp field
 
 --| Set response header value.
-setResponseHeader :: forall a. String -> a -> Handler
+setResponseHeader :: forall e a. String -> a -> Handler e
 setResponseHeader field val = HandlerM \_ resp _ ->
     intlRespSetHeader resp field val
 
 --| Check if headers have been sent already
-headersSent :: HandlerM Boolean
+headersSent :: forall e. HandlerM e Boolean
 headersSent = HandlerM \_ resp _ ->
     intlRespHeadersSent resp
 
 --| Set cookie by its name using specified options (maxAge, path, etc).
-setCookie :: String -> String -> CookieOptions -> Handler
+setCookie :: forall e. String -> String -> CookieOptions -> Handler e
 setCookie name val opts = HandlerM \_ resp _ ->
     intlRespSetCookie resp name val opts
 
 --| Clear cookie.
-clearCookie :: String -> String -> Handler
+clearCookie :: forall e. String -> String -> Handler e
 clearCookie name path = HandlerM \_ resp _ ->
     intlRespClearCookie resp name path
 
 --| Send a response. Could be object, string, buffer, etc.
-send :: forall a. a -> Handler
+send :: forall e a. a -> Handler e
 send data_ = HandlerM \_ resp _ ->
     intlRespSend resp data_
 
 --| Send a JSON response. Necessary headers are set automatically.
-sendJson :: forall a. a -> Handler
+sendJson :: forall e a. a -> Handler e
 sendJson data_ = HandlerM \_ resp _ ->
     intlRespSendJson resp data_
 
 --| Send a JSON response with JSONP support.
-sendJsonp :: forall a. a -> Handler
+sendJsonp :: forall e a. a -> Handler e
 sendJsonp data_ = HandlerM \_ resp _ ->
     intlRespSendJsonp resp data_
 
 --| Redirect to the given URL setting status to 302.
-redirect :: String -> Handler
+redirect :: forall e. String -> Handler e
 redirect = redirectWithStatus 302
 
 --| Redirect to the given URL using custom status.
-redirectWithStatus :: Int -> String -> Handler
+redirectWithStatus :: forall e. Int -> String -> Handler e
 redirectWithStatus status url = HandlerM \_ resp _ ->
     intlRespRedirect resp status url
 
 --| Set Location header.
-setLocation :: String -> Handler
+setLocation :: forall e. String -> Handler e
 setLocation url = HandlerM \_ resp _ ->
     intlRespSetLocation resp url
 
 --| Set Content-Type header.
-setContentType :: String -> Handler
+setContentType :: forall e. String -> Handler e
 setContentType t = HandlerM \_ resp _ ->
     intlRespType resp t
 
 --| Send file by its path.
-sendFile :: String -> Handler
+sendFile :: forall e. String -> Handler e
 sendFile path = sendFileExt path {root: pwd} (\_ -> return unit)
   where
     pwd = unsafeForeignFunction [] "process.cwd()"
 
 --| Send file by its path using specified options and error handler.
 --| See http://expressjs.com/4x/api.html#res.sendfile
-sendFileExt :: forall o. String -> { | o } -> (Error -> ExpressM Unit) -> Handler
+sendFileExt :: forall e o. String -> { | o } -> (Error -> ExpressM e Unit) -> Handler e
 sendFileExt path opts callback = HandlerM \_ resp _ ->
     intlRespSendFile resp path opts callback
 
 --| Transfer file as an attachment (will prompt user to download).
-download :: String -> Handler
+download :: forall e. String -> Handler e
 download path = downloadExt path "" (\_ -> return unit)
 
 --| Transfer file as an attachment using specified filename and error handler.
-downloadExt :: String -> String -> (Error -> ExpressM Unit) -> Handler
+downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e
 downloadExt path filename callback = HandlerM \_ resp _ ->
     intlRespDownload resp path filename callback
