@@ -14,10 +14,11 @@ import Test.Mock
 import Test.Unit
 import Test.Unit.Console
 
-foreign import mockMiddleware :: String -> Fn3 Request Response (ExpressM Unit) (ExpressM Unit)
+foreign import mockMiddleware :: forall e.
+    String -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
 assertProperty :: forall a e. (Show a, Eq a, IsForeign a) =>
-    String -> Maybe a -> TestMockApp (express :: Express | e)
+    String -> Maybe a -> TestMockApp (express :: EXPRESS | e)
 assertProperty name expected = assertInApp $ \report -> do
     actual <- getProp name
     let message = "Property '" ++ name ++ "' does not match: \
@@ -48,14 +49,14 @@ testValue = "TestValue"
 sendTestRequest :: forall e.
     Method
     -> String
-    -> (MockResponse -> TestMockApp (express :: Express | e))
-    -> TestMockApp (express :: Express | e)
+    -> (MockResponse -> TestMockApp (express :: EXPRESS | e))
+    -> TestMockApp (express :: EXPRESS | e)
 sendTestRequest method url testResponse =
     sendRequest method url (\x -> x) testResponse
 
 sendTestError :: forall e.
-    (MockResponse -> TestMockApp (express :: Express | e))
-    -> TestMockApp (express :: Express | e)
+    (MockResponse -> TestMockApp (express :: EXPRESS | e))
+    -> TestMockApp (express :: EXPRESS | e)
 sendTestError testResponse =
     sendError GET "http://example.com/" testValue testResponse
 

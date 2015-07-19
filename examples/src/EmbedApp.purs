@@ -7,16 +7,16 @@ import Node.Express.App
 import Node.Express.Handler
 
 
-wowHandler :: Handler
+wowHandler :: forall e. Handler e
 wowHandler = send "WOW"
 
-appSetup :: App
+appSetup :: forall e. App e
 appSetup = do
     get "/wow" wowHandler
 
-attach :: Application -> ExpressM Unit
+attach :: forall e. Application -> ExpressM e Unit
 attach = apply appSetup
 
-foreign import realMain :: forall e. (Application -> ExpressM Unit) -> Eff e Unit
+foreign import realMain :: forall e. (Application -> ExpressM e Unit) -> Eff (express :: EXPRESS | e) Unit
 
 main = realMain attach

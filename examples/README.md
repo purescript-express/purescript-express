@@ -14,10 +14,6 @@ pulp run -m <example-name>
 
 Simple Todo application. Nothing fancy, just plain text.
 
-#### `Capture`
-
-Shows how to use `capture` function to achieve asynchronicity.
-
 #### `EmbedApp`
 
 Shows how to embed purescript-express application into existing express.js

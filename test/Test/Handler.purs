@@ -20,7 +20,7 @@ import Test.Unit.Console
 import Unsafe.Coerce
 
 
-foreign import cwd :: String
+foreign import cwdJson :: String
 foreign import unsafeUpdateMapInPlace :: forall a e. StrMap.StrMap a -> String -> a -> Eff e Unit
 
 testValue = "TestValue"
@@ -259,7 +259,7 @@ testResponse = do
         setupMockApp $ use $ sendFile testFile
         sendTestRequest id $ \response -> do
             assertHeader filepathHeader (Just testFile) response
-            assertData ("{\"root\":\"" ++ cwd ++ "\"}") response
+            assertData ("{\"root\":" ++ cwdJson ++ "}") response
 
     testExpress "Handler.sendFileExt" $ do
         setupMockApp $ use $ sendFileExt testFile testData (\_ -> return unit)

@@ -1,15 +1,15 @@
 ## Module Node.Express.Types
 
-#### `Express`
+#### `EXPRESS`
 
 ``` purescript
-data Express :: !
+data EXPRESS :: !
 ```
 
 #### `ExpressM`
 
 ``` purescript
-type ExpressM a = forall e. Eff (express :: Express | e) a
+type ExpressM e a = Eff (express :: EXPRESS | e) a
 ```
 
 General monad, indicates that we're dealing with
@@ -51,6 +51,7 @@ data Protocol
 
 ##### Instances
 ``` purescript
+instance showProtocol :: Show Protocol
 instance isForeignProtocol :: IsForeign Protocol
 ```
 

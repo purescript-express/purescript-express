@@ -13,22 +13,22 @@ import Node.Express.Internal.QueryString
 
 
 intlReqRouteParam ::
-    forall a. (RequestParam a) =>
-    Request -> a -> ExpressM (Maybe String)
+    forall e a. (RequestParam a) =>
+    Request -> a -> ExpressM e (Maybe String)
 intlReqRouteParam req name = do
-    let getter :: forall a. Request -> a -> ExpressM Foreign
+    let getter :: forall e a. Request -> a -> ExpressM e Foreign
         getter = unsafeForeignFunction ["req", "name", ""] "req.params[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
 intlReqBodyParam ::
-    forall a. (IsForeign a) =>
-    Request -> String -> ExpressM (Maybe a)
+    forall e a. (IsForeign a) =>
+    Request -> String -> ExpressM e (Maybe a)
 intlReqBodyParam req name = do
     let getter = unsafeForeignFunction ["req", "name", ""]
                     "req.body == null ? void 0 : req.body[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
-intlReqQueryParams :: Request -> ExpressM (Array Param)
+intlReqQueryParams :: forall e. Request -> ExpressM e (Array Param)
 intlReqQueryParams req = do
     let getter = unsafeForeignFunction ["req", ""] "req.url.split('?')[1] || ''"
     query <- getter req
@@ -37,91 +37,91 @@ intlReqQueryParams req = do
         Right params -> return params
 
 intlReqRoute ::
-    Request -> ExpressM String
+    forall e. Request -> ExpressM e String
 intlReqRoute = unsafeForeignFunction ["req", ""] "req.route.path"
 
 
 intlReqGetCookie ::
-    Request -> String -> ExpressM (Maybe String)
+    forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqGetCookie req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.cookies[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
 intlReqGetSignedCookie ::
-    Request -> String -> ExpressM (Maybe String)
+    forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqGetSignedCookie req name = do
     let getter = unsafeForeignFunction ["req", "name", ""] "req.signedCookies[name]"
     liftM1 (eitherToMaybe <<< read) (getter req name)
 
 
 intlReqGetHeader ::
-    Request -> String -> ExpressM (Maybe String)
+    forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqGetHeader req field = do
     let getter = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
     liftM1 (eitherToMaybe <<< read) (getter req field)
 
 
-intlReqAccepts :: Request -> String -> ExpressM (Maybe String)
+intlReqAccepts :: forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqAccepts req types = do
     let getter = unsafeForeignFunction ["req", "types", ""] "req.accepts(types);"
     liftM1 (eitherToMaybe <<< read) (getter req types)
 
-intlReqAcceptsCharset :: Request -> String -> ExpressM (Maybe String)
+intlReqAcceptsCharset :: forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqAcceptsCharset req charset = do
     let getter = unsafeForeignFunction ["req", "charset", ""] "req.acceptsCharset(charset);"
     liftM1 (eitherToMaybe <<< read) (getter req charset)
 
-intlReqAcceptsLanguage :: Request -> String -> ExpressM (Maybe String)
+intlReqAcceptsLanguage :: forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqAcceptsLanguage req language = do
     let getter = unsafeForeignFunction ["req", "language", ""] "req.acceptsLanguage(language);"
     liftM1 (eitherToMaybe <<< read) (getter req language)
 
-intlReqHasType :: Request -> String -> ExpressM Boolean
+intlReqHasType :: forall e. Request -> String -> ExpressM e Boolean
 intlReqHasType req type_ = do
     let getter = unsafeForeignFunction ["req", "type", ""] "req.is(type);"
     val <- liftM1 (eitherToMaybe <<< read) (getter req type_)
     return $ fromMaybe false val
 
 
-intlReqGetRemoteIp :: Request -> ExpressM String
+intlReqGetRemoteIp :: forall e. Request -> ExpressM e String
 intlReqGetRemoteIp = unsafeForeignFunction ["req", ""] "req.ip"
 
-intlReqGetRemoteIps :: Request -> ExpressM (Array String)
+intlReqGetRemoteIps :: forall e. Request -> ExpressM e (Array String)
 intlReqGetRemoteIps = unsafeForeignFunction ["req", ""] "req.ips"
 
-intlReqGetPath :: Request -> ExpressM String
+intlReqGetPath :: forall e. Request -> ExpressM e String
 intlReqGetPath = unsafeForeignFunction ["req", ""] "req.path"
 
-intlReqGetHostname :: Request -> ExpressM String
+intlReqGetHostname :: forall e. Request -> ExpressM e String
 intlReqGetHostname = unsafeForeignFunction ["req", ""] "req.hostname"
 
-intlReqGetSubdomains :: Request -> ExpressM (Array String)
+intlReqGetSubdomains :: forall e. Request -> ExpressM e (Array String)
 intlReqGetSubdomains = unsafeForeignFunction ["req", ""] "req.subdomains"
 
 
-intlReqIsFresh :: Request -> ExpressM Boolean
+intlReqIsFresh :: forall e. Request -> ExpressM e Boolean
 intlReqIsFresh = unsafeForeignFunction ["req", ""] "req.fresh"
 
-intlReqIsStale :: Request -> ExpressM Boolean
+intlReqIsStale :: forall e. Request -> ExpressM e Boolean
 intlReqIsStale = unsafeForeignFunction ["req", ""] "req.stale"
 
 
-intlReqIsXhr :: Request -> ExpressM Boolean
+intlReqIsXhr :: forall e. Request -> ExpressM e Boolean
 intlReqIsXhr = unsafeForeignFunction ["req", ""] "req.xhr"
 
-intlReqGetProtocol :: Request -> ExpressM (Maybe Protocol)
+intlReqGetProtocol :: forall e. Request -> ExpressM e (Maybe Protocol)
 intlReqGetProtocol req = do
     let getter = unsafeForeignFunction ["req", ""] "req.protocol"
     liftM1 (eitherToMaybe <<< read) (getter req)
 
-intlReqGetMethod :: Request -> ExpressM (Maybe Method)
+intlReqGetMethod :: forall e. Request -> ExpressM e (Maybe Method)
 intlReqGetMethod req = do
     let getter = unsafeForeignFunction ["req", ""] "req.method"
     liftM1 (eitherToMaybe <<< read) (getter req)
 
 
-intlReqGetUrl :: Request -> ExpressM String
+intlReqGetUrl :: forall e. Request -> ExpressM e String
 intlReqGetUrl = unsafeForeignFunction ["req", ""] "req.url"
 
-intlReqGetOriginalUrl :: Request -> ExpressM String
+intlReqGetOriginalUrl :: forall e. Request -> ExpressM e String
 intlReqGetOriginalUrl = unsafeForeignFunction ["req", ""] "req.originalUrl"

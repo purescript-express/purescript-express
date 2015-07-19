@@ -1,6 +1,6 @@
 // module Test.Handler
 
-exports.cwd = process.cwd();
+exports.cwdJson = JSON.stringify(process.cwd());
 
 exports.unsafeUpdateMapInPlace = function(map) {
     return function(key) {
