@@ -12,6 +12,8 @@ import Data.Maybe
 import Node.Express.Types
 import Node.Express.App hiding (apply)
 import Node.Express.Handler
+import Node.Express.Request
+import Node.Express.Response
 import Prelude hiding (id)
 import qualified Data.StrMap as StrMap
 import Test.Mock

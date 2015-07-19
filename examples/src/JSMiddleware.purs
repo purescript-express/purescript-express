@@ -9,6 +9,8 @@ import Control.Monad.Eff.Console (CONSOLE(), log)
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
+import Node.Express.Request
+import Node.Express.Response
 import Node.HTTP (Server())
 
 

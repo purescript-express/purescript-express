@@ -10,8 +10,7 @@ import Data.Array (head, many, mapMaybe, some)
 import Data.List (List(..), fromList)
 import Data.Either
 import Data.Maybe
-import Data.String (joinWith, fromChar, fromCharArray)
-import Data.String.Unsafe (char)
+import Data.String (fromCharArray)
 import Control.Alternative
 import Text.Parsing.Parser
 import Text.Parsing.Parser.Combinators
