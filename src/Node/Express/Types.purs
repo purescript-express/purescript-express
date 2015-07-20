@@ -13,12 +13,13 @@ import Control.Monad.Eff.Class
 
 
 foreign import data Express :: !
+foreign import data EXPRESS :: !
 
 --| General monad, indicates that we're dealing with
 --| express.js related functions.
 --| Applications should use HandlerM and AppM primarily
 --| and ExpressM in rare cases.
-type ExpressM e a = Eff (express :: Express | e) a
+type ExpressM e a = Eff (express :: EXPRESS | e) a
 
 
 foreign import data Application :: *

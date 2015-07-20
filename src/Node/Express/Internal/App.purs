@@ -31,13 +31,11 @@ intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"
 
 
-type HandlerFn e = Request -> Response -> ExpressM e Unit -> ExpressM e Unit
+type HandlerFn e = Request -> Response -> Eff (express :: EXPRESS | e) Unit -> Eff (express :: EXPRESS | e) Unit
 
-intlAppHttp ::
+foreign import intlAppHttp ::
     forall e r. (RoutePattern r) =>
-    Application -> String -> r -> HandlerFn e -> ExpressM e Unit
-intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
-    "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
+    Fn4 Application String r (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
 foreign import intlAppListenHttp :: forall e.
     Application -> Int -> (Event -> Eff e Unit) -> ExpressM e Unit
@@ -45,28 +43,19 @@ foreign import intlAppListenHttp :: forall e.
 foreign import intlAppListenHttps :: forall opts e.
     Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM e Unit
 
-
-intlAppUse ::
-    forall e. Application -> HandlerFn e -> ExpressM e Unit
-intlAppUse = unsafeForeignProcedure ["app", "mw", ""]
-    "app.use(function(req, resp, next) { return mw(req)(resp)(next)(); });"
+foreign import intlAppUse ::
+    forall e. Fn2 Application (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
 intlAppUseExternal ::
     forall e. Application -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> ExpressM e Unit
 intlAppUseExternal = unsafeForeignProcedure ["app", "mw", ""] "app.use(mw);"
 
-intlAppUseAt ::
-    forall e. Application -> String -> HandlerFn e -> ExpressM e Unit
-intlAppUseAt = unsafeForeignProcedure ["app", "route", "mw", ""]
-    "app.use(route, function(req, resp, next) { return mw(req)(resp)(next)(); });"
+foreign import intlAppUseAt ::
+    forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-intlAppUseOnParam ::
-    forall e. Application -> String -> (String -> HandlerFn e) -> ExpressM e Unit
-intlAppUseOnParam = unsafeForeignProcedure ["app", "name", "cb", ""]
-    "app.param(name, function(req, resp, next, val) { return cb(val)(req)(resp)(next)(); })"
+foreign import intlAppUseOnParam ::
+    forall e. Fn3 Application String (String -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-intlAppUseOnError ::
-    forall e. Application -> (Error -> HandlerFn e) -> ExpressM e Unit
-intlAppUseOnError = unsafeForeignProcedure ["app", "cb", ""]
-    "app.use(function(err, req, resp, next) { return cb(err)(req)(resp)(next)(); })"
+foreign import intlAppUseOnError ::
+    forall e. Fn2 Application (Error -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
