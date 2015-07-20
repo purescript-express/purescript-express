@@ -40,12 +40,9 @@ import Node.Express.Internal.Request
 import Node.Express.Internal.QueryString
 
 -- | Monad responsible for handling single request.
---data HandlerM e a = HandlerM (Request -> Response -> ExpressM e Unit -> ExpressM e a)
-
 data HandlerM e a = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
 
 type ExpressHandlerM e = HandlerM (express :: EXPRESS | e)
-
 type Handler e = ExpressHandlerM e Unit
 
 instance functorHandlerM :: Functor (HandlerM e) where
@@ -75,7 +72,7 @@ runHandlerM :: forall e a. HandlerM e a -> Request -> Response -> Eff e Unit -> 
 runHandlerM (HandlerM h) req res next = launchAff (h req res next)
 
 -- | Call next handler/middleware in a chain.
-next :: forall e. ExpressHandlerM e Unit
+next :: forall e. Handler e
 next = HandlerM \_ _ nxt -> liftEff nxt
 
 -- | Call next handler/middleware and pass error to it.
@@ -141,7 +138,7 @@ accepts types = HandlerM \req _ _ ->
     liftEff $ intlReqAccepts req types
 
 -- | Execute specified handler if client accepts specified response type.
-ifAccepts :: forall e. String -> Handler e -> ExpressHandlerM e Unit
+ifAccepts :: forall e. String -> Handler e -> Handler e
 ifAccepts type_ act = do
     isAccepted <- (liftM1 (maybe false (const true)) $ accepts type_)
     when isAccepted act
@@ -225,7 +222,7 @@ getOriginalUrl = HandlerM \req _ _ ->
 -- Response --
 
 -- | Set status code.
-setStatus :: forall e. Int -> ExpressHandlerM e Unit
+setStatus :: forall e. Int -> Handler e
 setStatus val = HandlerM \_ resp _ ->
     liftEff $ intlRespSetStatus resp val
 
@@ -235,7 +232,7 @@ getResponseHeader field = HandlerM \_ resp _ -> do
     liftEff $ intlRespGetHeader resp field
 
 -- | Set response header value.
-setResponseHeader :: forall e a. String -> a -> ExpressHandlerM e Unit
+setResponseHeader :: forall e a. String -> a -> Handler e
 setResponseHeader field val = HandlerM \_ resp _ ->
     liftEff $ intlRespSetHeader resp field val
 
@@ -245,66 +242,66 @@ headersSent = HandlerM \_ resp _ ->
     liftEff $ intlRespHeadersSent resp
 
 -- | Set cookie by its name using specified options (maxAge, path, etc).
-setCookie :: forall e. String -> String -> CookieOptions -> ExpressHandlerM e Unit
+setCookie :: forall e. String -> String -> CookieOptions -> Handler e
 setCookie name val opts = HandlerM \_ resp _ ->
     liftEff $ intlRespSetCookie resp name val opts
 
 -- | Clear cookie.
-clearCookie :: forall e. String -> String -> ExpressHandlerM e Unit
+clearCookie :: forall e. String -> String -> Handler e
 clearCookie name path = HandlerM \_ resp _ ->
     liftEff $ intlRespClearCookie resp name path
 
 -- | Send a response. Could be object, string, buffer, etc.
-send :: forall e a. a -> ExpressHandlerM e Unit
+send :: forall e a. a -> Handler e
 send data_ = HandlerM \_ resp _ ->
     liftEff $ intlRespSend resp data_
 
 -- | Send a JSON response. Necessary headers are set automatically.
-sendJson :: forall e a. a -> ExpressHandlerM e Unit
+sendJson :: forall e a. a -> Handler e
 sendJson data_ = HandlerM \_ resp _ ->
     liftEff $ intlRespSendJson resp data_
 
 -- | Send a JSON response with JSONP support.
-sendJsonp :: forall e a. a -> ExpressHandlerM e Unit
+sendJsonp :: forall e a. a -> Handler e
 sendJsonp data_ = HandlerM \_ resp _ ->
     liftEff $ intlRespSendJsonp resp data_
 
 -- | Redirect to the given URL setting status to 302.
-redirect :: forall e. String -> ExpressHandlerM e Unit
+redirect :: forall e. String -> Handler e
 redirect = redirectWithStatus 302
 
 -- | Redirect to the given URL using custom status.
-redirectWithStatus :: forall e. Int -> String -> ExpressHandlerM e Unit
+redirectWithStatus :: forall e. Int -> String -> Handler e
 redirectWithStatus status url = HandlerM \_ resp _ ->
     liftEff $ intlRespRedirect resp status url
 
 -- | Set Location header.
-setLocation :: forall e. String -> ExpressHandlerM e Unit
+setLocation :: forall e. String -> Handler e
 setLocation url = HandlerM \_ resp _ ->
     liftEff $ intlRespSetLocation resp url
 
 -- | Set Content-Type header.
-setContentType :: forall e. String -> ExpressHandlerM e Unit
+setContentType :: forall e. String -> Handler e
 setContentType t = HandlerM \_ resp _ ->
     liftEff $ intlRespType resp t
 
 -- | Send file by its path.
-sendFile :: forall e. String -> ExpressHandlerM e Unit
+sendFile :: forall e. String -> Handler e
 sendFile path = sendFileExt path {root: pwd} (\_ -> return unit)
   where
     pwd = unsafeForeignFunction [] "process.cwd()"
 
 -- | Send file by its path using specified options and error handler.
 -- | See http://expressjs.com/4x/api.html#res.sendfile
-sendFileExt :: forall e o. String -> { | o } -> (Error -> ExpressM e Unit) -> ExpressHandlerM e Unit
+sendFileExt :: forall e o. String -> { | o } -> (Error -> ExpressM e Unit) -> Handler e
 sendFileExt path opts callback = HandlerM \_ resp _ ->
     liftEff $ intlRespSendFile resp path opts callback
 
 -- | Transfer file as an attachment (will prompt user to download).
-download :: forall e. String -> ExpressHandlerM e Unit
+download :: forall e. String -> Handler e
 download path = downloadExt path "" (\_ -> return unit)
 
 -- | Transfer file as an attachment using specified filename and error handler.
-downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> ExpressHandlerM e Unit
+downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e
 downloadExt path filename callback = HandlerM \_ resp _ ->
     liftEff $ intlRespDownload resp path filename callback
