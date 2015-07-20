@@ -15,10 +15,10 @@ import Control.Monad.Eff.Class
 foreign import data Express :: !
 foreign import data EXPRESS :: !
 
---| General monad, indicates that we're dealing with
---| express.js related functions.
---| Applications should use HandlerM and AppM primarily
---| and ExpressM in rare cases.
+-- | General monad, indicates that we're dealing with
+-- | express.js related functions.
+-- | Applications should use HandlerM and AppM primarily
+-- | and ExpressM in rare cases.
 type ExpressM e a = Eff (express :: EXPRESS | e) a
 
 
@@ -72,10 +72,10 @@ class RequestParam a
 instance requestParamString :: RequestParam String
 instance requestParamNumber :: RequestParam Number
 
---| Cookie options
---| - maxAge -- time in msecs
---| - signed -- use secret to sign if true
---| - path   -- cookie path
+-- | Cookie options
+-- | - maxAge -- time in msecs
+-- | - signed -- use secret to sign if true
+-- | - path   -- cookie path
 newtype CookieOptions = CookieOptions { maxAge :: Int, signed :: Boolean, path :: String }
 
 instance defaultCookieOptions :: Default CookieOptions where
