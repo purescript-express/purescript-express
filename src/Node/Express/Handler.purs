@@ -43,7 +43,7 @@ import Node.Express.Internal.QueryString
 data HandlerM e a = HandlerM (Request -> Response -> ExpressM e Unit -> ExpressM e a)
 
 data HandlerAff e a = HandlerAff (Request -> Response -> Eff e Unit -> Aff e a)
-type Handler e = HandlerAff e Unit
+type Handler e = HandlerAff (express :: EXPRESS | e) Unit
 
 instance functorHandlerM :: Functor (HandlerAff e) where
     map f (HandlerAff h) = HandlerAff \req resp nxt ->
@@ -138,7 +138,7 @@ accepts types = HandlerAff \req _ _ ->
     liftEff $ intlReqAccepts req types
 
 -- | Execute specified handler if client accepts specified response type.
-ifAccepts :: forall e. String -> Handler (express :: EXPRESS | e) -> HandlerAff (express :: EXPRESS | e) Unit
+ifAccepts :: forall e. String -> Handler e -> HandlerAff (express :: EXPRESS | e) Unit
 ifAccepts type_ act = do
     isAccepted <- (liftM1 (maybe false (const true)) $ accepts type_)
     when isAccepted act

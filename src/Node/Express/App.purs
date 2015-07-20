@@ -70,7 +70,7 @@ apply :: forall e. App (express :: EXPRESS | e) -> Application -> ExpressM e Uni
 apply (AppM act) app = act app
 
 -- | Use specified middleware handler.
-use :: forall e. Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+use :: forall e. Handler e -> App (express :: EXPRESS | e)
 use middleware = AppM \app ->
     runFn2 intlAppUse app $ runHandlerAff middleware
 
@@ -83,17 +83,17 @@ useExternal fn = AppM \app ->
     intlAppUseExternal app fn
 
 -- | Use specified middleware only on requests matching path.
-useAt :: forall e. Path -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+useAt :: forall e. Path -> Handler e -> App (express :: EXPRESS | e)
 useAt route middleware = AppM \app ->
     runFn3 intlAppUseAt app route $ runHandlerAff middleware
 
 -- | Process route param with specified handler.
-useOnParam :: forall e. String -> (String -> Handler (express :: EXPRESS | e)) -> App (express :: EXPRESS | e)
+useOnParam :: forall e. String -> (String -> Handler e) -> App (express :: EXPRESS | e)
 useOnParam param handler = AppM \app ->
     runFn3 intlAppUseOnParam app param (runHandlerAff <<< handler)
 
 -- | Use error handler. Probably this should be the last middleware to attach.
-useOnError :: forall e. (Error -> Handler (express :: EXPRESS | e)) -> App (express :: EXPRESS | e)
+useOnError :: forall e. (Error -> Handler e) -> App (express :: EXPRESS | e)
 useOnError handler = AppM \app ->
     runFn2 intlAppUseOnError app (runHandlerAff <<< handler)
 
@@ -112,27 +112,27 @@ setProp name val = AppM \app ->
 
 
 -- | Bind specified handler to handle request matching route and method.
-http :: forall e r. (RoutePattern r) => Method -> r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App (express :: EXPRESS | e)
 http method route handler = AppM \app ->
     runFn4 intlAppHttp app (show method) route $ runHandlerAff handler
 
 -- | Shortcut for `http GET`.
-get :: forall e r. (RoutePattern r) => r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+get :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
 get = http GET
 
 -- | Shortcut for `http POST`.
-post :: forall e r. (RoutePattern r) => r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+post :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
 post = http POST
 
 -- | Shortcut for `http PUT`.
-put :: forall e r. (RoutePattern r) => r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+put :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
 put = http PUT
 
 -- | Shortcut for `http DELETE`.
-delete :: forall e r. (RoutePattern r) => r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+delete :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
 delete = http DELETE
 
 -- | Shortcut for `http ALL` (match on any http method).
-all :: forall e r. (RoutePattern r) => r -> Handler (express :: EXPRESS | e) -> App (express :: EXPRESS | e)
+all :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
 all = http ALL
 
