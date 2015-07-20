@@ -72,7 +72,7 @@ apply (AppM act) app = act app
 -- | Use specified middleware handler.
 use :: forall e. Handler e -> App (express :: EXPRESS | e)
 use middleware = AppM \app ->
-    runFn2 intlAppUse app $ runHandlerAff middleware
+    runFn2 intlAppUse app $ runHandlerM middleware
 
 -- | Use any function as middleware.
 -- | Introduced to ease usage of a bunch of external
@@ -85,17 +85,17 @@ useExternal fn = AppM \app ->
 -- | Use specified middleware only on requests matching path.
 useAt :: forall e. Path -> Handler e -> App (express :: EXPRESS | e)
 useAt route middleware = AppM \app ->
-    runFn3 intlAppUseAt app route $ runHandlerAff middleware
+    runFn3 intlAppUseAt app route $ runHandlerM middleware
 
 -- | Process route param with specified handler.
 useOnParam :: forall e. String -> (String -> Handler e) -> App (express :: EXPRESS | e)
 useOnParam param handler = AppM \app ->
-    runFn3 intlAppUseOnParam app param (runHandlerAff <<< handler)
+    runFn3 intlAppUseOnParam app param (runHandlerM <<< handler)
 
 -- | Use error handler. Probably this should be the last middleware to attach.
 useOnError :: forall e. (Error -> Handler e) -> App (express :: EXPRESS | e)
 useOnError handler = AppM \app ->
-    runFn2 intlAppUseOnError app (runHandlerAff <<< handler)
+    runFn2 intlAppUseOnError app (runHandlerM <<< handler)
 
 
 -- | Get application property.
@@ -114,7 +114,7 @@ setProp name val = AppM \app ->
 -- | Bind specified handler to handle request matching route and method.
 http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App (express :: EXPRESS | e)
 http method route handler = AppM \app ->
-    runFn4 intlAppHttp app (show method) route $ runHandlerAff handler
+    runFn4 intlAppHttp app (show method) route $ runHandlerM handler
 
 -- | Shortcut for `http GET`.
 get :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)
