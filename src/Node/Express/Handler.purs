@@ -25,6 +25,7 @@ module Node.Express.Handler
 
 import Prelude
 import Data.Maybe
+import Data.Foreign
 import Data.Foreign.Class
 import Data.Foreign.EasyFFI
 import Control.Monad.Aff
@@ -126,17 +127,23 @@ foreign import reqRoute :: forall e. Request -> ExpressM e String
 -- | Get cookie param by its key.
 getCookie :: forall e. String -> ExpressHandlerM e (Maybe String)
 getCookie name = HandlerM \req _ _ ->
-    liftEff $ intlReqGetCookie req name
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_getCookie req name)
+
+foreign import _getCookie :: forall e. Request -> String -> ExpressM e Foreign
 
 -- | Get signed cookie param by its key.
 getSignedCookie :: forall e. String -> ExpressHandlerM e (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
-    liftEff $ intlReqGetSignedCookie req name
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_getSignedCookie req name)
 
+foreign import _getSignedCookie :: forall e. Request -> String -> ExpressM e Foreign
+                                   
 -- | Get request header param.
 getRequestHeader :: forall e. String -> ExpressHandlerM e (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
-    liftEff $ intlReqGetHeader req field
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_getHeader req field)
+
+foreign import _getHeader :: forall e. Request -> String -> ExpressM e Foreign
 
 -- | Check if specified response type will be accepted by a client.
 accepts :: forall e. String -> ExpressHandlerM e (Maybe String)

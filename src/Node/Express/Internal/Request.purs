@@ -36,24 +36,6 @@ intlReqQueryParams req = do
         Left _ -> return []
         Right params -> return params
 
-intlReqGetCookie ::
-    forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqGetCookie req name = do
-    let getter = unsafeForeignFunction ["req", "name", ""] "req.cookies[name]"
-    liftM1 (eitherToMaybe <<< read) (getter req name)
-
-intlReqGetSignedCookie ::
-    forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqGetSignedCookie req name = do
-    let getter = unsafeForeignFunction ["req", "name", ""] "req.signedCookies[name]"
-    liftM1 (eitherToMaybe <<< read) (getter req name)
-
-
-intlReqGetHeader ::
-    forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqGetHeader req field = do
-    let getter = unsafeForeignFunction ["req", "field", ""] "req.get(field);"
-    liftM1 (eitherToMaybe <<< read) (getter req field)
 
 
 intlReqAccepts :: forall e. Request -> String -> ExpressM e (Maybe String)
