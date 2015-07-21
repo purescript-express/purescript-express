@@ -34,8 +34,7 @@ intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
 type HandlerFn e = Request -> Response -> Eff (express :: EXPRESS | e) Unit -> Eff (express :: EXPRESS | e) Unit
 
 foreign import intlAppHttp ::
-    forall e r. (RoutePattern r) =>
-    Fn4 Application String r (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+    forall e. Fn4 Application String Foreign (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
 foreign import intlAppListenHttp :: forall e.
     Application -> Int -> (Event -> Eff e Unit) -> ExpressM e Unit

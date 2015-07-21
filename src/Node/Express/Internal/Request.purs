@@ -36,11 +36,6 @@ intlReqQueryParams req = do
         Left _ -> return []
         Right params -> return params
 
-intlReqRoute ::
-    forall e. Request -> ExpressM e String
-intlReqRoute = unsafeForeignFunction ["req", ""] "req.route.path"
-
-
 intlReqGetCookie ::
     forall e. Request -> String -> ExpressM e (Maybe String)
 intlReqGetCookie req name = do

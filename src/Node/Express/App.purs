@@ -8,6 +8,7 @@ module Node.Express.App
     ) where
 
 import Prelude hiding (apply)
+import Data.Foreign (toForeign)
 import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
@@ -114,7 +115,7 @@ setProp name val = AppM \app ->
 -- | Bind specified handler to handle request matching route and method.
 http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App (express :: EXPRESS | e)
 http method route handler = AppM \app ->
-    runFn4 intlAppHttp app (show method) route $ runHandlerM handler
+    runFn4 intlAppHttp app (show method) (toForeign route) $ runHandlerM handler
 
 -- | Shortcut for `http GET`.
 get :: forall e r. (RoutePattern r) => r -> Handler e -> App (express :: EXPRESS | e)

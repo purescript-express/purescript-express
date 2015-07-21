@@ -28,6 +28,7 @@ import Data.Maybe
 import Data.Foreign.Class
 import Data.Foreign.EasyFFI
 import Control.Monad.Aff
+import Control.Monad.Aff.Class
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
@@ -67,6 +68,9 @@ instance monadHandlerM :: Monad (HandlerM e)
 
 instance monadEffHandlerM :: MonadEff eff (HandlerM eff) where
     liftEff act = HandlerM \_ _ _ -> liftEff act
+
+instance monadAffHandlerM :: MonadAff eff (HandlerM eff) where
+    liftAff act = HandlerM \_ _ _ -> act
 
 runHandlerM :: forall e a. HandlerM e a -> Request -> Response -> Eff e Unit -> Eff e Unit
 runHandlerM (HandlerM h) req res next = launchAff (h req res next)
@@ -115,7 +119,9 @@ getQueryParams name = HandlerM \req _ _ -> do
 -- | Return route that matched this request.
 getRoute :: forall e. ExpressHandlerM e String
 getRoute = HandlerM \req _ _ ->
-    liftEff $ intlReqRoute req
+    liftEff $ reqRoute req
+
+foreign import reqRoute :: forall e. Request -> ExpressM e String
 
 -- | Get cookie param by its key.
 getCookie :: forall e. String -> ExpressHandlerM e (Maybe String)
