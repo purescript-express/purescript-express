@@ -11,8 +11,6 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Unsafe
 import Control.Monad.Eff.Class
 
-
-foreign import data Express :: !
 foreign import data EXPRESS :: !
 
 -- | General monad, indicates that we're dealing with

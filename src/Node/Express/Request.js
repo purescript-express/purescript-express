@@ -1,4 +1,4 @@
-// module Node.Express.Handler
+// module Node.Express.Request
 
 exports.reqRoute = function (req) {
     return function () {
