@@ -23,3 +23,27 @@ exports._getHeader = function (req, field) {
         return req.get(field);
     };
 };
+
+exports._accepts = function (req, types) {
+    return function () {
+        return req.accepts(types);
+    };
+};
+
+exports._acceptsCharset = function (req, charset) {
+    return function () {
+        return req.acceptsCharset(charset);
+    };
+};
+
+exports._acceptsLanguage = function (req, language) {
+    return function () {
+        return req.acceptsLanguage(language);
+    };
+};
+
+exports._hasType = function (req, type) {
+    return function () {
+        return req.is(type);
+    };
+};

@@ -57,35 +57,27 @@ getQueryParams name = HandlerM \req _ _ -> do
 -- | Return route that matched this request.
 getRoute :: forall e. ExpressHandlerM e String
 getRoute = HandlerM \req _ _ ->
-    liftEff $ reqRoute req
-
-foreign import reqRoute :: forall e. Request -> ExpressM e String
+    liftEff $ _getRoute req
 
 -- | Get cookie param by its key.
 getCookie :: forall e. String -> ExpressHandlerM e (Maybe String)
 getCookie name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< read) (_getCookie req name)
 
-foreign import _getCookie :: forall e. Request -> String -> ExpressM e Foreign
-
 -- | Get signed cookie param by its key.
 getSignedCookie :: forall e. String -> ExpressHandlerM e (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< read) (_getSignedCookie req name)
-
-foreign import _getSignedCookie :: forall e. Request -> String -> ExpressM e Foreign
                                    
 -- | Get request header param.
 getRequestHeader :: forall e. String -> ExpressHandlerM e (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< read) (_getHeader req field)
 
-foreign import _getHeader :: forall e. Request -> String -> ExpressM e Foreign
-
 -- | Check if specified response type will be accepted by a client.
 accepts :: forall e. String -> ExpressHandlerM e (Maybe String)
 accepts types = HandlerM \req _ _ ->
-    liftEff $ intlReqAccepts req types
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_accepts req types)
 
 -- | Execute specified handler if client accepts specified response type.
 ifAccepts :: forall e. String -> Handler e -> Handler e
@@ -96,18 +88,28 @@ ifAccepts type_ act = do
 -- | Check if specified charset is accepted.
 acceptsCharset :: forall e. String -> ExpressHandlerM e (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->
-    liftEff $ intlReqAcceptsCharset req charset
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_acceptsCharset req charset)
 
 -- | Check if specified language is accepted.
 acceptsLanguage :: forall e. String -> ExpressHandlerM e (Maybe String)
 acceptsLanguage language = HandlerM \req _ _ ->
-    liftEff $ intlReqAcceptsLanguage req language
+    liftEff $ liftM1 (eitherToMaybe <<< read) (_acceptsLanguage req language)
 
 -- | Check if request's Content-Type field matches type.
 -- | See http://expressjs.com/4x/api.html#req.is
 hasType :: forall e. String -> ExpressHandlerM e Boolean
-hasType type_ = HandlerM \req _ _ ->
-    liftEff $ intlReqHasType req type_
+hasType type_ = HandlerM \req _ _ -> do
+    val <- liftEff $ liftM1 (eitherToMaybe <<< read) (_hasType req type_)
+    return $ fromMaybe false val
+
+foreign import _getRoute :: forall e. Request -> ExpressM e String
+foreign import _getCookie :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _getSignedCookie :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _getHeader :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _accepts :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _acceptsCharset :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _acceptsLanguage :: forall e. Request -> String -> ExpressM e Foreign
+foreign import _hasType :: forall e. Request -> String -> ExpressM e Foreign
 
 -- | Return remote or upstream address.
 getRemoteIp :: forall e. ExpressHandlerM e String
@@ -196,26 +198,6 @@ intlReqQueryParams req = do
 
 
 
-intlReqAccepts :: forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqAccepts req types = do
-    let getter = unsafeForeignFunction ["req", "types", ""] "req.accepts(types);"
-    liftM1 (eitherToMaybe <<< read) (getter req types)
-
-intlReqAcceptsCharset :: forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqAcceptsCharset req charset = do
-    let getter = unsafeForeignFunction ["req", "charset", ""] "req.acceptsCharset(charset);"
-    liftM1 (eitherToMaybe <<< read) (getter req charset)
-
-intlReqAcceptsLanguage :: forall e. Request -> String -> ExpressM e (Maybe String)
-intlReqAcceptsLanguage req language = do
-    let getter = unsafeForeignFunction ["req", "language", ""] "req.acceptsLanguage(language);"
-    liftM1 (eitherToMaybe <<< read) (getter req language)
-
-intlReqHasType :: forall e. Request -> String -> ExpressM e Boolean
-intlReqHasType req type_ = do
-    let getter = unsafeForeignFunction ["req", "type", ""] "req.is(type);"
-    val <- liftM1 (eitherToMaybe <<< read) (getter req type_)
-    return $ fromMaybe false val
 
 
 intlReqGetRemoteIp :: forall e. Request -> ExpressM e String
