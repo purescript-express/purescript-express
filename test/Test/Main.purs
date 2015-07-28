@@ -5,3 +5,4 @@ import Test.Unit
 
 main = runTest do
     Test.QueryString.testSuite
+    Test.App.testSuite
