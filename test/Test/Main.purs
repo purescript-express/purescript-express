@@ -1,6 +1,7 @@
 module Test.Main where
 
 import Prelude
+import Test.Unit
 
-main = do
-    Test.QueryString.runTests
+main = runTest do
+    Test.QueryString.testSuite

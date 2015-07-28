@@ -1,4 +1,4 @@
-module Test.QueryString (runTests) where
+module Test.QueryString (testSuite) where
 
 import Data.Either
 import Data.Foldable (for_)
@@ -40,7 +40,7 @@ doTest fun testCase = do
         msg = show actual ++ " should equal " ++ show testCase.expected
     assert msg (actual == testCase.expected)
 
-runTests = runTest do
+testSuite = do
     test "QueryString.parse" do
         for_ queryParserTestCases $ doTest (\t -> parse t)
     test "QueryString.getOne" do
