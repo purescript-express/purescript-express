@@ -3,11 +3,13 @@ module Test.App (testSuite) where
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
+import Data.Array (zip, zipWith, foldM, length)
 import Data.Foreign.Class
 import Data.Foreign.Null
 import Data.Foreign.Undefined
 import Data.Function
 import Data.Maybe
+import Data.Tuple
 import Node.Express.Types
 import Node.Express.Internal.App
 import Prelude
@@ -15,61 +17,65 @@ import Test.Unit
 import Test.Unit.Console
 import Unsafe.Coerce
 
+type FnCall = { name :: String, arguments :: Array String }
+
+fnCall :: String -> Array String -> FnCall
+fnCall name args = { name: name, arguments: args }
+
+foreign import putCall :: Fn2 Application FnCall Unit
+foreign import getCalls :: Fn1 Application (Array FnCall)
+foreign import clearCalls :: Fn1 Application Unit
+
 foreign import createMockApp :: Fn0 Application
-foreign import registerCall :: Fn2 Application String Unit
-foreign import getCallData :: Fn1 Application String
+foreign import createMockMiddleware :: Fn1 Application (Fn3 Request Response (ExpressM Unit) (ExpressM Unit))
 
 type TestExpress e a = Eff ( express :: Express, testOutput :: TestOutput | e ) a
-
 type AssertionExpress e = Assertion ( express :: Express, testOutput :: TestOutput | e)
 
 toString :: forall a. a -> String
 toString = unsafeCoerce
 
-testGetProperty ::
-    forall a e. (Show a, Eq a, IsForeign a) =>
-    Application -> String -> Maybe a -> (TestResult -> TestExpress e Unit) -> TestExpress e Unit
-testGetProperty mockApp property expected callback = do
-    actual <- intlAppGetProp mockApp property
-    let errorMessage = show actual ++ " should be equal " ++ show expected
-        result = if (actual == expected) then success else failure errorMessage
-    callback result
+assertMatch :: forall a e. (Show a, Eq a) => String -> a -> a -> Assertion e
+assertMatch what expected actual = do
+    let errorMessage = what ++ " mismatch: Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
+    assert errorMessage (expected == actual)
 
 assertProperty ::
     forall a e. (Show a, Eq a, IsForeign a) =>
     Application -> String -> Maybe a -> AssertionExpress e
-assertProperty mockApp property expected =
-    testFn (testGetProperty mockApp property expected)
+assertProperty mockApp property expected = do
+    actual <- liftEff $ intlAppGetProp mockApp property
+    assertMatch "Property" expected actual
 
-assertApplicationCall ::
-    forall e. Application -> String -> (Application -> ExpressM Unit) -> AssertionExpress e
-assertApplicationCall mockApp expectedVal callFn = do
-    liftEff $ callFn mockApp
-    let callData = runFn1 getCallData mockApp
-        errorMessage = callData ++ " should be equal to " ++ expectedVal
-    assert errorMessage (callData == expectedVal)
+assertCalls :: forall e. Application -> Array FnCall -> Assertion e
+assertCalls mockApp expectedCalls = do
+    let actualCalls = runFn1 getCalls mockApp
+    assertMatch "Calls size" (length expectedCalls) (length actualCalls)
+    foldM assertCallsAreEqual unit (zip actualCalls expectedCalls)
+  where
+    assertCallsAreEqual :: forall e. Unit -> Tuple FnCall FnCall -> Assertion e
+    assertCallsAreEqual _ (Tuple actual expected) = do
+        assertMatch "Call name" expected.name actual.name
+        -- TODO: compare arguments
 
 genHandler :: Application -> Request -> Response -> ExpressM Unit -> ExpressM Unit
-genHandler mockApp req resp next = do
-    let val = toString req ++ "::" ++ toString resp ++ "::" ++ toString next
-    return $ runFn2 registerCall mockApp val
+genHandler mockApp req resp next =
+    return $ runFn2 putCall mockApp $
+        fnCall "handler" [toString req, toString resp, toString next]
 
 genErrorHandler :: Application -> Error -> Request -> Response -> ExpressM Unit -> ExpressM Unit
-genErrorHandler mockApp err req resp next = do
-    let val = toString err ++ "::" ++ toString req ++ "::" ++ toString resp ++ "::" ++ toString next
-    return $ runFn2 registerCall mockApp val
+genErrorHandler mockApp err req resp next =
+    return $ runFn2 putCall mockApp $
+        fnCall "handler" [toString err, toString req, toString resp, toString next]
 
-callBindHttp :: Method -> String -> Application -> ExpressM Unit
-callBindHttp method route mockApp =
+testBindHttp :: forall e. Application -> Method -> String -> AssertionExpress e
+testBindHttp mockApp method route = do
+    return $ runFn1 clearCalls mockApp
     liftEff $ intlAppHttp mockApp (show method) route (genHandler mockApp)
-
-callUseMiddleware :: Application -> ExpressM Unit
-callUseMiddleware mockApp =
-    liftEff $ intlAppUse mockApp (genHandler mockApp)
-
-callUseMiddlewareOnError :: Application -> ExpressM Unit
-callUseMiddlewareOnError mockApp =
-    liftEff $ intlAppUseOnError mockApp (genErrorHandler mockApp)
+    assertCalls mockApp [
+        fnCall (show method) [route],
+        fnCall "handler" ["request", "response", "next"]
+    ]
 
 testSuite = do
     let mockApp = runFn0 createMockApp
@@ -87,21 +93,41 @@ testSuite = do
         liftEff $ intlAppSetProp mockApp "testProperty" "OK"
         assertProperty mockApp "testProperty" (Just "OK")
     test "Internal.App.bindHttp" do
-        let assertBindHttpCall method route =
-            assertApplicationCall mockApp
-                (show method ++ "::" ++ route ++ "::OK")
-                (callBindHttp method route)
-        assertBindHttpCall ALL "/some/path"
-        assertBindHttpCall GET "/some/path"
-        assertBindHttpCall POST "/some/path"
-        assertBindHttpCall PUT "/some/path"
-        assertBindHttpCall DELETE "/some/path"
-        assertBindHttpCall OPTIONS "/some/path"
-        assertBindHttpCall HEAD "/some/path"
-        assertBindHttpCall TRACE "/some/path"
+        testBindHttp mockApp ALL "/some/path"
+        testBindHttp mockApp GET "/some/path"
+        testBindHttp mockApp POST "/some/path"
+        testBindHttp mockApp PUT "/some/path"
+        testBindHttp mockApp DELETE "/some/path"
+        testBindHttp mockApp OPTIONS "/some/path"
+        testBindHttp mockApp HEAD "/some/path"
+        testBindHttp mockApp TRACE "/some/path"
     test "Internal.App.useMiddleware" do
-        assertApplicationCall mockApp "request::response::next" callUseMiddleware
+        return $ runFn1 clearCalls mockApp
+        liftEff $ intlAppUse mockApp (genHandler mockApp)
+        assertCalls mockApp [
+            fnCall "use" [],
+            fnCall "handler" ["request", "response", "next"]
+        ]
     test "Internal.App.useMiddlewareOnError" do
-        assertApplicationCall mockApp "error::request::response::next" callUseMiddlewareOnError
-
+        return $ runFn1 clearCalls mockApp
+        liftEff $ intlAppUseOnError mockApp (genErrorHandler mockApp)
+        assertCalls mockApp [
+            fnCall "use" [],
+            fnCall "handler" ["error", "request", "response", "next"]
+        ]
+    test "Internal.App.useExternalMiddleware" do
+        return $ runFn1 clearCalls mockApp
+        liftEff $ intlAppUseExternal mockApp (runFn1 createMockMiddleware mockApp)
+        assertCalls mockApp [
+            fnCall "use" [],
+            fnCall "handler" ["request", "response", "next"]
+        ]
+    test "Internal.App.useMiddlewareAt" do
+        let route = "/some/path"
+        return $ runFn1 clearCalls mockApp
+        liftEff $ intlAppUseAt mockApp route (genHandler mockApp)
+        assertCalls mockApp [
+            fnCall "use" [route],
+            fnCall "handler" ["request", "response", "next"]
+        ]
 

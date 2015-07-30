@@ -1,5 +1,22 @@
 // module Test.App
 
+exports.putCall = function(mockApp, call) {
+    mockApp["mockFnCalls"].push(call);
+}
+
+exports.getCalls = function(mockApp) {
+    return mockApp["mockFnCalls"];
+}
+
+exports.clearCalls = function(mockApp) {
+    mockApp["mockFnCalls"] = [];
+}
+
+function Call(name, args) {
+    this.name = name;
+    this["arguments"] = args;
+}
+
 exports.createMockApp = function() {
 
     var properties = {
@@ -11,6 +28,9 @@ exports.createMockApp = function() {
         arrayProperty: ["a", "b", "c"],
         emptyArrayProperty: []
     };
+
+    var handlerArguments = ["request", "response", "next"];
+    var errorHandlerArguments = ["error", "request", "response", "next"];
 
     var app = {
         set: function(propertyName, value) {
@@ -24,16 +44,20 @@ exports.createMockApp = function() {
             }
         },
         mockBindHttp: function(method, route, handler) {
-            handler(method, route, "OK");
+            exports.putCall(this, new Call(method, [route]));
+            handler.apply(this, handlerArguments);
         },
         mockUse: function(handler) {
+            exports.putCall(this, new Call("use", []));
             if (handler.length == 3) {
-                handler("request", "response", "next");
+                handler.apply(this, handlerArguments);
             } else if (handler.length == 4) {
-                handler("error", "request", "response", "next");
+                handler.apply(this, errorHandlerArguments);
             }
         },
         mockUseAtRoute: function(route, handler) {
+            exports.putCall(this, new Call("use", [route]));
+            handler.apply(this, handlerArguments);
         }
     };
 
@@ -59,10 +83,8 @@ exports.createMockApp = function() {
     return app;
 }
 
-exports.registerCall = function(mockApp, callData) {
-    mockApp["mockCallData"] = callData;
-}
-
-exports.getCallData = function(mockApp) {
-    return mockApp["mockCallData"] || "";
+exports.createMockMiddleware = function(mockApp) {
+    return function(req, resp, next) {
+        exports.putCall(mockApp, new Call("handler", [req, resp, next]));
+    }
 }
