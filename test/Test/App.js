@@ -20,13 +20,16 @@ function Call(name, args) {
 exports.createMockApp = function() {
 
     var properties = {
-        stringProperty: "string",
-        intProperty: 42,
-        floatProperty: 100.1,
-        booleanProperty: true,
-        booleanFalseProperty: false,
-        arrayProperty: ["a", "b", "c"],
-        emptyArrayProperty: []
+        string: "string",
+        emptyString: "",
+        fortyTwo: 42,
+        zeroInt: 0,
+        hundredPointOne: 100.1,
+        zeroFloat: 0.0,
+        trueBoolean: true,
+        falseBoolean: false,
+        abcArray: ["a", "b", "c"],
+        emptyArray: []
     };
 
     var handlerArguments = ["request", "response", "next"];

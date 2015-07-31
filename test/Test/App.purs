@@ -96,14 +96,17 @@ testMiddleware mockApp useFn handlerGenFn expectedCalls = do
 testSuite = do
     let mockApp = runFn0 createMockApp
     test "Internal.App.getProperty" do
-        assertProperty mockApp "stringProperty" (Just "string")
+        assertProperty mockApp "string" (Just "string")
+        assertProperty mockApp "emptyString" (Just "")
         -- FIXME: Uncomment when there is IsForeign Int instance
-        -- assertProperty mockApp "intProperty" (Just 42)
-        assertProperty mockApp "floatProperty" (Just 100.1)
-        assertProperty mockApp "booleanProperty" (Just true)
-        assertProperty mockApp "booleanFalseProperty" (Just false)
-        assertProperty mockApp "arrayProperty" (Just ["a", "b", "c"])
-        assertProperty mockApp "emptyArrayProperty" (Just [] :: Maybe (Array String))
+        -- assertProperty mockApp "fortyTwo" (Just 42)
+        -- assertProperty mockApp "zeroInt" (Just 0)
+        assertProperty mockApp "hundredPointOne" (Just 100.1)
+        assertProperty mockApp "zeroFloat" (Just 0.0)
+        assertProperty mockApp "trueBoolean" (Just true)
+        assertProperty mockApp "falseBoolean" (Just false)
+        assertProperty mockApp "abcArray" (Just ["a", "b", "c"])
+        assertProperty mockApp "emptyArray" (Just [] :: Maybe (Array String))
     test "Internal.App.setProperty" do
         assertProperty mockApp "testProperty" (Nothing :: Maybe String)
         liftEff $ intlAppSetProp mockApp "testProperty" "OK"
