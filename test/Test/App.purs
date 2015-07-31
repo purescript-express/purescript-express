@@ -3,7 +3,7 @@ module Test.App (testSuite) where
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
-import Data.Array (zip, zipWith, foldM, length)
+import Data.Array (zip, zipWith, foldM, length, filter, null)
 import Data.Foreign.Class
 import Data.Foreign.Null
 import Data.Foreign.Undefined
@@ -51,12 +51,17 @@ assertCalls :: forall e. Application -> Array FnCall -> Assertion e
 assertCalls mockApp expectedCalls = do
     let actualCalls = runFn1 getCalls mockApp
     assertMatch "Calls size" (length expectedCalls) (length actualCalls)
-    foldM assertCallsAreEqual unit (zip actualCalls expectedCalls)
+    foldM assertCallsMatch unit (zip expectedCalls actualCalls)
   where
-    assertCallsAreEqual :: forall e. Unit -> Tuple FnCall FnCall -> Assertion e
-    assertCallsAreEqual _ (Tuple actual expected) = do
+    assertCallsMatch _ (Tuple expected actual) = do
         assertMatch "Call name" expected.name actual.name
-        -- TODO: compare arguments
+        assertArgumentsMatch expected.arguments actual.arguments
+    assertArgumentsMatch expected actual = do
+        let lengthMatch = length expected == length actual
+            argsMatch = null $ filter unmatched (zip expected actual)
+            unmatched (Tuple e a) = e /= a
+            errorMessage = "Call arguments mismatch: Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
+        assert errorMessage (lengthMatch && argsMatch)
 
 genHandler :: Application -> Request -> Response -> ExpressM Unit -> ExpressM Unit
 genHandler mockApp req resp next =
