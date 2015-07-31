@@ -82,11 +82,22 @@ testBindHttp mockApp method route = do
         fnCall "handler" ["request", "response", "next"]
     ]
 
+testMiddleware :: forall e h.
+    Application
+    -> (Application -> h -> ExpressM Unit)
+    -> (Application -> h)
+    -> Array FnCall
+    -> AssertionExpress e
+testMiddleware mockApp useFn handlerGenFn expectedCalls = do
+    return $ runFn1 clearCalls mockApp
+    liftEff $ useFn mockApp (handlerGenFn mockApp)
+    assertCalls mockApp expectedCalls
+
 testSuite = do
     let mockApp = runFn0 createMockApp
     test "Internal.App.getProperty" do
         assertProperty mockApp "stringProperty" (Just "string")
-        -- Uncomment when there is IsForeign Int instance
+        -- FIXME: Uncomment when there is IsForeign Int instance
         -- assertProperty mockApp "intProperty" (Just 42)
         assertProperty mockApp "floatProperty" (Just 100.1)
         assertProperty mockApp "booleanProperty" (Just true)
@@ -107,32 +118,17 @@ testSuite = do
         testBindHttp mockApp HEAD "/some/path"
         testBindHttp mockApp TRACE "/some/path"
     test "Internal.App.useMiddleware" do
-        return $ runFn1 clearCalls mockApp
-        liftEff $ intlAppUse mockApp (genHandler mockApp)
-        assertCalls mockApp [
-            fnCall "use" [],
-            fnCall "handler" ["request", "response", "next"]
-        ]
+        testMiddleware mockApp intlAppUse genHandler
+            [ fnCall "use" [], fnCall "handler" ["request", "response", "next"] ]
     test "Internal.App.useMiddlewareOnError" do
-        return $ runFn1 clearCalls mockApp
-        liftEff $ intlAppUseOnError mockApp (genErrorHandler mockApp)
-        assertCalls mockApp [
-            fnCall "use" [],
-            fnCall "handler" ["error", "request", "response", "next"]
-        ]
+        testMiddleware mockApp intlAppUseOnError genErrorHandler
+            [ fnCall "use" [], fnCall "handler" ["error", "request", "response", "next"] ]
     test "Internal.App.useExternalMiddleware" do
-        return $ runFn1 clearCalls mockApp
-        liftEff $ intlAppUseExternal mockApp (runFn1 createMockMiddleware mockApp)
-        assertCalls mockApp [
-            fnCall "use" [],
-            fnCall "handler" ["request", "response", "next"]
-        ]
+        testMiddleware mockApp intlAppUseExternal (runFn1 createMockMiddleware)
+            [ fnCall "use" [], fnCall "handler" ["request", "response", "next"] ]
     test "Internal.App.useMiddlewareAt" do
         let route = "/some/path"
-        return $ runFn1 clearCalls mockApp
-        liftEff $ intlAppUseAt mockApp route (genHandler mockApp)
-        assertCalls mockApp [
-            fnCall "use" [route],
-            fnCall "handler" ["request", "response", "next"]
-        ]
+            intlAppUseAtWrapper a = intlAppUseAt a route
+        testMiddleware mockApp intlAppUseAtWrapper genHandler
+            [ fnCall "use" [route], fnCall "handler" ["request", "response", "next"] ]
 
