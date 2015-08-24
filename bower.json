@@ -28,7 +28,7 @@
     "purescript-strings": "0.5.x",
     "purescript-easy-ffi": "purescript-0.7-prerelease",
     "purescript-control": "0.3.x",
-    "purescript-parsing": "0.4.x",
+    "purescript-parsing": "0.5.x",
     "purescript-foldable-traversable": "0.4.x",
     "purescript-exceptions": "0.3.x",
     "purescript-eff": "0.1.0",
@@ -38,5 +38,8 @@
   "devDependencies": {
     "purescript-console": "0.1.x",
     "purescript-node-fs": "0.7.1"
+  },
+  "resolutions": {
+    "purescript-strings": "^0.7.0"
   }
 }
