@@ -38,7 +38,7 @@
   "devDependencies": {
     "purescript-console": "0.1.x",
     "purescript-node-fs": "0.8.x",
-    "purescript-test-unit": "2.0.0",
+    "purescript-test-unit": "https://github.com/passy/purescript-test-unit.git#purescript-transformers-update",
     "purescript-unsafe-coerce": "0.1.0"
   }
 }
