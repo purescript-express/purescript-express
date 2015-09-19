@@ -83,7 +83,7 @@ MockApp.prototype.emulate = function(request, error) {
             return handler.useOnError;
         } else {
             var methodMatched = (handler.method == null || handler.method == request.method);
-            var routeMatched = (handler.route == null || request.path.startsWith(handler.route));
+            var routeMatched = (handler.route == null || request.path.search(handler.route) == 0);
             return methodMatched && routeMatched && !handler.useOnError;
         }
     };

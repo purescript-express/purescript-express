@@ -1,5 +1,5 @@
 
-var parseurl = require('parseurl');
+var Url = require('url');
 
 /**
  * @param method :: String
@@ -18,6 +18,12 @@ var MockRequest = function(method, url) {
     this.baseUrl = url;
     this.fresh = true;
     this.stale = false;
+
+    this.parsedUrl = Url.parse(this.url, true);
+    this.path = this.parsedUrl.pathname;
+    this.protocol = this.parsedUrl.protocol.slice(0, -1);
+    this.query = this.parsedUrl.query;
+    this.secure = this.protocol == "https";
 
     // TODO: implement
     this.params = null;

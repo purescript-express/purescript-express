@@ -108,7 +108,7 @@ testSuite = do
         lift $ use $ do
             Just value <- getRequestHeader "X-Test-Value-To-Return"
             setResponseHeader "X-Use-Handler" value
-        response <- sendTestRequest
+        response <- sendTestRequest "GET" "http://example.com/"
         assertHeader response "X-Use-Handler" $ Just testValue
     testApp "Application.useOnError" $ do
         lift $ useOnError $ \error -> do
@@ -118,13 +118,21 @@ testSuite = do
         assertHeader response "X-Use-On-Error-Handler" $ Just (testValue ++ testError)
     testApp "Application.useExternal" $ do
         mockApp >>= lift <<< useExternal <<< runFn1 createMockMiddleware
-        response <- sendTestRequest
+        response <- sendTestRequest "GET" "http://example.com/"
         assertHeader response "X-Mock-Middleware" $ Just testValue
+    testApp "Application.useAt" $ do
+        lift $ useAt "/some/path" $ do
+            Just value <- getRequestHeader "X-Test-Value-To-Return"
+            setResponseHeader "X-Use-At-Handler" value
+        response <- sendTestRequest "GET" "http://example.com/"
+        assertHeader response "X-Use-At-Handler" Nothing
+        response <- sendTestRequest "GET" "http://example.com/some/path"
+        assertHeader response "X-Use-At-Handler" $ Just testValue
   where
     testValue = "TestValue"
     testError = "Error"
-    sendTestRequest = do
-        let request = createMockRequest "GET" "http://example/com"
+    sendTestRequest method url = do
+        let request = createMockRequest method url
         liftEff $ request.setHeader "X-Test-Value-To-Return" testValue
         sendRequest request
     sendTestError = do
