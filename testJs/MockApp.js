@@ -1,21 +1,7 @@
 
 var MockRequest = require('./MockRequest');
 var MockResponse = require('./MockResponse');
-
-var Handler = function(method, route, useOnError, fn) {
-    this.method = method;
-    this.route = route;
-    this.useOnError = useOnError;
-    if (useOnError) {
-        this.run = function(app, error, req, resp, next) {
-            return fn.apply(app, [error, req, resp, next]);
-        };
-    } else {
-        this.run = function(app, req, resp, next) {
-            return fn.apply(app, [req, resp, next]);
-        };
-    }
-}
+var Handler = require('./Handler');
 
 var MockApp = function(properties) {
     this.properties = properties;
@@ -27,9 +13,7 @@ MockApp.prototype.get = function() {
         var propertyName = arguments[0];
         return this.properties[propertyName];
     } else {
-        var args = Array.prototype.slice.call(arguments);
-        args.unshift(method)
-        return this.httpMethod.apply(this, args);
+        return this.httpMethod.apply(this, arguments);
     }
 }
 
@@ -78,25 +62,13 @@ methods.forEach(function(method) {
 
 MockApp.prototype.emulate = function(request, error) {
     var isError = error != null;
-    var handlerMatches = function(handler) {
-        if (isError) {
-            return handler.useOnError;
-        } else {
-            var methodMatched = (handler.method == null || handler.method == request.method);
-            var routeMatched = (handler.route == null || request.path.search(handler.route) == 0);
-            return methodMatched && routeMatched && !handler.useOnError;
-        }
-    };
-
     var response = new MockResponse();
     var app = this;
     this.handlers.forEach(function (handler, i) {
-        if (handlerMatches(handler)) {
-            if (isError) {
-                handler.run(app, error, request, response, function() {});
-            } else {
-                handler.run(app, request, response, function() {});
-            }
+        if (isError && handler.useOnError) {
+            handler.run(app, error, request, response, function() {});
+        } else if (handler.matches(request)) {
+            handler.run(app, request, response, function() {});
         }
     });
     return response;

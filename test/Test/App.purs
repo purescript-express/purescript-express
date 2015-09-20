@@ -78,6 +78,15 @@ testApplicationUseAt = testApp "Application.useAt" $ do
     response <- sendTestRequest "GET" "http://example.com/some/path"
     assertHeader response "X-Use-At-Handler" $ Just testValue
 
+testApplicationHttpMethod method = testApp ("Application." ++ show method) $ do
+    lift $ http method "/" $ do
+        Just value <- getRequestHeader "X-Test-Value-To-Return"
+        setResponseHeader "X-Http-Handler" value
+    response <- sendTestRequest "" "http://example.com/"
+    assertHeader response "X-Http-Handler" Nothing
+    response <- sendTestRequest (show method) "http://example.com/"
+    assertHeader response "X-Http-Handler" $ Just testValue
+
 testSuite = do
     testApplicationGetProp
     testApplicationSetProp
@@ -85,4 +94,10 @@ testSuite = do
     testApplicationUseOnError
     testApplicationUseExternal
     testApplicationUseAt
-
+    testApplicationHttpMethod GET
+    testApplicationHttpMethod POST
+    testApplicationHttpMethod PUT
+    testApplicationHttpMethod DELETE
+    testApplicationHttpMethod OPTIONS
+    testApplicationHttpMethod HEAD
+    testApplicationHttpMethod TRACE

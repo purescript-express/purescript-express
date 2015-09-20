@@ -1,3 +1,4 @@
+
 var MockResponse = function() {
     this.status = 0;
     this.contentType = "";
