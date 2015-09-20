@@ -21,7 +21,9 @@ exports.createMockApp = function() {
 
 exports.createMockRequest = function(method) {
     return function(url) {
-        return new MockRequest(method, url);
+        return function() {
+            return new MockRequest(method, url);
+        };
     };
 }
 

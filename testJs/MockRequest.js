@@ -14,6 +14,7 @@ var MockRequest = function(method, url) {
     this.headers = {};
     this.body = {};
     this.cookies = {};
+    this.params = {};
 
     this.baseUrl = url;
     this.fresh = true;
@@ -26,7 +27,6 @@ var MockRequest = function(method, url) {
     this.secure = this.protocol == "https";
 
     // TODO: implement
-    this.params = null;
     this.route = null;
 }
 
@@ -44,6 +44,15 @@ MockRequest.prototype.setBodyParam = function(paramName) {
     return function(paramValue) {
         return function() {
             self.body[paramName] = paramValue;
+        };
+    };
+}
+
+MockRequest.prototype.setRouteParam = function(paramName) {
+    var self = this;
+    return function(paramValue) {
+        return function() {
+            self.params[paramName] = paramValue;
         };
     };
 }

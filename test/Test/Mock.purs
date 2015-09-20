@@ -37,13 +37,14 @@ type MockResponse = {
 
 type MockRequest = {
     setHeader :: forall e. String -> String -> Eff e Unit,
-    setBodyParam :: forall e. String -> String -> Eff e Unit
+    setBodyParam :: forall e. String -> String -> Eff e Unit,
+    setRouteParam :: forall e. String -> String -> Eff e Unit
 }
 
 foreign import createMockApp ::
-    Fn0 Application
+    forall e. Eff e Application
 foreign import createMockRequest ::
-    String -> String -> MockRequest
+    forall e. String -> String -> Eff e MockRequest
 foreign import sendMockRequest ::
     forall e. Application -> MockRequest -> Eff e MockResponse
 foreign import sendMockError ::
@@ -57,8 +58,8 @@ testApp :: forall e.
            Assertion ( express :: Express, testOutput :: TestOutput | e)
 testApp testName appGenerator = test testName $ testFn tester where
     tester callback = do
-        let mockApp = runFn0 createMockApp
-            app = runReaderT appGenerator $ Tuple mockApp (liftEff <<< callback)
+        mockApp <- createMockApp
+        let app = runReaderT appGenerator $ Tuple mockApp (liftEff <<< callback)
         liftEff $ apply app mockApp
 
 -- TODO: report type inference issue

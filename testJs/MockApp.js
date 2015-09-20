@@ -13,7 +13,9 @@ MockApp.prototype.get = function() {
         var propertyName = arguments[0];
         return this.properties[propertyName];
     } else {
-        return this.httpMethod.apply(this, arguments);
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift("get")
+        return this.httpMethod.apply(this, args);
     }
 }
 
@@ -24,14 +26,14 @@ MockApp.prototype.set = function(propertyName, value) {
 MockApp.prototype.use = function() {
     var use = function(handler) {
         if (handler.length == 3) {
-            this.handlers.push(new Handler(null, null, false, handler));
+            this.handlers.push(new Handler(null, null, null, false, handler));
         } else if (handler.length == 4) {
-            this.handlers.push(new Handler(null, null, true, handler));
+            this.handlers.push(new Handler(null, null, null, true, handler));
         }
     }
 
     var useAtRoute = function(route, handler) {
-        this.handlers.push(new Handler(null, route, false, handler));
+        this.handlers.push(new Handler(null, route, null, false, handler));
     }
 
     if (arguments.length == 1) {
@@ -45,7 +47,7 @@ MockApp.prototype.httpMethod = function(method, route, handler) {
     if (method == "all") {
         method = null;
     }
-    this.handlers.push(new Handler(method, route, false, handler));
+    this.handlers.push(new Handler(method, route, null, false, handler));
 }
 
 var methods = [
@@ -59,6 +61,10 @@ methods.forEach(function(method) {
         this.httpMethod.apply(this, args);
     };
 });
+
+MockApp.prototype.param = function(name, handler) {
+    this.handlers.push(new Handler(null, null, name, false, handler));
+}
 
 MockApp.prototype.emulate = function(request, error) {
     var isError = error != null;
