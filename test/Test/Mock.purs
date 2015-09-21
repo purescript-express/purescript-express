@@ -1,13 +1,13 @@
 module Test.Mock
     ( MockResponse(..)
     , MockRequest(..)
-    , TestAppM(..)
-    , TestApp(..)
+    , TestUnitM(..)
+    , TestMockApp(..)
     , createMockApp
     , createMockRequest
-    , testApp
-    , report
-    , getMockApp
+    , testExpress
+    , setupMockApp
+    , assertInApp
     , sendRequest
     , sendError
     , assertMatch
@@ -16,6 +16,8 @@ module Test.Mock
 
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Cont.Trans
+import Control.Monad.Except.Trans
 import Control.Monad.Reader.Trans
 import Data.Function
 import Data.Maybe
@@ -36,62 +38,71 @@ type MockResponse = {
 }
 
 type MockRequest = {
-    setHeader :: forall e. String -> String -> Eff e Unit,
-    setBodyParam :: forall e. String -> String -> Eff e Unit,
-    setRouteParam :: forall e. String -> String -> Eff e Unit
+    setHeader :: forall e. String -> String -> Eff (express :: Express | e) Unit,
+    setBodyParam :: forall e. String -> String -> Eff (express :: Express | e) Unit,
+    setRouteParam :: forall e. String -> String -> Eff (express :: Express | e) Unit
 }
 
 foreign import createMockApp ::
     forall e. Eff e Application
 foreign import createMockRequest ::
-    forall e. String -> String -> Eff e MockRequest
+    forall e. String -> String -> ExpressM MockRequest
 foreign import sendMockRequest ::
-    forall e. Application -> MockRequest -> Eff e MockResponse
+    forall e. Application -> MockRequest -> ExpressM MockResponse
 foreign import sendMockError ::
-    forall e. Application -> MockRequest -> String -> Eff e MockResponse
+    forall e. Application -> MockRequest -> String -> ExpressM MockResponse
 
-type TestAppM = ReaderT (Tuple Application (TestResult -> App)) AppM
-type TestApp = TestAppM Unit
+type TestUnitM e = ExceptT String (ContT Unit (Eff e))
+type TestMockApp e = ReaderT Application (TestUnitM e) Unit
 
-testApp :: forall e.
-           String -> TestApp ->
-           Assertion ( express :: Express, testOutput :: TestOutput | e)
-testApp testName appGenerator = test testName $ testFn tester where
-    tester callback = do
-        mockApp <- createMockApp
-        let app = runReaderT appGenerator $ Tuple mockApp (liftEff <<< callback)
-        liftEff $ apply app mockApp
+testExpress :: forall e.
+    String
+    -> TestMockApp (express :: Express, testOutput :: TestOutput | e)
+    -> Assertion (express :: Express, testOutput :: TestOutput | e)
+testExpress testName assertions = test testName $ do
+    mockApp <- lift $ lift $ createMockApp
+    runReaderT assertions mockApp
 
--- TODO: report type inference issue
-appAndReporter :: TestAppM (Tuple Application (TestResult -> App))
-appAndReporter = ask
+setupMockApp :: forall e. App -> TestMockApp (express :: Express | e)
+setupMockApp app = do
+    mockApp <- ask
+    liftEff $ apply app mockApp
 
-report :: TestResult -> TestApp
-report message = do
-    reporter <- map snd appAndReporter
-    lift $ reporter message
+assertInApp :: forall e.
+    ((TestResult -> Eff (express :: Express | e) Unit) -> App)
+    -> TestMockApp (express :: Express | e)
+assertInApp assertion = do
+    mockApp <- ask
+    let tester callback = liftEff $ apply (assertion callback) mockApp
+    lift $ testFn tester
 
-getMockApp :: TestAppM Application
-getMockApp = map fst appAndReporter
+sendRequest :: forall e.
+    MockRequest
+    -> (MockResponse -> TestMockApp (express :: Express | e))
+    -> TestMockApp (express :: Express | e)
+sendRequest request testResponse = do
+    app <- ask
+    response <- liftEff $ sendMockRequest app request
+    testResponse response
 
-sendRequest :: MockRequest -> TestAppM MockResponse
-sendRequest request =
-    getMockApp >>= \app -> liftEff $ sendMockRequest app request
+sendError :: forall e.
+    MockRequest
+    -> String
+    -> (MockResponse -> TestMockApp (express :: Express | e))
+    -> TestMockApp (express :: Express | e)
+sendError request error testResponse = do
+    app <- ask
+    response <- liftEff $ sendMockError app request error
+    testResponse response
 
-sendError :: MockRequest -> String -> TestAppM MockResponse
-sendError request error =
-    getMockApp >>= \app -> liftEff $ sendMockError app request error
-
-assertMatch :: forall a. (Show a, Eq a) => String -> Maybe a -> Maybe a -> TestApp
+assertMatch :: forall a e. (Show a, Eq a) => String -> Maybe a -> Maybe a -> Assertion e
 assertMatch what expected actual = do
     let message = what ++ " does not match: \
         \Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
-    if expected == actual
-        then report success
-        else report $ failure message
+    assert message (expected == actual)
 
-assertHeader :: MockResponse -> String -> Maybe String -> TestApp
+assertHeader :: forall e. MockResponse -> String -> Maybe String -> TestMockApp e
 assertHeader response name expected = do
     let actual = StrMap.lookup name response.headers
-    assertMatch ("Header '" ++ name ++ "'") expected actual
+    lift $ assertMatch ("Header '" ++ name ++ "'") expected actual
 
