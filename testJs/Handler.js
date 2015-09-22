@@ -10,11 +10,13 @@ var Handler = function(method, route, param, useOnError, fn) {
         };
     } else if (param) {
         this.run = function(app, req, resp, next) {
+            req.setRoute(route);
             var paramValue = req.params[param];
             return fn.apply(app, [req, resp, next, paramValue]);
         };
     } else {
         this.run = function(app, req, resp, next) {
+            req.setRoute(route);
             return fn.apply(app, [req, resp, next]);
         };
     }
@@ -32,7 +34,8 @@ Handler.prototype.methodMatches = function(request) {
 }
 
 Handler.prototype.routeMatches = function(request) {
-    return this.route == null || request.path.search(this.route) == 0;
+    var routeRx = new RegExp(this.route);
+    return this.route == null || routeRx.test(request.path);
 }
 
 Handler.prototype.paramMatches = function(request) {
