@@ -33,27 +33,24 @@ var MockRequest = function(method, url) {
 MockRequest.prototype.setHeader = function(headerName) {
     var self = this;
     return function(headerValue) {
-        return function() {
-            self.headers[headerName] = headerValue;
-        };
+        self.headers[headerName] = headerValue;
+        return self;
     };
 }
 
 MockRequest.prototype.setBodyParam = function(paramName) {
     var self = this;
     return function(paramValue) {
-        return function() {
-            self.body[paramName] = paramValue;
-        };
+        self.body[paramName] = paramValue;
+        return self;
     };
 }
 
 MockRequest.prototype.setRouteParam = function(paramName) {
     var self = this;
     return function(paramValue) {
-        return function() {
-            self.params[paramName] = paramValue;
-        };
+        self.params[paramName] = paramValue;
+        return self;
     };
 }
 

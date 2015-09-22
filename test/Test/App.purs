@@ -14,7 +14,7 @@ import Test.Mock
 import Test.Unit
 import Test.Unit.Console
 
-foreign import mockMiddleware :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit)
+foreign import mockMiddleware :: String -> Fn3 Request Response (ExpressM Unit) (ExpressM Unit)
 
 assertProperty :: forall a e. (Show a, Eq a, IsForeign a) =>
     String -> Maybe a -> TestMockApp (express :: Express | e)
@@ -44,71 +44,53 @@ testApplicationSetProp = testExpress "Application.setProp" $ do
     assertProperty "notExistingYet" (Just "nowItIsHere")
 
 testValue = "TestValue"
-testRequestHeader = "X-Test-Request-Header"
-testResponseHeader = "X-Test-Response-Header"
 
 sendTestRequest :: forall e.
     Method
     -> String
     -> (MockResponse -> TestMockApp (express :: Express | e))
     -> TestMockApp (express :: Express | e)
-sendTestRequest method url testResponse = do
-    request <- liftEff $ createMockRequest (show method) url
-    liftEff $ request.setHeader testRequestHeader testValue
-    sendRequest request testResponse
+sendTestRequest method url testResponse =
+    sendRequest method url (\x -> x) testResponse
 
 sendTestError :: forall e.
     (MockResponse -> TestMockApp (express :: Express | e))
     -> TestMockApp (express :: Express | e)
-sendTestError testResponse = do
-    request <- liftEff $ createMockRequest "GET" "http://example.com"
-    sendError request testValue testResponse
+sendTestError testResponse =
+    sendError GET "http://example.com/" testValue testResponse
 
-setTestResponseHeader :: Handler
-setTestResponseHeader = do
-    Just value <- getRequestHeader testRequestHeader
-    setResponseHeader testResponseHeader value
-
-assertTestResponseHeader :: forall e. MockResponse -> TestMockApp e
-assertTestResponseHeader response =
-    assertHeader response testResponseHeader $ Just testValue
-
-assertNoTestResponseHeader :: forall e. MockResponse -> TestMockApp e
-assertNoTestResponseHeader response =
-    assertHeader response testResponseHeader Nothing
+assertTestHeaderExists = assertTestHeader $ Just testValue
+assertTestHeaderAbsent = assertTestHeader Nothing
 
 testApplicationUse = testExpress "Application.use" $ do
-    setupMockApp $ use setTestResponseHeader
-    sendTestRequest GET "http://example.com/" assertTestResponseHeader
+    setupMockApp $ use $ setTestHeader testValue
+    sendTestRequest GET "http://example.com/" assertTestHeaderExists
 
 testApplicationUseOnError = testExpress "Application.useOnError" $ do
-    setupMockApp $ useOnError $ \error -> do
-        setResponseHeader testResponseHeader $ message error
-    sendTestError assertTestResponseHeader
+    setupMockApp $ useOnError $ \error -> setTestHeader $ message error
+    sendTestRequest GET "http://example.com/" assertTestHeaderAbsent
+    sendTestError assertTestHeaderExists
 
 testApplicationUseExternal = testExpress "Application.useExternal" $ do
-    setupMockApp $ useExternal mockMiddleware
-    sendTestRequest GET "http://example.com/" assertTestResponseHeader
+    setupMockApp $ useExternal (mockMiddleware testValue)
+    sendTestRequest GET "http://example.com/" assertTestHeaderExists
 
 testApplicationUseAt = testExpress "Application.useAt" $ do
-    setupMockApp $ useAt "/some/path" setTestResponseHeader
-    sendTestRequest GET "http://example.com/" assertNoTestResponseHeader
-    sendTestRequest GET "http://example.com/some/path" assertTestResponseHeader
+    setupMockApp $ useAt "/some/path" $ setTestHeader testValue
+    sendTestRequest GET "http://example.com/" assertTestHeaderAbsent
+    sendTestRequest GET "http://example.com/some/path" assertTestHeaderExists
 
 testApplicationUseOnParam = testExpress "Application.useOnParam" $ do
-    setupMockApp $ useOnParam "param" (setResponseHeader testResponseHeader)
-    sendTestRequest GET "http://example.com/some/path" assertNoTestResponseHeader
-    sendTestRequestWithParam assertTestResponseHeader
+    setupMockApp $ useOnParam "param" setTestHeader
+    sendTestRequest GET "http://example.com/some/path" assertTestHeaderAbsent
+    sendRequest GET "http://example/com" withRouteParam $ assertTestHeaderExists
   where
-    sendTestRequestWithParam testResponse = do
-        request <- liftEff $ createMockRequest "GET" "http://example.com/"
-        liftEff $ request.setRouteParam "param" testValue
-        sendRequest request testResponse
+    withRouteParam = setRouteParam "param" testValue
 
 testApplicationHttpMethod method = testExpress ("Application." ++ show method) $ do
-    setupMockApp $ http method "/" setTestResponseHeader
-    sendTestRequest (CustomMethod "") "http://example.com/" assertNoTestResponseHeader
-    sendTestRequest method "http://example.com/" assertTestResponseHeader
+    setupMockApp $ http method "/" $ setTestHeader testValue
+    sendTestRequest (CustomMethod "") "http://example.com/" assertTestHeaderAbsent
+    sendTestRequest method "http://example.com/" assertTestHeaderExists
 
 testSuite = do
     testApplicationGetProp

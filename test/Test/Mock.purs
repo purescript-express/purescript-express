@@ -1,6 +1,9 @@
 module Test.Mock
     ( MockResponse(..)
     , MockRequest(..)
+    , setRequestHeader
+    , setRouteParam
+    , setBodyParam
     , TestUnitM(..)
     , TestMockApp(..)
     , createMockApp
@@ -12,6 +15,8 @@ module Test.Mock
     , sendError
     , assertMatch
     , assertHeader
+    , setTestHeader
+    , assertTestHeader
     ) where
 
 import Control.Monad.Eff
@@ -37,11 +42,20 @@ type MockResponse = {
     data        :: String
 }
 
-type MockRequest = {
-    setHeader :: forall e. String -> String -> Eff (express :: Express | e) Unit,
-    setBodyParam :: forall e. String -> String -> Eff (express :: Express | e) Unit,
-    setRouteParam :: forall e. String -> String -> Eff (express :: Express | e) Unit
+newtype MockRequest = MockRequest {
+    setHeader :: String -> String -> MockRequest,
+    setBodyParam :: String -> String -> MockRequest,
+    setRouteParam :: String -> String -> MockRequest
 }
+
+setRequestHeader :: String -> String -> MockRequest -> MockRequest
+setRequestHeader name value (MockRequest r) = r.setHeader name value
+
+setBodyParam :: String -> String -> MockRequest -> MockRequest
+setBodyParam name value (MockRequest r) = r.setBodyParam name value
+
+setRouteParam :: String -> String -> MockRequest -> MockRequest
+setRouteParam name value (MockRequest r) = r.setRouteParam name value
 
 foreign import createMockApp ::
     forall e. Eff e Application
@@ -77,21 +91,26 @@ assertInApp assertion = do
     lift $ testFn tester
 
 sendRequest :: forall e.
-    MockRequest
+    Method
+    -> String
+    -> (MockRequest -> MockRequest)
     -> (MockResponse -> TestMockApp (express :: Express | e))
     -> TestMockApp (express :: Express | e)
-sendRequest request testResponse = do
+sendRequest method url setupRequest testResponse = do
     app <- ask
+    request <- liftEff $ map setupRequest $ createMockRequest (show method) url
     response <- liftEff $ sendMockRequest app request
     testResponse response
 
 sendError :: forall e.
-    MockRequest
+    Method
+    -> String
     -> String
     -> (MockResponse -> TestMockApp (express :: Express | e))
     -> TestMockApp (express :: Express | e)
-sendError request error testResponse = do
+sendError method url error testResponse = do
     app <- ask
+    request <- liftEff $ createMockRequest (show method) url
     response <- liftEff $ sendMockError app request error
     testResponse response
 
@@ -101,8 +120,16 @@ assertMatch what expected actual = do
         \Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
     assert message (expected == actual)
 
-assertHeader :: forall e. MockResponse -> String -> Maybe String -> TestMockApp e
-assertHeader response name expected = do
+assertHeader :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertHeader name expected response = do
     let actual = StrMap.lookup name response.headers
     lift $ assertMatch ("Header '" ++ name ++ "'") expected actual
 
+testHeader :: String
+testHeader = "X-Test-Response-Header"
+
+setTestHeader :: String -> Handler
+setTestHeader = setResponseHeader testHeader
+
+assertTestHeader :: forall e. Maybe String -> MockResponse -> TestMockApp e
+assertTestHeader value response = assertHeader testHeader value response
