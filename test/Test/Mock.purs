@@ -4,6 +4,8 @@ module Test.Mock
     , setRequestHeader
     , setRouteParam
     , setBodyParam
+    , setRequestCookie
+    , setRequestSignedCookie
     , TestUnitM(..)
     , TestMockApp(..)
     , createMockApp
@@ -45,7 +47,9 @@ type MockResponse = {
 newtype MockRequest = MockRequest {
     setHeader :: String -> String -> MockRequest,
     setBodyParam :: String -> String -> MockRequest,
-    setRouteParam :: String -> String -> MockRequest
+    setRouteParam :: String -> String -> MockRequest,
+    setCookie :: String -> String -> MockRequest,
+    setSignedCookie :: String -> String -> MockRequest
 }
 
 setRequestHeader :: String -> String -> MockRequest -> MockRequest
@@ -56,6 +60,12 @@ setBodyParam name value (MockRequest r) = r.setBodyParam name value
 
 setRouteParam :: String -> String -> MockRequest -> MockRequest
 setRouteParam name value (MockRequest r) = r.setRouteParam name value
+
+setRequestCookie :: String -> String -> MockRequest -> MockRequest
+setRequestCookie name value (MockRequest r) = r.setCookie name value
+
+setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
+setRequestSignedCookie name value (MockRequest r) = r.setSignedCookie name value
 
 foreign import createMockApp ::
     forall e. Eff e Application

@@ -102,8 +102,22 @@ testHeaders = do
         sendTestRequest withContentType assertTestHeaderExists
 
 testCookies = do
-    testExpress "Handler.getCookie" muteTest
-    testExpress "Handler.getSignedCookie" muteTest
+    testExpress "Handler.getCookie" $ do
+        setupMockApp $ use $
+            getCookie testCookie >>= maybe (return unit) setTestHeader
+        sendTestRequest id assertTestHeaderAbsent
+        sendTestRequest withTestCookie assertTestHeaderExists
+        sendTestRequest withTestSignedCookie assertTestHeaderAbsent
+    testExpress "Handler.getSignedCookie" $ do
+        setupMockApp $ use $
+            getSignedCookie testCookie >>= maybe (return unit) setTestHeader
+        sendTestRequest id assertTestHeaderAbsent
+        sendTestRequest withTestCookie assertTestHeaderAbsent
+        sendTestRequest withTestSignedCookie assertTestHeaderExists
+  where
+    testCookie = "cookie"
+    withTestCookie = setRequestCookie testCookie testValue
+    withTestSignedCookie = setRequestSignedCookie testCookie testValue
 
 testMisc = do
     testExpress "Handler.getRoute" $ do

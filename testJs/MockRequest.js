@@ -9,6 +9,7 @@ var MockRequest = function(method, url) {
     this.headers = {};
     this.body = {};
     this.cookies = {};
+    this.signedCookies = {};
     this.params = {};
 
     // NOTE: to be initialized when corresponding handler is called
@@ -41,6 +42,24 @@ MockRequest.prototype.setRouteParam = function(paramName) {
     var self = this;
     return function(paramValue) {
         self.params[paramName] = paramValue;
+        return self;
+    };
+}
+
+// String -> String -> MockRequest
+MockRequest.prototype.setCookie = function(cookieName) {
+    var self = this;
+    return function(cookieValue) {
+        self.cookies[cookieName] = cookieValue;
+        return self;
+    };
+}
+
+// String -> String -> MockRequest
+MockRequest.prototype.setSignedCookie = function(cookieName) {
+    var self = this;
+    return function(cookieValue) {
+        self.signedCookies[cookieName] = cookieValue;
         return self;
     };
 }
