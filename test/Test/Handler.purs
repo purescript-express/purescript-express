@@ -179,8 +179,30 @@ testMisc = do
         setupMockApp $ use $ getOriginalUrl >>= setTestHeader
         sendTestRequest id $ assertTestHeaderWith "http://example.com"
 
+testResponse = do
+    testExpress "Handler.setStatus" $ do
+        sendTestRequest id $ assertStatusCode 0
+        setupMockApp $ use $ setStatus 200
+        sendTestRequest id $ assertStatusCode 200
+    testExpress "Handler.(get)setResponseHeader" muteTest
+    testExpress "Handler.headersSent" muteTest
+    testExpress "Handler.setCookie" muteTest
+    testExpress "Handler.clearCookie" muteTest
+    testExpress "Handler.send" muteTest
+    testExpress "Handler.sendJson" muteTest
+    testExpress "Handler.sendJsonp" muteTest
+    testExpress "Handler.redirect" muteTest
+    testExpress "Handler.redirectWithStatus" muteTest
+    testExpress "Handler.setLocation" muteTest
+    testExpress "Handler.setContentType" muteTest
+    testExpress "Handler.sendFile" muteTest
+    testExpress "Handler.sendFileExt" muteTest
+    testExpress "Handler.download" muteTest
+    testExpress "Handler.downloadExt" muteTest
+
 testSuite = do
     testParams
     testHeaders
     testCookies
     testMisc
+    testResponse

@@ -1,18 +1,18 @@
 
 var MockResponse = function() {
-    this.status = 0;
-    this.contentType = "";
+    this.statusCode = 0;
     this.headers = {};
     this.data = "";
+    this.cookies = {};
     this.headersSent = false;
 }
 
 MockResponse.prototype.status = function(statusCode) {
-    this.status = statusCode;
+    this.statusCode = statusCode;
 }
 
 MockResponse.prototype.type = function(contentType) {
-    this.contentType = contentType;
+    this.headers['Content-Type'] = contentType;
 }
 
 MockResponse.prototype.get = function(headerName) {
@@ -24,11 +24,11 @@ MockResponse.prototype.set = function(headerName, value) {
 }
 
 MockResponse.prototype.cookie = function(name, value, options) {
-    throw "NotImplemented";
+    this.cookies[name] = {name: name, value: value, options: options};
 }
 
 MockResponse.prototype.clearCookie = function(name, options) {
-    throw "NotImplemented";
+    delete this.cookies[name];
 }
 
 MockResponse.prototype.send = function(data) {
@@ -46,8 +46,8 @@ MockResponse.prototype.json = function(obj) {
 
 MockResponse.prototype.jsonp = MockResponse.prototype.json;
 
-MockResponse.prototype.redirect = function(status, url) {
-    this.status(status);
+MockResponse.prototype.redirect = function(statusCode, url) {
+    this.status(statusCode);
     this.location(url);
 }
 

@@ -12,11 +12,14 @@ module Test.Mock
     , createMockRequest
     , testExpress
     , setupMockApp
-    , assertInApp
     , sendRequest
     , sendError
     , assertMatch
+    , assertInApp
+    , assertStatusCode
     , assertHeader
+    , assertData
+    , assertCookieValue
     , setTestHeader
     , assertTestHeader
     ) where
@@ -37,20 +40,26 @@ import Prelude hiding (apply)
 import Test.Unit
 import Test.Unit.Console
 
-type MockResponse = {
-    status      :: Int,
-    contentType :: String,
-    headers     :: StrMap.StrMap String,
-    data        :: String
-}
+type MockCookie =
+    { name    :: String
+    , value   :: String
+    , options :: String
+    }
 
-newtype MockRequest = MockRequest {
-    setHeader :: String -> String -> MockRequest,
-    setBodyParam :: String -> String -> MockRequest,
-    setRouteParam :: String -> String -> MockRequest,
-    setCookie :: String -> String -> MockRequest,
-    setSignedCookie :: String -> String -> MockRequest
-}
+type MockResponse =
+    { statusCode  :: Int
+    , headers     :: StrMap.StrMap String
+    , data        :: String
+    , cookies     :: StrMap.StrMap MockCookie
+    }
+
+newtype MockRequest = MockRequest
+    { setHeader :: String -> String -> MockRequest
+    , setBodyParam :: String -> String -> MockRequest
+    , setRouteParam :: String -> String -> MockRequest
+    , setCookie :: String -> String -> MockRequest
+    , setSignedCookie :: String -> String -> MockRequest
+    }
 
 setRequestHeader :: String -> String -> MockRequest -> MockRequest
 setRequestHeader name value (MockRequest r) = r.setHeader name value
@@ -92,14 +101,6 @@ setupMockApp app = do
     mockApp <- ask
     liftEff $ apply app mockApp
 
-assertInApp :: forall e.
-    ((TestResult -> Eff (express :: Express | e) Unit) -> App)
-    -> TestMockApp (express :: Express | e)
-assertInApp assertion = do
-    mockApp <- ask
-    let tester callback = liftEff $ apply (assertion callback) mockApp
-    lift $ testFn tester
-
 sendRequest :: forall e.
     Method
     -> String
@@ -124,16 +125,37 @@ sendError method url error testResponse = do
     response <- liftEff $ sendMockError app request error
     testResponse response
 
-assertMatch :: forall a e. (Show a, Eq a) => String -> Maybe a -> Maybe a -> Assertion e
+assertMatch :: forall a e. (Show a, Eq a) => String -> a -> a -> Assertion e
 assertMatch what expected actual = do
     let message = what ++ " does not match: \
         \Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
     assert message (expected == actual)
 
+assertInApp :: forall e.
+    ((TestResult -> Eff (express :: Express | e) Unit) -> App)
+    -> TestMockApp (express :: Express | e)
+assertInApp assertion = do
+    mockApp <- ask
+    let tester callback = liftEff $ apply (assertion callback) mockApp
+    lift $ testFn tester
+
+assertStatusCode :: forall e. Int -> MockResponse -> TestMockApp e
+assertStatusCode expected response =
+    lift $ assertMatch "Status code" expected response.statusCode
+
 assertHeader :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
 assertHeader name expected response = do
     let actual = StrMap.lookup name response.headers
     lift $ assertMatch ("Header '" ++ name ++ "'") expected actual
+
+assertData :: forall e. String -> MockResponse -> TestMockApp e
+assertData expected response =
+    lift $ assertMatch "Response data" expected response.data
+
+assertCookieValue :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertCookieValue name expected response = do
+    let actual = map (\r -> r.value) $ StrMap.lookup name response.cookies
+    lift $ assertMatch ("Cookie '" ++ name ++ "'") expected actual
 
 testHeader :: String
 testHeader = "X-Test-Response-Header"
