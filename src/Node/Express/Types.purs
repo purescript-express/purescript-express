@@ -28,6 +28,10 @@ foreign import data Request :: *
 
 data Protocol = Http | Https
 
+instance showProtocol :: Show Protocol where
+    show Http  = "http"
+    show Https = "https"
+
 instance isForeignProtocol :: IsForeign Protocol where
     read value = case readString value of
         Right "http"  -> Right Http

@@ -11,7 +11,8 @@
     "node_modules",
     "bower_components",
     "output",
-    "tests",
+    "test",
+    "testJs",
     "example",
     "Gruntfile.js",
     "package.json",
@@ -33,10 +34,14 @@
     "purescript-exceptions": "0.3.x",
     "purescript-eff": "0.1.x",
     "purescript-lists": "0.7.x",
-    "purescript-data-default": "0.1.0"
+    "purescript-data-default": "0.1.0",
+    "purescript-unfoldable": "0.4.0"
   },
   "devDependencies": {
     "purescript-console": "0.1.x",
-    "purescript-node-fs": "0.8.x"
+    "purescript-node-fs": "0.8.x",
+    "purescript-test-unit": "https://github.com/passy/purescript-test-unit.git#purescript-transformers-update",
+    "purescript-unsafe-coerce": "0.1.0",
+    "purescript-maps": "0.5.x"
   }
 }

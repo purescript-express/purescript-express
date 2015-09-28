@@ -17,7 +17,7 @@ module Node.Express.Handler
     , getResponseHeader, setResponseHeader, headersSent, setContentType
     , setCookie, clearCookie
     , send, sendJson, sendJsonp
-    , redirect, setLocation
+    , redirect, redirectWithStatus, setLocation
     , sendFile, sendFileExt, download, downloadExt
     ) where
 
