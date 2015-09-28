@@ -4,6 +4,7 @@ import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
 import Control.Monad.Trans
 import Data.Array (head)
+import Data.Default
 import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
@@ -184,21 +185,78 @@ testResponse = do
         sendTestRequest id $ assertStatusCode 0
         setupMockApp $ use $ setStatus 200
         sendTestRequest id $ assertStatusCode 200
-    testExpress "Handler.(get)setResponseHeader" muteTest
-    testExpress "Handler.headersSent" muteTest
-    testExpress "Handler.setCookie" muteTest
-    testExpress "Handler.clearCookie" muteTest
-    testExpress "Handler.send" muteTest
-    testExpress "Handler.sendJson" muteTest
-    testExpress "Handler.sendJsonp" muteTest
-    testExpress "Handler.redirect" muteTest
-    testExpress "Handler.redirectWithStatus" muteTest
-    testExpress "Handler.setLocation" muteTest
-    testExpress "Handler.setContentType" muteTest
+
+    testExpress "Handler.(get)setResponseHeader" $ do
+        setupMockApp $ use $ do
+            setResponseHeader "X-Foo-Bar" "foo"
+            maybeFoo <- getResponseHeader "X-Foo-Bar"
+            if maybeFoo == Just "foo"
+                then setTestHeader testValue
+                else return unit
+        sendTestRequest id assertTestHeaderExists
+
+    testExpress "Handler.headersSent" $ do
+        setupMockApp $ use $ do
+            headersAreNotSentBeforeSend <- map not headersSent
+            send "Something"
+            headersAreSentAfterSend <- headersSent
+            if (headersAreNotSentBeforeSend && headersAreSentAfterSend)
+                then setTestHeader testValue
+                else return unit
+        sendTestRequest id assertTestHeaderExists
+
+    testExpress "Handler.setCookie" $ do
+        setupMockApp $ use $ setCookie testCookie testValue def
+        sendTestRequest id (assertCookieValue testCookie $ Just testValue)
+
+    testExpress "Handler.clearCookie" $ do
+        let withTestCookie = setRequestCookie testCookie testValue
+            assertTestCookieAbsent = assertCookieValue testCookie Nothing
+        setupMockApp $ use $ clearCookie testCookie "/"
+        sendTestRequest id assertTestCookieAbsent
+        sendTestRequest withTestCookie assertTestCookieAbsent
+
+    testExpress "Handler.send" $ do
+        setupMockApp $ use $ send testValue
+        sendTestRequest id $ assertData testValue
+
+    testExpress "Handler.sendJson" $ do
+        setupMockApp $ use $ sendJson testData
+        sendTestRequest id $ assertData testDataStr
+
+    testExpress "Handler.sendJsonp" $ do
+        setupMockApp $ use $ sendJsonp testData
+        sendTestRequest id $ assertData testDataStr
+
+    testExpress "Handler.redirect" $ do
+        setupMockApp $ use $ redirect exampleCom
+        sendTestRequest id $ \response -> do
+            assertStatusCode 302 response
+            assertHeader "Location" (Just exampleCom) response
+
+    testExpress "Handler.redirectWithStatus" $ do
+        setupMockApp $ use $ redirectWithStatus 301 exampleCom
+        sendTestRequest id $ \response -> do
+            assertStatusCode 301 response
+            assertHeader "Location" (Just exampleCom) response
+
+    testExpress "Handler.setLocation" $ do
+        setupMockApp $ use $ setLocation exampleCom
+        sendTestRequest id $ assertHeader "Location" (Just exampleCom)
+
+    testExpress "Handler.setContentType" $ do
+        setupMockApp $ use $ setContentType "text/html"
+        sendTestRequest id $ assertHeader "Content-Type" (Just "text/html")
+
     testExpress "Handler.sendFile" muteTest
     testExpress "Handler.sendFileExt" muteTest
     testExpress "Handler.download" muteTest
     testExpress "Handler.downloadExt" muteTest
+  where
+    exampleCom = "http://example.com"
+    testCookie = "testCookie"
+    testData = {foo: "bar"}
+    testDataStr = "{\"foo\":\"bar\"}"
 
 testSuite = do
     testParams

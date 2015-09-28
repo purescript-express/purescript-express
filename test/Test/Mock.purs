@@ -1,6 +1,7 @@
 module Test.Mock
     ( MockResponse(..)
     , MockRequest(..)
+    , MockCookie(..)
     , setRequestHeader
     , setRouteParam
     , setBodyParam
