@@ -1,5 +1,6 @@
 module Test.Handler (testSuite) where
 
+import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
 import Control.Monad.Trans
@@ -12,9 +13,15 @@ import Node.Express.Types
 import Node.Express.App hiding (apply)
 import Node.Express.Handler
 import Prelude hiding (id)
+import qualified Data.StrMap as StrMap
 import Test.Mock
 import Test.Unit
 import Test.Unit.Console
+import Unsafe.Coerce
+
+
+foreign import cwd :: String
+foreign import unsafeUpdateMapInPlace :: forall a e. StrMap.StrMap a -> String -> a -> Eff e Unit
 
 testValue = "TestValue"
 assertTestHeaderExists = assertTestHeader $ Just testValue
@@ -248,15 +255,50 @@ testResponse = do
         setupMockApp $ use $ setContentType "text/html"
         sendTestRequest id $ assertHeader "Content-Type" (Just "text/html")
 
-    testExpress "Handler.sendFile" muteTest
-    testExpress "Handler.sendFileExt" muteTest
-    testExpress "Handler.download" muteTest
-    testExpress "Handler.downloadExt" muteTest
+    testExpress "Handler.sendFile" $ do
+        setupMockApp $ use $ sendFile testFile
+        sendTestRequest id $ \response -> do
+            assertHeader filepathHeader (Just testFile) response
+            assertData ("{\"root\":\"" ++ cwd ++ "\"}") response
+
+    testExpress "Handler.sendFileExt" $ do
+        setupMockApp $ use $ sendFileExt testFile testData (\_ -> return unit)
+        sendTestRequest id $ \response -> do
+            assertHeader filepathHeader (Just testFile) response
+            assertData testDataStr response
+
+    testExpress "Handler.sendFileExt (with error)" $ do
+        setupMockApp $ use $ sendFileExt testFile {triggerError: true} testErrorHandler
+        sendTestRequest id $ assertHeader testErrorHeader (Just testValue)
+
+    testExpress "Handler.download" $ do
+        setupMockApp $ use $ download testFile
+        sendTestRequest id $ \response -> do
+            assertHeader filepathHeader (Just testFile) response
+            assertHeader realFilepathHeader (Just testFile) response
+
+    testExpress "Handler.downloadExt" $ do
+        setupMockApp $ use $ downloadExt testFile "renamed.txt" (\_ -> return unit)
+        sendTestRequest id $ \response -> do
+            assertHeader filepathHeader (Just "renamed.txt") response
+            assertHeader realFilepathHeader (Just testFile) response
+
+    testExpress "Handler.downloadExt (with error)" $ do
+        setupMockApp $ use $ downloadExt testFile "triggerError" testErrorHandler
+        sendTestRequest id $ assertHeader testErrorHeader (Just testValue)
   where
     exampleCom = "http://example.com"
     testCookie = "testCookie"
     testData = {foo: "bar"}
     testDataStr = "{\"foo\":\"bar\"}"
+    testFile = "test.txt"
+    filepathHeader = "X-Filepath"
+    realFilepathHeader = "X-Real-Filepath"
+    testErrorHeader = "X-Test-Error"
+    testErrorHandler :: forall e. Error -> Eff e Unit
+    testErrorHandler = \respAsError ->
+        let response = unsafeCoerce respAsError in
+        unsafeUpdateMapInPlace (response.headers) testErrorHeader testValue
 
 testSuite = do
     testParams

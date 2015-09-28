@@ -55,16 +55,32 @@ MockResponse.prototype.location = function(url) {
     this.set("Location", url);
 }
 
-MockResponse.prototype.attachemnt = function(filename) {
-    throw "NotImplemented";
-}
-
 MockResponse.prototype.sendFile = function(path, options, callback) {
-    throw "NotImplemented";
+    if (typeof options === 'object' && options.triggerError) {
+        return callback(this);
+    }
+
+    this.set("X-Filepath", path);
+    this.json(options);
 }
 
 MockResponse.prototype.download = function() {
-    throw "NotImplemented";
+    if (arguments.length == 2) {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(arguments[0])
+        this.downloadImpl.apply(this, args);
+    } else if (arguments.length == 3) {
+        this.downloadImpl.apply(this, arguments);
+    }
+}
+
+MockResponse.prototype.downloadImpl = function(path, filename, callback) {
+    if (filename == "triggerError") {
+        return callback(this);
+    }
+
+    this.set("X-Filepath", filename);
+    this.set("X-Real-Filepath", path);
 }
 
 module.exports = MockResponse;

@@ -158,11 +158,8 @@ assertCookieValue name expected response = do
     let actual = map (\r -> r.value) $ StrMap.lookup name response.cookies
     lift $ assertMatch ("Cookie '" ++ name ++ "'") expected actual
 
-testHeader :: String
-testHeader = "X-Test-Response-Header"
-
 setTestHeader :: String -> Handler
-setTestHeader = setResponseHeader testHeader
+setTestHeader = setResponseHeader "X-Test-Response-Header"
 
 assertTestHeader :: forall e. Maybe String -> MockResponse -> TestMockApp e
-assertTestHeader value response = assertHeader testHeader value response
+assertTestHeader value response = assertHeader "X-Test-Response-Header" value response
