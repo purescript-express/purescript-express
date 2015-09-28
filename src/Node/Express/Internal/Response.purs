@@ -66,10 +66,6 @@ intlRespSetLocation = unsafeForeignProcedure ["resp", "url", ""]
     "resp.location(url)"
 
 
-intlRespSetAttachment :: Response -> String -> ExpressM Unit
-intlRespSetAttachment = unsafeForeignProcedure ["resp", "filename", ""]
-    "resp.attachment(filename)"
-
 intlRespSendFile ::
     forall opts.
     Response -> String -> { | opts } -> (Error -> ExpressM Unit) -> ExpressM Unit
