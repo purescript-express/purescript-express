@@ -12,6 +12,7 @@ import Control.Monad.ST
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
+import Node.HTTP (Server())
 
 
 -- Pretend for now that this is our cool database (:
@@ -131,7 +132,7 @@ appSetup = do
     get "/done/:id" doTodoHandler
     useOnError errorHandler
 
-main :: forall e. Eff (express :: Express | e) Unit
+main :: forall e. Eff (express :: Express | e) Server
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
     listenHttp appSetup port \_ ->
