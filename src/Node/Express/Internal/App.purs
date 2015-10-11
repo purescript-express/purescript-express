@@ -12,7 +12,7 @@ import Control.Monad.Eff.Exception
 import Node.Express.Types
 import Node.Express.Internal.Utils
 import Node.Express.Handler
-
+import Node.HTTP (Server())
 
 foreign import intlMkApplication :: ExpressM Application
 
@@ -40,10 +40,10 @@ intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
 
 foreign import intlAppListenHttp :: forall e.
-    Application -> Int -> (Event -> Eff e Unit) -> ExpressM Unit
+    Application -> Int -> (Event -> Eff e Unit) -> ExpressM Server
 
 foreign import intlAppListenHttps :: forall opts e.
-    Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+    Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM Server
 
 
 intlAppUse ::

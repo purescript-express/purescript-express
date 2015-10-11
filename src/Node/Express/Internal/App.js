@@ -10,9 +10,11 @@ exports.intlAppListenHttp = function(app) {
         return function(cb) {
             return function() {
                 var http = module.require('http');
-                http.createServer(app).listen(port, function(e) {
+                var server = http.createServer(app);
+                server.listen(port, function(e) {
                     return cb(e)();
                 });
+                return server;
             }
         }
     }
@@ -24,9 +26,11 @@ exports.intlAppListenHttps = function(app) {
             return function(cb) {
                 return function() {
                     var https = module.require('https');
-                    https.createServer(opts, app).listen(port, function(e) {
+                    var server = https.createServer(opts, app);
+                    server.listen(port, function(e) {
                         return cb(e)();
                     });
+                    return server;
                 }
             }
         }
