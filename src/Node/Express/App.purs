@@ -15,10 +15,12 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Unsafe
+import Node.HTTP (Server ())
 
 import Node.Express.Types
 import Node.Express.Internal.App
 import Node.Express.Handler
+
 
 
 --| Monad responsible for application related operations (initial setup mostly).
@@ -51,7 +53,7 @@ instance monadEffAppM :: MonadEff eff AppM where
 
 --| Run application on specified port and execute callback after launch.
 --| HTTP version
-listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Unit
+listenHttp :: forall e. App -> Port -> (Event -> Eff e Unit) -> ExpressM Server
 listenHttp (AppM act) port cb = do
     app <- intlMkApplication
     act app
@@ -59,7 +61,7 @@ listenHttp (AppM act) port cb = do
 
 --| Run application on specified port and execute callback after launch.
 --| HTTPS version
-listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Unit
+listenHttps :: forall e opts. App -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM Server
 listenHttps (AppM act) port opts cb = do
     app <- intlMkApplication
     act app

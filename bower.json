@@ -35,7 +35,8 @@
     "purescript-eff": "0.1.x",
     "purescript-lists": "0.7.x",
     "purescript-data-default": "0.1.0",
-    "purescript-unfoldable": "0.4.0"
+    "purescript-unfoldable": "0.4.0",
+    "purescript-node-http": "0.1.6"
   },
   "devDependencies": {
     "purescript-console": "0.1.x",

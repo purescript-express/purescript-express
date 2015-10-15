@@ -14,6 +14,7 @@ import qualified Node.FS.Async as F
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
+import Node.HTTP (Server())
 
 
 indexHandler :: Handler
@@ -32,6 +33,6 @@ sendContentsHandler eitherContents =
 appSetup :: App
 appSetup = get  "/" indexHandler
 
-main :: forall e. Eff (express :: Express | e) Unit
+main :: forall e. Eff (express :: Express | e) Server
 main = do
     listenHttp appSetup 8080 \_ -> log $ "Listening on 8080"

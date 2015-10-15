@@ -9,6 +9,7 @@ import Control.Monad.Eff.Console (log)
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
+import Node.HTTP (Server())
 
 
 foreign import jsonBodyParser :: Fn3 Request Response (ExpressM Unit) (ExpressM Unit)
@@ -29,6 +30,6 @@ appSetup = do
     get  "/" indexHandler
     post "/" echoHandler
 
-main :: forall e. Eff (express :: Express | e) Unit
+main :: forall e. Eff (express :: Express | e) Server
 main = do
     listenHttp appSetup 8080 \_ -> log $ "Listening on 8080"
