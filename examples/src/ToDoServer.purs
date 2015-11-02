@@ -53,7 +53,7 @@ parseNumber :: String -> Number
 parseNumber = unsafeForeignFunction ["str"] "parseInt(str);"
 
 
-logger :: forall e. Handler e
+logger :: forall e. Handler (console :: CONSOLE | e)
 logger = do
     url <- getOriginalUrl
     liftEff $ log (">>> " ++ url)
@@ -79,12 +79,12 @@ help = { name: "Todo example"
 indexHandler :: forall e. Handler e
 indexHandler = sendJson help
 
-listTodosHandler :: forall e. Handler e
+listTodosHandler :: forall e. Handler (db :: DB | e)
 listTodosHandler = do
     indexedTodos <- liftEff $ getTodosWithIndexes todos
     sendJson indexedTodos
 
-createTodoHandler :: forall e. Handler e
+createTodoHandler :: forall e. Handler (db :: DB | e)
 createTodoHandler = do
     descParam <- getQueryParam "desc"
     case descParam of
@@ -93,7 +93,7 @@ createTodoHandler = do
             newId <- liftEff $ addTodo todos { desc: desc, isDone: false }
             sendJson {status: "Created", id: newId}
 
-updateTodoHandler :: forall e. Handler e
+updateTodoHandler :: forall e. Handler (db :: DB | e)
 updateTodoHandler = do
     idParam <- getRouteParam "id"
     descParam <- getQueryParam "desc"
@@ -103,7 +103,7 @@ updateTodoHandler = do
             sendJson {status: "Updated"}
         _ -> nextThrow $ error "Id and Description are required"
 
-deleteTodoHandler :: forall e. Handler e
+deleteTodoHandler :: forall e. Handler (db :: DB | e)
 deleteTodoHandler = do
     idParam <- getRouteParam "id"
     case idParam of
@@ -112,7 +112,7 @@ deleteTodoHandler = do
             liftEff $ deleteTodo todos (parseNumber id)
             sendJson {status: "Deleted"}
 
-doTodoHandler :: forall e. Handler e
+doTodoHandler :: forall e. Handler (db :: DB | e)
 doTodoHandler = do
     idParam <- getRouteParam "id"
     case idParam of
@@ -121,7 +121,7 @@ doTodoHandler = do
             liftEff $ setDone todos (parseNumber id)
             sendJson {status: "Done"}
 
-appSetup :: forall e. App e
+appSetup :: forall e. App (db :: DB, console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
     setProp "json spaces" 4.0
@@ -134,7 +134,7 @@ appSetup = do
     get "/done/:id" doTodoHandler
     useOnError errorHandler
 
-main :: forall e. Eff (express :: EXPRESS, console :: CONSOLE | e) Server
+main :: forall e. Eff (db :: DB, express :: EXPRESS, console :: CONSOLE | e) Server
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
     listenHttp appSetup port \_ ->
