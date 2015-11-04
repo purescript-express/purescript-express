@@ -52,7 +52,7 @@ instance monadEffAppM :: MonadEff eff (AppM eff) where
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTP version
-listenHttp :: forall e. App e -> Port -> (Event -> Eff e Unit) -> ExpressM e Server
+listenHttp :: forall e1 e2. App e1 -> Port -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
 listenHttp (AppM act) port cb = do
     app <- intlMkApplication
     act app
@@ -60,8 +60,8 @@ listenHttp (AppM act) port cb = do
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTPS version
-listenHttps :: forall e opts.
-    App e -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM e Server
+listenHttps :: forall e1 e2 opts.
+    App e1 -> Port -> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
 listenHttps (AppM act) port opts cb = do
     app <- intlMkApplication
     act app

@@ -39,11 +39,11 @@ intlAppHttp ::
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
 
-foreign import intlAppListenHttp :: forall e.
-    Application -> Int -> (Event -> Eff e Unit) -> ExpressM e Server
+foreign import intlAppListenHttp :: forall e1 e2.
+    Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
-foreign import intlAppListenHttps :: forall opts e.
-    Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM e Server
+foreign import intlAppListenHttps :: forall opts e1 e2.
+    Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 
 intlAppUse ::
