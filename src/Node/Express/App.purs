@@ -46,8 +46,8 @@ instance bindAppM :: Bind (AppM e) where
 
 instance monadAppM :: Monad (AppM e)
 
-instance monadEffAppM :: MonadEff eff (AppM e) where
-    liftEff act = AppM \_ -> unsafeInterleaveEff act
+instance monadEffAppM :: MonadEff eff (AppM eff) where
+    liftEff act = AppM \_ -> act
 
 
 -- | Run application on specified port and execute callback after launch.
