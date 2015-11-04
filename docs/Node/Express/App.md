@@ -15,7 +15,7 @@ instance applyAppM :: Apply (AppM e)
 instance applicativeAppM :: Applicative (AppM e)
 instance bindAppM :: Bind (AppM e)
 instance monadAppM :: Monad (AppM e)
-instance monadEffAppM :: MonadEff eff (AppM e)
+instance monadEffAppM :: MonadEff eff (AppM eff)
 ```
 
 #### `App`
@@ -27,7 +27,7 @@ type App e = AppM (express :: EXPRESS | e) Unit
 #### `listenHttp`
 
 ``` purescript
-listenHttp :: forall e. App e -> Port -> (Event -> Eff e Unit) -> ExpressM e Server
+listenHttp :: forall e1 e2. App e1 -> Port -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
 ```
 
 Run application on specified port and execute callback after launch.
@@ -36,7 +36,7 @@ HTTP version
 #### `listenHttps`
 
 ``` purescript
-listenHttps :: forall e opts. App e -> Port -> opts -> (Event -> Eff e Unit) -> ExpressM e Server
+listenHttps :: forall e1 e2 opts. App e1 -> Port -> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
 ```
 
 Run application on specified port and execute callback after launch.

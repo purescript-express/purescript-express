@@ -28,7 +28,7 @@ type Handler e = HandlerM (express :: EXPRESS | e) Unit
 #### `runHandlerM`
 
 ``` purescript
-runHandlerM :: forall e a. HandlerM (express :: EXPRESS | e) a -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
+runHandlerM :: forall e. Handler e -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
 ```
 
 #### `next`
