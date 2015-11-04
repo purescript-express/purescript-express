@@ -70,8 +70,8 @@ instance monadEffHandlerM :: MonadEff eff (HandlerM eff) where
 instance monadAffHandlerM :: MonadAff eff (HandlerM eff) where
     liftAff act = HandlerM \_ _ _ -> act
 
-runHandlerM :: forall e a. HandlerM (express :: EXPRESS | e) a -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
-runHandlerM (HandlerM h) req res nxt = runAff (intlNextWithError nxt) (const $ pure unit) (h req res nxt)
+runHandlerM :: forall e. Handler e -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
+runHandlerM (HandlerM h) req res nxt = runAff (intlNextWithError nxt) pure (h req res nxt)
 
 -- | Call next handler/middleware in a chain.
 next :: forall e. Handler e
