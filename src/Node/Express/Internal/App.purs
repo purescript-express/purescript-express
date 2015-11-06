@@ -14,59 +14,58 @@ import Node.Express.Internal.Utils
 import Node.Express.Handler
 import Node.HTTP (Server())
 
-foreign import intlMkApplication :: ExpressM Application
+foreign import intlMkApplication :: forall e. ExpressM e Application
 
 intlAppGetProp ::
-    forall a. (IsForeign a) =>
-    Application -> String -> ExpressM (Maybe a)
+    forall e a. (IsForeign a) =>
+    Application -> String -> ExpressM e (Maybe a)
 intlAppGetProp app name = do
-    let getter :: Application -> String -> ExpressM Foreign
+    let getter :: Application -> String -> ExpressM e Foreign
         getter = unsafeForeignFunction ["app", "name", ""] "app.get(name)"
     liftM1 (eitherToMaybe <<< read) (getter app name)
 
 intlAppSetProp ::
-    forall a. (IsForeign a) =>
-    Application -> String -> a -> ExpressM Unit
+    forall e a. (IsForeign a) =>
+    Application -> String -> a -> ExpressM e Unit
 intlAppSetProp = unsafeForeignProcedure ["app", "name", "val", ""]
     "app.set(name, val)"
 
 
-type HandlerFn = Request -> Response -> ExpressM Unit -> ExpressM Unit
+type HandlerFn e = Request -> Response -> ExpressM e Unit -> ExpressM e Unit
 
 intlAppHttp ::
-    forall r. (RoutePattern r) =>
-    Application -> String -> r -> HandlerFn -> ExpressM Unit
+    forall e r. (RoutePattern r) =>
+    Application -> String -> r -> HandlerFn e -> ExpressM e Unit
 intlAppHttp = unsafeForeignProcedure ["app", "method", "route", "cb", ""]
     "app[method](route, function(req, resp, next) { return cb(req)(resp)(next)(); })"
 
-foreign import intlAppListenHttp :: forall e.
-    Application -> Int -> (Event -> Eff e Unit) -> ExpressM Server
+foreign import intlAppListenHttp :: forall e1 e2.
+    Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
-foreign import intlAppListenHttps :: forall opts e.
-    Application -> Int -> opts -> (Event -> Eff e Unit) -> ExpressM Server
+foreign import intlAppListenHttps :: forall opts e1 e2.
+    Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 
 intlAppUse ::
-    Application -> HandlerFn -> ExpressM Unit
+    forall e. Application -> HandlerFn e -> ExpressM e Unit
 intlAppUse = unsafeForeignProcedure ["app", "mw", ""]
     "app.use(function(req, resp, next) { return mw(req)(resp)(next)(); });"
 
 intlAppUseExternal ::
-    Application -> Fn3 Request Response (ExpressM Unit) (ExpressM Unit) -> ExpressM Unit
+    forall e. Application -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> ExpressM e Unit
 intlAppUseExternal = unsafeForeignProcedure ["app", "mw", ""] "app.use(mw);"
 
 intlAppUseAt ::
-    Application -> String -> HandlerFn -> ExpressM Unit
+    forall e. Application -> String -> HandlerFn e -> ExpressM e Unit
 intlAppUseAt = unsafeForeignProcedure ["app", "route", "mw", ""]
     "app.use(route, function(req, resp, next) { return mw(req)(resp)(next)(); });"
 
 intlAppUseOnParam ::
-    Application -> String -> (String -> HandlerFn) -> ExpressM Unit
+    forall e. Application -> String -> (String -> HandlerFn e) -> ExpressM e Unit
 intlAppUseOnParam = unsafeForeignProcedure ["app", "name", "cb", ""]
     "app.param(name, function(req, resp, next, val) { return cb(val)(req)(resp)(next)(); })"
 
 intlAppUseOnError ::
-    Application -> (Error -> HandlerFn) -> ExpressM Unit
+    forall e. Application -> (Error -> HandlerFn e) -> ExpressM e Unit
 intlAppUseOnError = unsafeForeignProcedure ["app", "cb", ""]
     "app.use(function(err, req, resp, next) { return cb(err)(req)(resp)(next)(); })"
-

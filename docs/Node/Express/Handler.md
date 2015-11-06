@@ -3,54 +3,38 @@
 #### `HandlerM`
 
 ``` purescript
-data HandlerM a
+data HandlerM e a
 ```
 
 Monad responsible for handling single request.
 
 ##### Instances
 ``` purescript
-instance functorHandlerM :: Functor HandlerM
-instance applyHandlerM :: Apply HandlerM
-instance applicativeHandlerM :: Applicative HandlerM
-instance bindHandlerM :: Bind HandlerM
-instance monadHandlerM :: Monad HandlerM
-instance monadEffHandlerM :: MonadEff eff HandlerM
+instance functorHandlerM :: Functor (HandlerM e)
+instance applyHandlerM :: Apply (HandlerM e)
+instance applicativeHandlerM :: Applicative (HandlerM e)
+instance bindHandlerM :: Bind (HandlerM e)
+instance monadHandlerM :: Monad (HandlerM e)
+instance monadEffHandlerM :: MonadEff eff (HandlerM eff)
+instance monadAffHandlerM :: MonadAff eff (HandlerM eff)
 ```
 
 #### `Handler`
 
 ``` purescript
-type Handler = HandlerM Unit
+type Handler e = HandlerM (express :: EXPRESS | e) Unit
 ```
 
-#### `withHandler`
+#### `runHandlerM`
 
 ``` purescript
-withHandler :: forall a. HandlerM a -> Request -> Response -> ExpressM Unit -> ExpressM a
+runHandlerM :: forall e. Handler e -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
 ```
-
-#### `capture`
-
-``` purescript
-capture :: forall a b eff. (a -> HandlerM b) -> HandlerM (a -> Eff eff b)
-```
-
-Generate a closure from a function capturing current request and response.
-It is intended to use with async functions like `fs.readFile`.
-Example:
-
-    fileReadHandler :: Handler
-    fileReadHandler = do
-        callback <- capture $ \data ->
-            send data
-        fs.readFile("some_file.txt", callback)
-
 
 #### `next`
 
 ``` purescript
-next :: Handler
+next :: forall e. Handler e
 ```
 
 Call next handler/middleware in a chain.
@@ -58,7 +42,7 @@ Call next handler/middleware in a chain.
 #### `nextThrow`
 
 ``` purescript
-nextThrow :: forall a. Error -> HandlerM a
+nextThrow :: forall e a. Error -> HandlerM (express :: EXPRESS | e) a
 ```
 
 Call next handler/middleware and pass error to it.
@@ -66,13 +50,13 @@ Call next handler/middleware and pass error to it.
 #### `getRouteParam`
 
 ``` purescript
-getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
+getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 #### `getBodyParam`
 
 ``` purescript
-getBodyParam :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getBodyParam :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Get param from request's body.
@@ -82,7 +66,7 @@ NOTE: Not parsed by default, you must attach proper middleware
 #### `getQueryParam`
 
 ``` purescript
-getQueryParam :: String -> HandlerM (Maybe String)
+getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Get param from query string (part of URL behind '?').
@@ -92,7 +76,7 @@ return the first one.
 #### `getQueryParams`
 
 ``` purescript
-getQueryParams :: String -> HandlerM (Array String)
+getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
 ```
 
 Get all params from query string having specified key.
@@ -100,7 +84,7 @@ Get all params from query string having specified key.
 #### `getRoute`
 
 ``` purescript
-getRoute :: HandlerM String
+getRoute :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return route that matched this request.
@@ -108,7 +92,7 @@ Return route that matched this request.
 #### `getCookie`
 
 ``` purescript
-getCookie :: String -> HandlerM (Maybe String)
+getCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Get cookie param by its key.
@@ -116,7 +100,7 @@ Get cookie param by its key.
 #### `getSignedCookie`
 
 ``` purescript
-getSignedCookie :: String -> HandlerM (Maybe String)
+getSignedCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Get signed cookie param by its key.
@@ -124,7 +108,7 @@ Get signed cookie param by its key.
 #### `getRequestHeader`
 
 ``` purescript
-getRequestHeader :: String -> HandlerM (Maybe String)
+getRequestHeader :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Get request header param.
@@ -132,7 +116,7 @@ Get request header param.
 #### `accepts`
 
 ``` purescript
-accepts :: String -> HandlerM (Maybe String)
+accepts :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Check if specified response type will be accepted by a client.
@@ -140,7 +124,7 @@ Check if specified response type will be accepted by a client.
 #### `ifAccepts`
 
 ``` purescript
-ifAccepts :: String -> Handler -> Handler
+ifAccepts :: forall e. String -> Handler e -> Handler e
 ```
 
 Execute specified handler if client accepts specified response type.
@@ -148,7 +132,7 @@ Execute specified handler if client accepts specified response type.
 #### `acceptsCharset`
 
 ``` purescript
-acceptsCharset :: String -> HandlerM (Maybe String)
+acceptsCharset :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Check if specified charset is accepted.
@@ -156,7 +140,7 @@ Check if specified charset is accepted.
 #### `acceptsLanguage`
 
 ``` purescript
-acceptsLanguage :: String -> HandlerM (Maybe String)
+acceptsLanguage :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Check if specified language is accepted.
@@ -164,7 +148,7 @@ Check if specified language is accepted.
 #### `hasType`
 
 ``` purescript
-hasType :: String -> HandlerM Boolean
+hasType :: forall e. String -> HandlerM (express :: EXPRESS | e) Boolean
 ```
 
 Check if request's Content-Type field matches type.
@@ -173,7 +157,7 @@ See http://expressjs.com/4x/api.html#req.is
 #### `getRemoteIp`
 
 ``` purescript
-getRemoteIp :: HandlerM String
+getRemoteIp :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return remote or upstream address.
@@ -181,7 +165,7 @@ Return remote or upstream address.
 #### `getRemoteIps`
 
 ``` purescript
-getRemoteIps :: HandlerM (Array String)
+getRemoteIps :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
 ```
 
 Return list of X-Forwarded-For proxies if any.
@@ -189,7 +173,7 @@ Return list of X-Forwarded-For proxies if any.
 #### `getPath`
 
 ``` purescript
-getPath :: HandlerM String
+getPath :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return request URL pathname.
@@ -197,7 +181,7 @@ Return request URL pathname.
 #### `getHostname`
 
 ``` purescript
-getHostname :: HandlerM String
+getHostname :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return Host header field.
@@ -205,7 +189,7 @@ Return Host header field.
 #### `getSubdomains`
 
 ``` purescript
-getSubdomains :: HandlerM (Array String)
+getSubdomains :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
 ```
 
 Return array of subdomains.
@@ -213,7 +197,7 @@ Return array of subdomains.
 #### `isFresh`
 
 ``` purescript
-isFresh :: HandlerM Boolean
+isFresh :: forall e. HandlerM (express :: EXPRESS | e) Boolean
 ```
 
 Check that Last-Modified and/or ETag still matches.
@@ -221,7 +205,7 @@ Check that Last-Modified and/or ETag still matches.
 #### `isStale`
 
 ``` purescript
-isStale :: HandlerM Boolean
+isStale :: forall e. HandlerM (express :: EXPRESS | e) Boolean
 ```
 
 Check that Last-Modified and/or ETag do not match.
@@ -229,7 +213,7 @@ Check that Last-Modified and/or ETag do not match.
 #### `isXhr`
 
 ``` purescript
-isXhr :: HandlerM Boolean
+isXhr :: forall e. HandlerM (express :: EXPRESS | e) Boolean
 ```
 
 Check if request was issued by XMLHttpRequest.
@@ -237,7 +221,7 @@ Check if request was issued by XMLHttpRequest.
 #### `getProtocol`
 
 ``` purescript
-getProtocol :: HandlerM (Maybe Protocol)
+getProtocol :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Protocol)
 ```
 
 Return request protocol.
@@ -245,7 +229,7 @@ Return request protocol.
 #### `getMethod`
 
 ``` purescript
-getMethod :: HandlerM (Maybe Method)
+getMethod :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Method)
 ```
 
 Return request HTTP method
@@ -253,7 +237,7 @@ Return request HTTP method
 #### `getUrl`
 
 ``` purescript
-getUrl :: HandlerM String
+getUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return request URL (may be modified by other handlers/middleware).
@@ -261,7 +245,7 @@ Return request URL (may be modified by other handlers/middleware).
 #### `getOriginalUrl`
 
 ``` purescript
-getOriginalUrl :: HandlerM String
+getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return request original URL.
@@ -269,13 +253,13 @@ Return request original URL.
 #### `setStatus`
 
 ``` purescript
-setStatus :: Int -> Handler
+setStatus :: forall e. Int -> Handler e
 ```
 
 #### `getResponseHeader`
 
 ``` purescript
-getResponseHeader :: forall a. (IsForeign a) => String -> HandlerM (Maybe a)
+getResponseHeader :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Return response header value.
@@ -283,7 +267,7 @@ Return response header value.
 #### `setResponseHeader`
 
 ``` purescript
-setResponseHeader :: forall a. String -> a -> Handler
+setResponseHeader :: forall e a. String -> a -> Handler e
 ```
 
 Set response header value.
@@ -291,7 +275,7 @@ Set response header value.
 #### `headersSent`
 
 ``` purescript
-headersSent :: HandlerM Boolean
+headersSent :: forall e. HandlerM (express :: EXPRESS | e) Boolean
 ```
 
 Check if headers have been sent already
@@ -299,7 +283,7 @@ Check if headers have been sent already
 #### `setCookie`
 
 ``` purescript
-setCookie :: String -> String -> CookieOptions -> Handler
+setCookie :: forall e. String -> String -> CookieOptions -> Handler e
 ```
 
 Set cookie by its name using specified options (maxAge, path, etc).
@@ -307,7 +291,7 @@ Set cookie by its name using specified options (maxAge, path, etc).
 #### `clearCookie`
 
 ``` purescript
-clearCookie :: String -> String -> Handler
+clearCookie :: forall e. String -> String -> Handler e
 ```
 
 Clear cookie.
@@ -315,7 +299,7 @@ Clear cookie.
 #### `send`
 
 ``` purescript
-send :: forall a. a -> Handler
+send :: forall e a. a -> Handler e
 ```
 
 Send a response. Could be object, string, buffer, etc.
@@ -323,7 +307,7 @@ Send a response. Could be object, string, buffer, etc.
 #### `sendJson`
 
 ``` purescript
-sendJson :: forall a. a -> Handler
+sendJson :: forall e a. a -> Handler e
 ```
 
 Send a JSON response. Necessary headers are set automatically.
@@ -331,7 +315,7 @@ Send a JSON response. Necessary headers are set automatically.
 #### `sendJsonp`
 
 ``` purescript
-sendJsonp :: forall a. a -> Handler
+sendJsonp :: forall e a. a -> Handler e
 ```
 
 Send a JSON response with JSONP support.
@@ -339,15 +323,23 @@ Send a JSON response with JSONP support.
 #### `redirect`
 
 ``` purescript
-redirect :: String -> Handler
+redirect :: forall e. String -> Handler e
 ```
 
 Redirect to the given URL setting status to 302.
 
+#### `redirectWithStatus`
+
+``` purescript
+redirectWithStatus :: forall e. Int -> String -> Handler e
+```
+
+Redirect to the given URL using custom status.
+
 #### `setLocation`
 
 ``` purescript
-setLocation :: String -> Handler
+setLocation :: forall e. String -> Handler e
 ```
 
 Set Location header.
@@ -355,7 +347,7 @@ Set Location header.
 #### `setContentType`
 
 ``` purescript
-setContentType :: String -> Handler
+setContentType :: forall e. String -> Handler e
 ```
 
 Set Content-Type header.
@@ -363,7 +355,7 @@ Set Content-Type header.
 #### `sendFile`
 
 ``` purescript
-sendFile :: String -> Handler
+sendFile :: forall e. String -> Handler e
 ```
 
 Send file by its path.
@@ -371,7 +363,7 @@ Send file by its path.
 #### `sendFileExt`
 
 ``` purescript
-sendFileExt :: forall o. String -> {  | o } -> (Error -> ExpressM Unit) -> Handler
+sendFileExt :: forall e o. String -> {  | o } -> (Error -> ExpressM e Unit) -> Handler e
 ```
 
 Send file by its path using specified options and error handler.
@@ -380,7 +372,7 @@ See http://expressjs.com/4x/api.html#res.sendfile
 #### `download`
 
 ``` purescript
-download :: String -> Handler
+download :: forall e. String -> Handler e
 ```
 
 Transfer file as an attachment (will prompt user to download).
@@ -388,7 +380,7 @@ Transfer file as an attachment (will prompt user to download).
 #### `downloadExt`
 
 ``` purescript
-downloadExt :: String -> String -> (Error -> ExpressM Unit) -> Handler
+downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e
 ```
 
 Transfer file as an attachment using specified filename and error handler.

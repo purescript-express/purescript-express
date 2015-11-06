@@ -80,24 +80,24 @@ setRequestSignedCookie name value (MockRequest r) = r.setSignedCookie name value
 foreign import createMockApp ::
     forall e. Eff e Application
 foreign import createMockRequest ::
-    forall e. String -> String -> ExpressM MockRequest
+    forall e. String -> String -> ExpressM e MockRequest
 foreign import sendMockRequest ::
-    forall e. Application -> MockRequest -> ExpressM MockResponse
+    forall e. Application -> MockRequest -> ExpressM e MockResponse
 foreign import sendMockError ::
-    forall e. Application -> MockRequest -> String -> ExpressM MockResponse
+    forall e. Application -> MockRequest -> String -> ExpressM e MockResponse
 
 type TestUnitM e = ExceptT String (ContT Unit (Eff e))
 type TestMockApp e = ReaderT Application (TestUnitM e) Unit
 
 testExpress :: forall e.
     String
-    -> TestMockApp (express :: Express, testOutput :: TestOutput | e)
-    -> Assertion (express :: Express, testOutput :: TestOutput | e)
+    -> TestMockApp (express :: EXPRESS, testOutput :: TestOutput | e)
+    -> Assertion (express :: EXPRESS, testOutput :: TestOutput | e)
 testExpress testName assertions = test testName $ do
     mockApp <- lift $ lift $ createMockApp
     runReaderT assertions mockApp
 
-setupMockApp :: forall e. App -> TestMockApp (express :: Express | e)
+setupMockApp :: forall e. App e -> TestMockApp (express :: EXPRESS | e)
 setupMockApp app = do
     mockApp <- ask
     liftEff $ apply app mockApp
@@ -106,8 +106,8 @@ sendRequest :: forall e.
     Method
     -> String
     -> (MockRequest -> MockRequest)
-    -> (MockResponse -> TestMockApp (express :: Express | e))
-    -> TestMockApp (express :: Express | e)
+    -> (MockResponse -> TestMockApp (express :: EXPRESS | e))
+    -> TestMockApp (express :: EXPRESS | e)
 sendRequest method url setupRequest testResponse = do
     app <- ask
     request <- liftEff $ map setupRequest $ createMockRequest (show method) url
@@ -118,8 +118,8 @@ sendError :: forall e.
     Method
     -> String
     -> String
-    -> (MockResponse -> TestMockApp (express :: Express | e))
-    -> TestMockApp (express :: Express | e)
+    -> (MockResponse -> TestMockApp (express :: EXPRESS | e))
+    -> TestMockApp (express :: EXPRESS | e)
 sendError method url error testResponse = do
     app <- ask
     request <- liftEff $ createMockRequest (show method) url
@@ -133,8 +133,8 @@ assertMatch what expected actual = do
     assert message (expected == actual)
 
 assertInApp :: forall e.
-    ((TestResult -> Eff (express :: Express | e) Unit) -> App)
-    -> TestMockApp (express :: Express | e)
+    ((TestResult -> Eff (express :: EXPRESS | e) Unit) -> App e)
+    -> TestMockApp (express :: EXPRESS | e)
 assertInApp assertion = do
     mockApp <- ask
     let tester callback = liftEff $ apply (assertion callback) mockApp
@@ -158,7 +158,7 @@ assertCookieValue name expected response = do
     let actual = map (\r -> r.value) $ StrMap.lookup name response.cookies
     lift $ assertMatch ("Cookie '" ++ name ++ "'") expected actual
 
-setTestHeader :: String -> Handler
+setTestHeader :: forall e. String -> Handler e
 setTestHeader = setResponseHeader "X-Test-Response-Header"
 
 assertTestHeader :: forall e. Maybe String -> MockResponse -> TestMockApp e
