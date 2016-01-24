@@ -5,6 +5,7 @@ import Control.Monad.Eff
 import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
+import Node.Express.Response
 
 
 wowHandler :: forall e. Handler e

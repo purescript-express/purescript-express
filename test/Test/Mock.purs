@@ -37,6 +37,7 @@ import Data.Tuple
 import Node.Express.App
 import Node.Express.Handler
 import Node.Express.Types
+import Node.Express.Response
 import Prelude hiding (apply)
 import Test.Unit
 import Test.Unit.Console

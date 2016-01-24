@@ -13,6 +13,8 @@ import Node.Express.Types
 import Node.Express.App
 import Node.Express.Handler
 import Node.HTTP (Server())
+import Node.Express.Request
+import Node.Express.Response
 
 
 -- Pretend for now that this is our cool database (:
