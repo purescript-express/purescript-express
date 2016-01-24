@@ -2,10 +2,18 @@
 
 A couple of examples of purescript-express usage
 
-## How to run
+## Installation
 
 ```
-pulp run -m <example-name>
+$ npm install -g bower pulp purescript
+$ npm install
+$ bower install
+```
+
+## Running
+
+```
+$ pulp run -m <example-name>
 ```
 
 ## Available examples

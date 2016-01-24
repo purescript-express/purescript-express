@@ -6,6 +6,10 @@
   "keywords": [
     "purescript"
   ],
+  "repository": {
+      "type": "git",
+      "url": "git://github.com/dancingrobot84/purescript-express.git"
+  },
   "ignore": [
     "**/.*",
     "node_modules",
