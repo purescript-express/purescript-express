@@ -93,6 +93,14 @@ useOnError :: forall e. (Error -> Handler e) -> App e
 
 Use error handler. Probably this should be the last middleware to attach.
 
+#### `mount`
+
+``` purescript
+mount :: forall eff. Path -> App eff -> App eff
+```
+Mount a sub app on main app.
+
+
 #### `getProp`
 
 ``` purescript
@@ -118,13 +126,6 @@ http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App e
 ```
 
 Bind specified handler to handle request matching route and method.
-
-#### `mount`
-
-``` purescript
-mount :: forall eff. Path -> App eff -> App eff
-```
-Mount a sub app on main app.
 
 #### `get`
 
