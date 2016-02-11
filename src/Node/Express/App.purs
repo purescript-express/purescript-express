@@ -2,7 +2,7 @@ module Node.Express.App
     ( AppM()
     , App()
     , listenHttp, listenHttps, apply
-    , use, useExternal, useAt, useOnParam, useOnError
+    , use, useExternal, useAt, useOnParam, useOnError, mount
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -120,6 +120,13 @@ http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App e
 http method route handler = AppM \app ->
     runFn4 _http app (show method) (toForeign route) $ runHandlerM handler
 
+-- | Monut a sub app.
+mount :: forall eff. Path -> App eff -> App eff
+mount mountpath (AppM subact) = AppM \app -> do
+  subapp <- mkApplication
+  subact subapp
+  runFn3 _mount app mountpath subapp
+
 -- | Shortcut for `http GET`.
 get :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 get = http GET
@@ -169,3 +176,6 @@ foreign import _useOnParam ::
 
 foreign import _useOnError ::
     forall e. Fn2 Application (Error -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+
+foreign import _mount ::
+  forall eff. Fn3 Application String Application (Eff (express :: EXPRESS | eff) Unit)
