@@ -86,6 +86,10 @@ useExternal :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit
 useExternal fn = AppM \app ->
     runFn2 _useExternal app fn
 
+useExternalAt :: forall e. Path -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+useExternalAt route fn = AppM \app ->
+    runFn3 _useExternalAt app route fn
+
 -- | Use specified middleware only on requests matching path.
 useAt :: forall e. Path -> Handler e -> App e
 useAt route middleware = AppM \app ->
@@ -167,6 +171,9 @@ foreign import _use ::
 
 foreign import _useExternal
     :: forall e. Fn2 Application (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
+
+foreign import _useExternalAt
+    :: forall e. Fn3 Application Path (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
 
 foreign import _useAt ::
     forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
