@@ -2,7 +2,7 @@ module Node.Express.App
     ( AppM()
     , App()
     , listenHttp, listenHttps, apply
-    , use, useExternal, useAt, useOnParam, useOnError, mount
+    , use, uuseExternal, seExternalAt, useAt, useOnParam, useOnError, mount
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
