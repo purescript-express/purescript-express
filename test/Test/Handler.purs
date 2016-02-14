@@ -237,6 +237,10 @@ testResponse = do
         setupMockApp $ use $ sendJsonp testData
         sendTestRequest id $ assertData testDataStr
 
+    testExpress "Handler.render" $ do
+        setupMockApp $ use $ render "test-view" testData
+        sendTestRequest id $ assertData testDataRendered
+
     testExpress "Handler.redirect" $ do
         setupMockApp $ use $ redirect exampleCom
         sendTestRequest id $ \response -> do
@@ -293,6 +297,7 @@ testResponse = do
     testCookie = "testCookie"
     testData = {foo: "bar"}
     testDataStr = "{\"foo\":\"bar\"}"
+    testDataRendered = "Rendered test-view with data: {\"foo\":\"bar\"}"
     testFile = "test.txt"
     filepathHeader = "X-Filepath"
     realFilepathHeader = "X-Real-Filepath"

@@ -105,3 +105,10 @@ exports._headersSent = function (resp) {
         return resp.headersSent;
     };
 };
+
+exports._render = function (res, view, data) {
+    return function () {
+        return res.render(view, data);
+    };
+};
+
