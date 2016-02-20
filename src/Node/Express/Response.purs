@@ -5,6 +5,7 @@ module Node.Express.Response
     , send, sendJson, sendJsonp
     , redirect, redirectWithStatus, setLocation
     , sendFile, sendFileExt, download, downloadExt
+    , render
     ) where
 
 import Prelude
@@ -106,6 +107,10 @@ downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handl
 downloadExt path filename callback = HandlerM \_ resp _ ->
     liftEff $ runFn4 _downloadExt resp path filename callback
 
+-- | Render a view with a view model object. Could be object, string, buffer, etc.
+render :: forall e a. String -> a -> Handler e
+render view data_ = HandlerM \_ resp _ ->
+    liftEff $ runFn3 _render resp view data_
 
 foreign import _cwd :: Unit -> String
 
@@ -138,4 +143,6 @@ foreign import _sendFileExt :: forall e opts. Fn4 Response String { | opts } (Er
 foreign import _downloadExt :: forall e. Fn4 Response String String (Error -> ExpressM e Unit) (ExpressM e Unit)
 
 foreign import _headersSent :: forall e. Response -> ExpressM e Boolean
+
+foreign import _render :: forall e a. Fn3 Response String a (ExpressM e Unit)
 

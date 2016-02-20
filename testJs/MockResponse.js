@@ -44,6 +44,10 @@ MockResponse.prototype.json = function(obj) {
    this.send(JSON.stringify(obj));
 }
 
+MockResponse.prototype.render = function(view, obj) {
+   this.send('Rendered ' + view + ' with data: ' + JSON.stringify(obj));
+}
+
 MockResponse.prototype.jsonp = MockResponse.prototype.json;
 
 MockResponse.prototype.redirect = function(statusCode, url) {
