@@ -2,7 +2,7 @@ module Node.Express.App
     ( AppM()
     , App()
     , listenHttp, listenHttps, apply
-    , use, useExternal, useAt, useOnParam, useOnError
+    , use, useExternal, useExternalAt, useAt, useOnParam, useOnError, mount
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -86,6 +86,10 @@ useExternal :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit
 useExternal fn = AppM \app ->
     runFn2 _useExternal app fn
 
+useExternalAt :: forall e. Path -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+useExternalAt route fn = AppM \app ->
+    runFn3 _useExternalAt app route fn
+
 -- | Use specified middleware only on requests matching path.
 useAt :: forall e. Path -> Handler e -> App e
 useAt route middleware = AppM \app ->
@@ -119,6 +123,13 @@ setProp name val = AppM \app ->
 http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App e
 http method route handler = AppM \app ->
     runFn4 _http app (show method) (toForeign route) $ runHandlerM handler
+
+-- | Monut a sub app.
+mount :: forall eff. Path -> App eff -> App eff
+mount mountpath (AppM subact) = AppM \app -> do
+  subapp <- mkApplication
+  subact subapp
+  runFn3 _mount app mountpath subapp
 
 -- | Shortcut for `http GET`.
 get :: forall e r. (RoutePattern r) => r -> Handler e -> App e
@@ -161,6 +172,9 @@ foreign import _use ::
 foreign import _useExternal
     :: forall e. Fn2 Application (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
 
+foreign import _useExternalAt
+    :: forall e. Fn3 Application Path (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
+
 foreign import _useAt ::
     forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
@@ -169,3 +183,6 @@ foreign import _useOnParam ::
 
 foreign import _useOnError ::
     forall e. Fn2 Application (Error -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+
+foreign import _mount ::
+  forall eff. Fn3 Application String Application (Eff (express :: EXPRESS | eff) Unit)
