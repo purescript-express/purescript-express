@@ -9,15 +9,15 @@ module Node.Express.Response
     ) where
 
 import Prelude
-import Data.Foreign.Class
-import Data.Function
-import Data.Foreign
-import Data.Maybe
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception
-import Node.Express.Handler
-import Node.Express.Internal.Utils
-import Node.Express.Types
+import Data.Foreign.Class (class IsForeign, read)
+import Data.Function.Uncurried (Fn3, Fn4, Fn2, runFn3, runFn4, runFn2)
+import Data.Foreign (Foreign)
+import Data.Maybe (Maybe)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (Error)
+import Node.Express.Handler (Handler, HandlerM(..))
+import Node.Express.Internal.Utils (eitherToMaybe)
+import Node.Express.Types (ExpressM, Response, CookieOptions, EXPRESS)
 
 -- | Set status code.
 setStatus :: forall e. Int -> Handler e
@@ -90,7 +90,7 @@ setContentType t = HandlerM \_ resp _ ->
 
 -- | Send file by its path.
 sendFile :: forall e. String -> Handler e
-sendFile path = sendFileExt path {root: _cwd unit} (\_ -> return unit)
+sendFile path = sendFileExt path {root: _cwd unit} (\_ -> pure unit)
 
 -- | Send file by its path using specified options and error handler.
 -- | See http://expressjs.com/4x/api.html#res.sendfile
@@ -100,7 +100,7 @@ sendFileExt path opts callback = HandlerM \_ resp _ ->
 
 -- | Transfer file as an attachment (will prompt user to download).
 download :: forall e. String -> Handler e
-download path = downloadExt path "" (\_ -> return unit)
+download path = downloadExt path "" (\_ -> pure unit)
 
 -- | Transfer file as an attachment using specified filename and error handler.
 downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e

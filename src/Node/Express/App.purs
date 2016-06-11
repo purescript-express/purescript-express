@@ -8,19 +8,20 @@ module Node.Express.App
     ) where
 
 import Prelude hiding (apply)
-import Data.Foreign (toForeign)
-import Data.Foreign.Class
-import Data.Function
-import Data.Maybe
-import Data.Foreign
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception
+import Data.Foreign.Class (class IsForeign, read)
+import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn4, runFn3, runFn2)
+import Data.Maybe (Maybe)
+import Data.Foreign (Foreign, toForeign)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (class MonadEff, liftEff)
+import Control.Monad.Eff.Exception (Error)
 import Node.HTTP (Server ())
 
-import Node.Express.Types
-import Node.Express.Internal.Utils
-import Node.Express.Handler
+import Node.Express.Types (class RoutePattern, EXPRESS, Application, 
+                           ExpressM, Response, Request, Event, Path, 
+                           Port, Method(..))
+import Node.Express.Internal.Utils (eitherToMaybe)
+import Node.Express.Handler (Handler, runHandlerM)
 
 -- | Monad responsible for application related operations (initial setup mostly).
 data AppM e a = AppM (Application -> Eff e a)
@@ -35,10 +36,10 @@ instance applyAppM :: Apply (AppM e) where
     apply (AppM f) (AppM h) = AppM \app -> do
         res <- h app
         trans <- f app
-        return $ trans res
+        pure $ trans res
 
 instance applicativeAppM :: Applicative (AppM e) where
-    pure x = AppM \_ -> return x
+    pure x = AppM \_ -> pure x
 
 instance bindAppM :: Bind (AppM e) where
     bind (AppM h) f = AppM \app -> do

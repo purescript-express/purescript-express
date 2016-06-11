@@ -1,13 +1,12 @@
 module Node.Express.Types where
 
 import Prelude
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Either
-import Data.String.Regex
-import Data.Default
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
+import Data.Foreign (ForeignError(..), readString)
+import Data.Foreign.Class (class IsForeign)
+import Data.Either (Either(..))
+import Data.String.Regex (Regex)
+import Data.Default (class Default)
+import Control.Monad.Eff (Eff)
 
 
 foreign import data EXPRESS :: !

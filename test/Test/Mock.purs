@@ -32,7 +32,7 @@ import Control.Monad.Except.Trans
 import Control.Monad.Reader.Trans
 import Data.Function
 import Data.Maybe
-import qualified Data.StrMap as StrMap
+import Data.StrMap as StrMap
 import Data.Tuple
 import Node.Express.App
 import Node.Express.Handler
