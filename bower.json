@@ -46,7 +46,7 @@
   "devDependencies": {
     "purescript-console": "^1.0.0",
     "purescript-maps": "^1.0.0",
-    "purescript-node-fs": "https://github.com/kika/purescript-node-fs.git#a6cd5ae321eee04e223cf40ff39993487781c0dd",
+    "purescript-node-fs": "^1.0.0",
     "purescript-unsafe-coerce": "^1.0.0"
   }
 }
