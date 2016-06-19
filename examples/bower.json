@@ -5,8 +5,8 @@
   "dependencies": {
     "purescript-console": "^1.0.0",
     "purescript-node-fs": "^1.0.0",
-    "purescript-strings": "~1.0.0",
-    "purescript-refs": "~1.0.0",
-    "purescript-express": "https://github.com/kika/purescript-express.git#purescript-0.9.1"
+    "purescript-strings": "^1.0.0",
+    "purescript-refs": "^1.0.0",
+    "purescript-express": "master"
   }
 }
