@@ -1,16 +1,15 @@
 module JSMiddleware where
 
 import Prelude hiding (apply)
-import Data.Maybe
-import Data.Function
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
+import Data.Maybe (Maybe(..))
+import Data.Function.Uncurried (Fn3)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE(), log)
-import Node.Express.Types
-import Node.Express.App
-import Node.Express.Handler
-import Node.Express.Request
-import Node.Express.Response
+import Node.Express.Types (EXPRESS, ExpressM, Response, Request)
+import Node.Express.App (App, listenHttp, post, get, useExternal)
+import Node.Express.Handler (Handler)
+import Node.Express.Request (getBodyParam)
+import Node.Express.Response (send)
 import Node.HTTP (Server())
 
 
@@ -24,7 +23,7 @@ echoHandler = do
     messageParam <- getBodyParam "message"
     case messageParam of
         Nothing -> send "You did not say anything"
-        Just message -> send $ "You said: " ++ message
+        Just message -> send $ "You said: " <> message
 
 appSetup :: forall e. App e
 appSetup = do

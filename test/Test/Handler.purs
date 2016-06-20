@@ -15,7 +15,7 @@ import Node.Express.Handler
 import Node.Express.Request
 import Node.Express.Response
 import Prelude hiding (id)
-import qualified Data.StrMap as StrMap
+import Data.StrMap as StrMap
 import Test.Mock
 import Test.Unit
 import Test.Unit.Console

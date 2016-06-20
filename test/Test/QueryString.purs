@@ -6,6 +6,7 @@ import Data.Maybe
 import Node.Express.Internal.QueryString
 import Prelude
 import Test.Unit
+import Test.Unit.Assert
 
 type TestCase a b = { input :: a, expected :: b }
 
@@ -34,10 +35,10 @@ queryGetAllTestCases =
     , {input: [Param "a" "b", Param "a" "c"],   expected: ["b", "c"]}
     ]
 
-doTest :: forall a b e. (Show b, Eq b) => (a -> b) -> TestCase a b -> Assertion e
+doTest :: forall a b e. (Show b, Eq b) => (a -> b) -> TestCase a b -> Test e
 doTest fun testCase = do
     let actual = fun testCase.input
-        msg = show actual ++ " should equal " ++ show testCase.expected
+        msg = show actual <> " should equal " <> show testCase.expected
     assert msg (actual == testCase.expected)
 
 testSuite = do

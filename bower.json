@@ -25,29 +25,29 @@
     "DOCS.md"
   ],
   "dependencies": {
-    "purescript-aff": "^0.16.1",
-    "purescript-arrays": "^0.4.5",
-    "purescript-control": "^0.3.2",
+    "purescript-aff": "^1.0.0",
+    "purescript-arrays": "^1.0.0",
+    "purescript-control": "^1.0.0",
     "purescript-data-default": "^0.1.0",
-    "purescript-easy-ffi": "^1.0.2",
-    "purescript-eff": "^0.1.2",
-    "purescript-either": "^0.2.3",
-    "purescript-exceptions": "^0.3.4",
-    "purescript-foldable-traversable": "^0.4.2",
-    "purescript-foreign": "^0.7.2",
-    "purescript-lists": "^0.7.9",
-    "purescript-maybe": "^0.3.5",
-    "purescript-node-http": "^0.4.0",
-    "purescript-parsing": "^0.7.1",
-    "purescript-strings": "^0.7.1",
-    "purescript-transformers": "^0.8.4",
-    "purescript-unfoldable": "^0.4.1"
+    "purescript-easy-ffi": "^2.0.0",
+    "purescript-eff": "^1.0.0",
+    "purescript-either": "^1.0.0",
+    "purescript-exceptions": "^1.0.0",
+    "purescript-foldable-traversable": "^1.0.0",
+    "purescript-foreign": "^1.0.0",
+    "purescript-lists": "^1.0.0",
+    "purescript-maybe": "^1.0.0",
+    "purescript-node-http": "^1.0.0",
+    "purescript-parsing": "^1.0.0",
+    "purescript-strings": "^1.0.0",
+    "purescript-transformers": "^1.0.0",
+    "purescript-unfoldable": "^1.0.0"
   },
   "devDependencies": {
-    "purescript-console": "^0.1.1",
-    "purescript-maps": "^0.5.4",
-    "purescript-node-fs": "^0.11.0",
-    "purescript-test-unit": "^3.0.0",
-    "purescript-unsafe-coerce": "^0.1.0"
+    "purescript-console": "^1.0.0",
+    "purescript-maps": "^1.0.0",
+    "purescript-node-fs": "^1.0.0",
+    "purescript-test-unit": "^7.0.0",
+    "purescript-unsafe-coerce": "^1.0.0"
   }
 }

@@ -1,11 +1,11 @@
 module EmbedApp where
 
 import Prelude hiding (apply)
-import Control.Monad.Eff
-import Node.Express.Types
-import Node.Express.App
-import Node.Express.Handler
-import Node.Express.Response
+import Control.Monad.Eff (Eff)
+import Node.Express.Types (EXPRESS, ExpressM, Application)
+import Node.Express.App (App, apply, get)
+import Node.Express.Handler (Handler)
+import Node.Express.Response (send)
 
 
 wowHandler :: forall e. Handler e
@@ -20,4 +20,5 @@ attach = apply appSetup
 
 foreign import realMain :: forall e. (Application -> ExpressM e Unit) -> Eff (express :: EXPRESS | e) Unit
 
+main::forall e. Eff (express::EXPRESS | e) Unit
 main = realMain attach

@@ -11,18 +11,17 @@ module Node.Express.Request
     ) where
 
 import Prelude
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Function (Fn2(), runFn2)
-import Data.Either
-import Data.Maybe
-import Control.Monad (when)
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception
-import Node.Express.Handler
-import Node.Express.Types
-import Node.Express.Internal.Utils
-import Node.Express.Internal.QueryString
+import Data.Foreign (Foreign)
+import Data.Foreign.Class (class IsForeign, read)
+import Data.Function.Uncurried (Fn2(), runFn2)
+import Data.Either (Either(..))
+import Data.Maybe (Maybe, fromMaybe, maybe)
+import Control.Monad.Eff.Class (liftEff)
+import Node.Express.Handler (Handler, HandlerM(..))
+import Node.Express.Types (class RequestParam, ExpressM, Request, EXPRESS, 
+                           Method, Protocol)
+import Node.Express.Internal.Utils (eitherToMaybe)
+import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
 
 -- | Get route param value. If it is named route, e.g `/user/:id` then
 -- | `getRouteParam "id"` return matched part of route. If it is
@@ -46,13 +45,13 @@ getBodyParam name = HandlerM \req _ _ ->
 getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
     params <- liftEff $ queryParams req
-    return $ getOne params name
+    pure $ getOne params name
 
 -- | Get all params from query string having specified key.
 getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
 getQueryParams name = HandlerM \req _ _ -> do
     params <- liftEff $ queryParams req
-    return $ getAll params name
+    pure $ getAll params name
 
 -- | Return route that matched this request.
 getRoute :: forall e. HandlerM (express :: EXPRESS | e) String
@@ -100,7 +99,7 @@ acceptsLanguage language = HandlerM \req _ _ ->
 hasType :: forall e. String -> HandlerM (express :: EXPRESS | e) Boolean
 hasType type_ = HandlerM \req _ _ -> do
     val <- liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _hasType req type_)
-    return $ fromMaybe false val
+    pure $ fromMaybe false val
 
 -- | Return remote or upstream address.
 getRemoteIp :: forall e. HandlerM (express :: EXPRESS | e) String
@@ -166,8 +165,8 @@ queryParams :: forall e. Request -> ExpressM e (Array Param)
 queryParams req = do
     query <- _getQueryParams req
     case parse query of
-        Left _ -> return []
-        Right params -> return params
+        Left _ -> pure []
+        Right params -> pure params
 
 foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
 

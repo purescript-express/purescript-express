@@ -30,9 +30,9 @@ import Control.Monad.Eff.Class
 import Control.Monad.Cont.Trans
 import Control.Monad.Except.Trans
 import Control.Monad.Reader.Trans
-import Data.Function
+import Data.Function hiding (apply)
 import Data.Maybe
-import qualified Data.StrMap as StrMap
+import Data.StrMap as StrMap
 import Data.Tuple
 import Node.Express.App
 import Node.Express.Handler
@@ -41,6 +41,7 @@ import Node.Express.Response
 import Prelude hiding (apply)
 import Test.Unit
 import Test.Unit.Console
+import Test.Unit.Assert
 
 type MockCookie =
     { name    :: String
@@ -92,8 +93,8 @@ type TestMockApp e = ReaderT Application (TestUnitM e) Unit
 
 testExpress :: forall e.
     String
-    -> TestMockApp (express :: EXPRESS, testOutput :: TestOutput | e)
-    -> Assertion (express :: EXPRESS, testOutput :: TestOutput | e)
+    -> TestMockApp (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+    -> Test (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
 testExpress testName assertions = test testName $ do
     mockApp <- lift $ lift $ createMockApp
     runReaderT assertions mockApp
@@ -127,14 +128,14 @@ sendError method url error testResponse = do
     response <- liftEff $ sendMockError app request error
     testResponse response
 
-assertMatch :: forall a e. (Show a, Eq a) => String -> a -> a -> Assertion e
+assertMatch :: forall a e. (Show a, Eq a) => String -> a -> a -> Test e
 assertMatch what expected actual = do
-    let message = what ++ " does not match: \
-        \Expected [ " ++ show expected ++ " ], Got [ " ++ show actual ++ " ]"
+    let message = what <> " does not match: \
+        \Expected [ " <> show expected <> " ], Got [ " <> show actual <> " ]"
     assert message (expected == actual)
 
 assertInApp :: forall e.
-    ((TestResult -> Eff (express :: EXPRESS | e) Unit) -> App e)
+    (((Test e) -> Eff (express :: EXPRESS | e) Unit) -> App e)
     -> TestMockApp (express :: EXPRESS | e)
 assertInApp assertion = do
     mockApp <- ask
@@ -148,7 +149,7 @@ assertStatusCode expected response =
 assertHeader :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
 assertHeader name expected response = do
     let actual = StrMap.lookup name response.headers
-    lift $ assertMatch ("Header '" ++ name ++ "'") expected actual
+    lift $ assertMatch ("Header '" <> name <> "'") expected actual
 
 assertData :: forall e. String -> MockResponse -> TestMockApp e
 assertData expected response =
@@ -157,7 +158,7 @@ assertData expected response =
 assertCookieValue :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
 assertCookieValue name expected response = do
     let actual = map (\r -> r.value) $ StrMap.lookup name response.cookies
-    lift $ assertMatch ("Cookie '" ++ name ++ "'") expected actual
+    lift $ assertMatch ("Cookie '" <> name <> "'") expected actual
 
 setTestHeader :: forall e. String -> Handler e
 setTestHeader = setResponseHeader "X-Test-Response-Header"

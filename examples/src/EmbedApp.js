@@ -1,4 +1,4 @@
-// module EmbedApp
+"use strict";
 
 exports.realMain = function(attachFn) {
     return function() {
