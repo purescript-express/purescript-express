@@ -5,7 +5,6 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Either (Either(..))
 import Data.Int (fromString)
 import Data.Array    as A
-import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE(), log)
@@ -17,6 +16,7 @@ import Node.Express.Handler (Handler, nextThrow, next)
 import Node.Express.Request (getRouteParam, getQueryParam, getOriginalUrl)
 import Node.Express.Response (sendJson, setStatus)
 import Node.HTTP (Server())
+import Node.Process (PROCESS, lookupEnv)
 
 --- Model type definitions
 type Todo        = { desc :: String, isDone :: Boolean }
@@ -164,10 +164,12 @@ appSetup state = do
   get "/done/:id"   (doTodoHandler     state)
   useOnError        (errorHandler      state)
 
-main :: forall e. Eff (ref :: REF, express :: EXPRESS, console :: CONSOLE | e) Server
+main :: forall e. Eff (ref :: REF, express :: EXPRESS, 
+                       console :: CONSOLE, process :: PROCESS | e) 
+                      Server
 main = do
   state <- initState
-  port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
+  port <- (parseInt <<< fromMaybe "8080") <$> lookupEnv "PORT"
   listenHttp (appSetup state) port \_ ->
     log $ "Listening on " <> show port
 
