@@ -138,3 +138,15 @@ exports._getOriginalUrl = function (req) {
     };
 };
 
+exports._getData = function (req, field) {
+    return function () {
+        return req[field];
+    };
+};
+
+exports._setData = function (req, field, val) {
+    return function () {
+        req[field] = val;
+    };
+};
+

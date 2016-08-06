@@ -8,12 +8,13 @@ module Node.Express.Request
     , isFresh, isStale
     , isXhr, getProtocol, getMethod
     , getUrl, getOriginalUrl
+    , getUserData, setUserData
     ) where
 
 import Prelude
 import Data.Foreign (Foreign)
 import Data.Foreign.Class (class IsForeign, read)
-import Data.Function.Uncurried (Fn2(), runFn2)
+import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromMaybe, maybe)
 import Control.Monad.Eff.Class (liftEff)
@@ -161,6 +162,19 @@ getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 getOriginalUrl = HandlerM \req _ _ ->
     liftEff $ _getOriginalUrl req
 
+-- | Sets the arbitrary attribute of the Request object to specified data
+-- | Doesn't check if the attribute already exists, be careful to not override
+-- | standard Request fields. 
+setUserData :: forall a e. String -> a -> Handler e
+setUserData field val = HandlerM \req _ _ ->
+    liftEff $ runFn3 _setData req field val
+
+-- | Retrieves the data from the request set with previous call to `setUserData`
+getUserData :: forall e a. (IsForeign a) => String -> 
+                           HandlerM (express :: EXPRESS | e) (Maybe a)
+getUserData field = HandlerM \req _ _ -> do
+    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getData req field)
+
 queryParams :: forall e. Request -> ExpressM e (Array Param)
 queryParams req = do
     query <- _getQueryParams req
@@ -214,3 +228,6 @@ foreign import _getUrl :: forall e. Request -> ExpressM e String
 
 foreign import _getOriginalUrl :: forall e. Request -> ExpressM e String
 
+foreign import _setData :: forall a e. Fn3 Request String a (ExpressM e Unit)
+
+foreign import _getData :: forall e. Fn2 Request String (ExpressM e Foreign)
