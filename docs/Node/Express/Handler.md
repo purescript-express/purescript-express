@@ -11,13 +11,13 @@ Monad responsible for handling single request.
 
 ##### Instances
 ``` purescript
-instance functorHandlerM :: Functor (HandlerM e)
-instance applyHandlerM :: Apply (HandlerM e)
-instance applicativeHandlerM :: Applicative (HandlerM e)
-instance bindHandlerM :: Bind (HandlerM e)
-instance monadHandlerM :: Monad (HandlerM e)
-instance monadEffHandlerM :: MonadEff eff (HandlerM eff)
-instance monadAffHandlerM :: MonadAff eff (HandlerM eff)
+Functor (HandlerM e)
+Apply (HandlerM e)
+Applicative (HandlerM e)
+Bind (HandlerM e)
+Monad (HandlerM e)
+MonadEff eff (HandlerM eff)
+MonadAff eff (HandlerM eff)
 ```
 
 #### `Handler`

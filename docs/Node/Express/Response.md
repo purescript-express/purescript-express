@@ -11,7 +11,7 @@ Set status code.
 #### `getResponseHeader`
 
 ``` purescript
-getResponseHeader :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getResponseHeader :: forall e a. IsForeign a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Return response header value.
@@ -136,5 +136,13 @@ downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handl
 ```
 
 Transfer file as an attachment using specified filename and error handler.
+
+#### `render`
+
+``` purescript
+render :: forall e a. String -> a -> Handler e
+```
+
+Render a view with a view model object. Could be object, string, buffer, etc.
 
 
