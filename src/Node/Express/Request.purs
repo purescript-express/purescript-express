@@ -162,9 +162,8 @@ getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 getOriginalUrl = HandlerM \req _ _ ->
     liftEff $ _getOriginalUrl req
 
--- | Sets the arbitrary attribute of the Request object to specified data
--- | Doesn't check if the attribute already exists, be careful to not override
--- | standard Request fields. 
+-- | Sets the specified field of the userData object attached to the Request 
+-- | object to specified data
 setUserData :: forall a e. String -> a -> Handler e
 setUserData field val = HandlerM \req _ _ ->
     liftEff $ runFn3 _setData req field val

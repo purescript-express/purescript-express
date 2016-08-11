@@ -140,13 +140,14 @@ exports._getOriginalUrl = function (req) {
 
 exports._getData = function (req, field) {
     return function () {
-        return req[field];
+        return req.userData && req.userData[field];
     };
 };
 
 exports._setData = function (req, field, val) {
     return function () {
-        req[field] = val;
+        req.userData = req.userData || {};
+        req.userData[field] = val;
     };
 };
 
