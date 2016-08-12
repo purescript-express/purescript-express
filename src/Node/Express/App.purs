@@ -17,8 +17,8 @@ import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (Error)
 import Node.HTTP (Server ())
 
-import Node.Express.Types (class RoutePattern, EXPRESS, Application, 
-                           ExpressM, Response, Request, Event, Path, 
+import Node.Express.Types (class RoutePattern, EXPRESS, Application,
+                           ExpressM, Response, Request, Event, Path,
                            Port, Method(..))
 import Node.Express.Internal.Utils (eitherToMaybe)
 import Node.Express.Handler (Handler, runHandlerM)
@@ -147,26 +147,18 @@ foreign import _getProp :: forall e. Fn2 Application String (ExpressM e Foreign)
 
 foreign import _setProp :: forall e a. Fn3 Application String a (ExpressM e Unit)
 
-foreign import _http ::
-    forall e. Fn4 Application String Foreign (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+foreign import _http :: forall e. Fn4 Application String Foreign (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-foreign import _listenHttp :: forall e1 e2.
-    Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
+foreign import _listenHttp :: forall e1 e2. Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
-foreign import _listenHttps :: forall opts e1 e2.
-    Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
+foreign import _listenHttps :: forall opts e1 e2. Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
-foreign import _use ::
-    forall e. Fn2 Application (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+foreign import _use :: forall e. Fn2 Application (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-foreign import _useExternal
-    :: forall e. Fn2 Application (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
+foreign import _useExternal :: forall e. Fn2 Application (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
 
-foreign import _useAt ::
-    forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+foreign import _useAt :: forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-foreign import _useOnParam ::
-    forall e. Fn3 Application String (String -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+foreign import _useOnParam :: forall e. Fn3 Application String (String -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
-foreign import _useOnError ::
-    forall e. Fn2 Application (Error -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+foreign import _useOnError :: forall e. Fn2 Application (Error -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
