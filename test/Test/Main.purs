@@ -1,9 +1,12 @@
 module Test.Main where
 
 import Prelude
-import Test.Unit
+import Test.Unit.Main (runTest)
+import Test.QueryString as QueryString
+import Test.App as App
+import Test.Handler as Handler
 
 main = runTest do
-    Test.QueryString.testSuite
-    Test.App.testSuite
-    Test.Handler.testSuite
+    QueryString.testSuite
+    App.testSuite
+    Handler.testSuite

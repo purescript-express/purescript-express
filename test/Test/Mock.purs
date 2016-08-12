@@ -7,7 +7,7 @@ module Test.Mock
     , setBodyParam
     , setRequestCookie
     , setRequestSignedCookie
-    , TestUnitM(..)
+    , TestExpress(..)
     , TestMockApp(..)
     , createMockApp
     , createMockRequest
@@ -25,8 +25,10 @@ module Test.Mock
     , assertTestHeader
     ) where
 
+import Control.Monad.Aff (Aff, launchAff)
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Cont.Trans
 import Control.Monad.Except.Trans
 import Control.Monad.Reader.Trans
@@ -80,7 +82,7 @@ setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 setRequestSignedCookie name value (MockRequest r) = r.setSignedCookie name value
 
 foreign import createMockApp ::
-    forall e. Eff e Application
+    forall e. Eff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e) Application
 foreign import createMockRequest ::
     forall e. String -> String -> ExpressM e MockRequest
 foreign import sendMockRequest ::
@@ -88,18 +90,19 @@ foreign import sendMockRequest ::
 foreign import sendMockError ::
     forall e. Application -> MockRequest -> String -> ExpressM e MockResponse
 
-type TestUnitM e = ExceptT String (ContT Unit (Eff e))
-type TestMockApp e = ReaderT Application (TestUnitM e) Unit
+type TestExpress e = Aff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+type TestMockApp e = ReaderT Application (TestExpress e) Unit
+type TestApp e = App (err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
 
 testExpress :: forall e.
     String
-    -> TestMockApp (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
-    -> Test (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+    -> TestMockApp e
+    -> TestSuite (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
 testExpress testName assertions = test testName $ do
-    mockApp <- lift $ lift $ createMockApp
+    mockApp <- liftEff $ createMockApp
     runReaderT assertions mockApp
 
-setupMockApp :: forall e. App e -> TestMockApp (express :: EXPRESS | e)
+setupMockApp :: forall e. TestApp e -> TestMockApp e
 setupMockApp app = do
     mockApp <- ask
     liftEff $ apply app mockApp
@@ -108,8 +111,8 @@ sendRequest :: forall e.
     Method
     -> String
     -> (MockRequest -> MockRequest)
-    -> (MockResponse -> TestMockApp (express :: EXPRESS | e))
-    -> TestMockApp (express :: EXPRESS | e)
+    -> (MockResponse -> TestMockApp e)
+    -> TestMockApp e
 sendRequest method url setupRequest testResponse = do
     app <- ask
     request <- liftEff $ map setupRequest $ createMockRequest (show method) url
@@ -120,8 +123,8 @@ sendError :: forall e.
     Method
     -> String
     -> String
-    -> (MockResponse -> TestMockApp (express :: EXPRESS | e))
-    -> TestMockApp (express :: EXPRESS | e)
+    -> (MockResponse -> TestMockApp e)
+    -> TestMockApp e
 sendError method url error testResponse = do
     app <- ask
     request <- liftEff $ createMockRequest (show method) url
@@ -134,13 +137,14 @@ assertMatch what expected actual = do
         \Expected [ " <> show expected <> " ], Got [ " <> show actual <> " ]"
     assert message (expected == actual)
 
-assertInApp :: forall e.
-    (((Test e) -> Eff (express :: EXPRESS | e) Unit) -> App e)
-    -> TestMockApp (express :: EXPRESS | e)
+type Reporter e = Test (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+                  -> Eff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e) Unit
+
+assertInApp :: forall e. (Reporter e -> TestApp e) -> TestMockApp e
 assertInApp assertion = do
     mockApp <- ask
-    let tester callback = liftEff $ apply (assertion callback) mockApp
-    lift $ testFn tester
+    let reporter result = launchAff result >>= \_ -> pure unit
+    liftEff $ apply (assertion reporter) mockApp
 
 assertStatusCode :: forall e. Int -> MockResponse -> TestMockApp e
 assertStatusCode expected response =

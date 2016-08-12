@@ -41,10 +41,11 @@ doTest fun testCase = do
         msg = show actual <> " should equal " <> show testCase.expected
     assert msg (actual == testCase.expected)
 
-testSuite = do
-    test "QueryString.parse" do
-        for_ queryParserTestCases $ doTest (\t -> parse t)
-    test "QueryString.getOne" do
-        for_ queryGetOneTestCases $ doTest (\t -> getOne t "a")
-    test "QueryString.getAll" do
-        for_ queryGetAllTestCases $ doTest (\t -> getAll t "a")
+testSuite =
+    suite "QueryString" do
+        test "parse" do
+            for_ queryParserTestCases $ doTest (\t -> parse t)
+        test "getOne" do
+            for_ queryGetOneTestCases $ doTest (\t -> getOne t "a")
+        test "getAll" do
+            for_ queryGetAllTestCases $ doTest (\t -> getAll t "a")
