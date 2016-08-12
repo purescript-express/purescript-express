@@ -51,8 +51,8 @@ data Protocol
 
 ##### Instances
 ``` purescript
-instance showProtocol :: Show Protocol
-instance isForeignProtocol :: IsForeign Protocol
+Show Protocol
+IsForeign Protocol
 ```
 
 #### `Method`
@@ -72,8 +72,8 @@ data Method
 
 ##### Instances
 ``` purescript
-instance showMethod :: Show Method
-instance isForeignMethod :: IsForeign Method
+Show Method
+IsForeign Method
 ```
 
 #### `Port`
@@ -96,8 +96,8 @@ class RoutePattern a
 
 ##### Instances
 ``` purescript
-instance routePath :: RoutePattern String
-instance routeRegex :: RoutePattern Regex
+RoutePattern String
+RoutePattern Regex
 ```
 
 #### `RequestParam`
@@ -108,8 +108,8 @@ class RequestParam a
 
 ##### Instances
 ``` purescript
-instance requestParamString :: RequestParam String
-instance requestParamNumber :: RequestParam Number
+RequestParam String
+RequestParam Number
 ```
 
 #### `CookieOptions`
@@ -126,7 +126,7 @@ Cookie options
 
 ##### Instances
 ``` purescript
-instance defaultCookieOptions :: Default CookieOptions
+Default CookieOptions
 ```
 
 

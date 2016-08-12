@@ -13,7 +13,8 @@ import Control.Monad.Eff.Ref (REF, Ref, modifyRef', readRef, newRef)
 import Node.Express.Types (EXPRESS)
 import Node.Express.App (App, listenHttp, useOnError, get, use, setProp)
 import Node.Express.Handler (Handler, nextThrow, next)
-import Node.Express.Request (getRouteParam, getQueryParam, getOriginalUrl)
+import Node.Express.Request (getRouteParam, getQueryParam, getOriginalUrl,
+                             setUserData, getUserData)
 import Node.Express.Response (sendJson, setStatus)
 import Node.HTTP (Server())
 import Node.Process (PROCESS, lookupEnv)
@@ -80,6 +81,7 @@ logger state = do
   todos <- liftEff $ readRef state
   url   <- getOriginalUrl
   liftEff $ log (">>> " <> url <> " count =" <> (show $ A.length todos))
+  setUserData "logged" url
   next
 
 errorHandler :: forall e. AppState -> Error -> Handler e
@@ -102,6 +104,13 @@ help = { name: "Todo example"
 indexHandler :: forall e. AppState -> Handler e
 indexHandler _ = do
   sendJson help
+
+-- demonstrates middleware-to-handler communication through 
+-- setUserData/getUserData functions
+getLoggerStatus :: forall e. AppState -> Handler (ref :: REF|e)
+getLoggerStatus _ = do
+  userdata <- getUserData "logged"
+  sendJson $ fromMaybe "missing" userdata
 
 listTodosHandler :: forall e. AppState -> Handler (ref :: REF|e)
 listTodosHandler state = do
@@ -162,6 +171,7 @@ appSetup state = do
   get "/update/:id" (updateTodoHandler state)
   get "/delete/:id" (deleteTodoHandler state)
   get "/done/:id"   (doTodoHandler     state)
+  get "/logger"     (getLoggerStatus   state)
   useOnError        (errorHandler      state)
 
 main :: forall e. Eff (ref :: REF, express :: EXPRESS, 

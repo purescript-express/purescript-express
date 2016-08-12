@@ -3,7 +3,7 @@
 #### `getRouteParam`
 
 ``` purescript
-getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getRouteParam :: forall e a. RequestParam a => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 ```
 
 Get route param value. If it is named route, e.g `/user/:id` then
@@ -15,7 +15,7 @@ route.
 #### `getBodyParam`
 
 ``` purescript
-getBodyParam :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getBodyParam :: forall e a. IsForeign a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Get param from request's body.
@@ -208,5 +208,23 @@ getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 ```
 
 Return request original URL.
+
+#### `setUserData`
+
+``` purescript
+setUserData :: forall a e. String -> a -> Handler e
+```
+
+Sets the arbitrary attribute of the Request object to specified data
+Doesn't check if the attribute already exists, be careful to not override
+standard Request fields. 
+
+#### `getUserData`
+
+``` purescript
+getUserData :: forall e a. IsForeign a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+```
+
+Retrieves the data from the request set with previous call to `setUserData`
 
 
