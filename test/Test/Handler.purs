@@ -190,6 +190,12 @@ testMisc = do
         setupMockApp $ use $ getOriginalUrl >>= setTestHeader
         sendTestRequest id $ assertTestHeaderWith "http://example.com"
 
+    testExpress "getUserData + setUserData" $ do
+        setupMockApp $ do
+            use $ setUserData "key" "TEST-DATA"
+            get "/" $ getUserData "key" >>= maybe (pure unit) setTestHeader
+        sendTestRequest id $ assertTestHeaderWith "TEST-DATA"
+
 testResponse = do
     testExpress "setStatus" $ do
         sendTestRequest id $ assertStatusCode 0
