@@ -4,7 +4,6 @@ node_js:
   - 4.1
 install:
   - npm install bower pulp purescript -g
-  - npm install
   - bower install
 script:
   - psc --version
