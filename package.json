@@ -1,7 +1,0 @@
-{
-  "name": "purescript-express",
-  "repository": "https://github.com/dancingrobot84/purescript-express",
-  "dependencies": {
-    "express": "^4.13.3"
-  }
-}
