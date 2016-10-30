@@ -2,7 +2,7 @@ module Test.App (testSuite) where
 
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
-import Control.Monad.Trans
+import Control.Monad.Trans.Class
 import Data.Foreign.Class
 import Data.Function.Uncurried
 import Data.Maybe

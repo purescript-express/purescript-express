@@ -15,6 +15,7 @@ import Data.Foreign (Foreign, toForeign)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (Error)
+import Control.Monad.Except (runExcept)
 import Node.HTTP (Server ())
 
 import Node.Express.Types (class RoutePattern, EXPRESS, Application,
@@ -107,7 +108,7 @@ useOnError handler = AppM \app ->
 -- | See http://expressjs.com/4x/api.html#app-settings
 getProp :: forall e a. (IsForeign a) => String -> AppM (express :: EXPRESS | e) (Maybe a)
 getProp name = AppM \app ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getProp app name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getProp app name)
 
 -- | Set application property.
 -- | See http://expressjs.com/4x/api.html#app-settings

@@ -18,6 +18,7 @@ import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromMaybe, maybe)
 import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Except (runExcept)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, ExpressM, Request, EXPRESS, 
                            Method, Protocol)
@@ -31,14 +32,14 @@ import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
 -- | route.
 getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getRouteParam req name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getRouteParam req name)
 
 -- | Get param from request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
 getBodyParam :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 getBodyParam name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getBodyParam req name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getBodyParam req name)
 
 -- | Get param from query string (part of URL behind '?').
 -- | If there are multiple params having equal keys
@@ -62,22 +63,22 @@ getRoute = HandlerM \req _ _ ->
 -- | Get cookie param by its key.
 getCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getCookie name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getCookie req name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getCookie req name)
 
 -- | Get signed cookie param by its key.
 getSignedCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getSignedCookie req name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getSignedCookie req name)
                                    
 -- | Get request header param.
 getRequestHeader :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getHeader req field)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getHeader req field)
 
 -- | Check if specified response type will be accepted by a client.
 accepts :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 accepts types = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _accepts req types)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _accepts req types)
 
 -- | Execute specified handler if client accepts specified response type.
 ifAccepts :: forall e. String -> Handler e -> Handler e
@@ -88,18 +89,18 @@ ifAccepts type_ act = do
 -- | Check if specified charset is accepted.
 acceptsCharset :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _acceptsCharset req charset)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _acceptsCharset req charset)
 
 -- | Check if specified language is accepted.
 acceptsLanguage :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 acceptsLanguage language = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _acceptsLanguage req language)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _acceptsLanguage req language)
 
 -- | Check if request's Content-Type field matches type.
 -- | See http://expressjs.com/4x/api.html#req.is
 hasType :: forall e. String -> HandlerM (express :: EXPRESS | e) Boolean
 hasType type_ = HandlerM \req _ _ -> do
-    val <- liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _hasType req type_)
+    val <- liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _hasType req type_)
     pure $ fromMaybe false val
 
 -- | Return remote or upstream address.
@@ -145,12 +146,12 @@ isXhr = HandlerM \req _ _ ->
 -- | Return request protocol.
 getProtocol :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Protocol)
 getProtocol = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (_getProtocol req)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (_getProtocol req)
 
 -- | Return request HTTP method
 getMethod :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Method)
 getMethod = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< read) (_getMethod req)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (_getMethod req)
 
 -- | Return request URL (may be modified by other handlers/middleware).
 getUrl :: forall e. HandlerM (express :: EXPRESS | e) String
@@ -172,7 +173,7 @@ setUserData field val = HandlerM \req _ _ ->
 getUserData :: forall e a. (IsForeign a) => String -> 
                            HandlerM (express :: EXPRESS | e) (Maybe a)
 getUserData field = HandlerM \req _ _ -> do
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getData req field)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getData req field)
 
 queryParams :: forall e. Request -> ExpressM e (Array Param)
 queryParams req = do

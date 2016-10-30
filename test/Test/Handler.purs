@@ -3,7 +3,7 @@ module Test.Handler (testSuite) where
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
-import Control.Monad.Trans
+import Control.Monad.Trans.Class
 import Data.Array (head)
 import Data.Default
 import Data.Foreign.Class
