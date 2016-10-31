@@ -15,6 +15,7 @@ import Data.Foreign (Foreign)
 import Data.Maybe (Maybe)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Exception (Error)
+import Control.Monad.Except (runExcept)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Internal.Utils (eitherToMaybe)
 import Node.Express.Types (ExpressM, Response, CookieOptions, EXPRESS)
@@ -27,7 +28,7 @@ setStatus val = HandlerM \_ resp _ ->
 -- | Return response header value.
 getResponseHeader :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
-    liftEff $ liftM1 (eitherToMaybe <<< read) (runFn2 _getHeader resp field)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getHeader resp field)
 
 -- | Set response header value.
 setResponseHeader :: forall e a. String -> a -> Handler e

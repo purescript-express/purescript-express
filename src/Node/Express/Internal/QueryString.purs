@@ -11,7 +11,7 @@ import Data.List (List, toUnfoldable)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.String (fromCharArray)
-import Text.Parsing.Parser (Parser, ParseError(..), runParser)
+import Text.Parsing.Parser (Parser, parseErrorMessage, runParser)
 import Text.Parsing.Parser.Combinators (sepBy)
 import Text.Parsing.Parser.String (satisfy, string)
 
@@ -33,7 +33,7 @@ getAll params key =
 
 parse :: String -> Either String (Array Param)
 parse str = case runParser str queryString of
-    Left (ParseError err) -> Left err.message
+    Left err -> Left $ parseErrorMessage err
     Right result -> Right $ toUnfoldable result
 
 queryString :: Parser String (List Param)

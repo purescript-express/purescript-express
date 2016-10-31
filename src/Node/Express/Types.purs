@@ -1,9 +1,8 @@
 module Node.Express.Types where
 
 import Prelude
-import Data.Foreign (ForeignError(..), readString)
+import Data.Foreign (ForeignError(..), readString, fail)
 import Data.Foreign.Class (class IsForeign)
-import Data.Either (Either(..))
 import Data.String.Regex (Regex)
 import Data.Default (class Default)
 import Control.Monad.Eff (Eff)
@@ -30,10 +29,10 @@ instance showProtocol :: Show Protocol where
     show Https = "https"
 
 instance isForeignProtocol :: IsForeign Protocol where
-    read value = case readString value of
-        Right "http"  -> Right Http
-        Right "https" -> Right Https
-        _ -> Left $ JSONError "Unknown protocol"
+    read value = readString value >>= case _ of
+        "http"  -> pure Http
+        "https" -> pure Https
+        _ -> fail $ JSONError "Unknown protocol"
 
 
 data Method = ALL | GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CustomMethod String
@@ -50,16 +49,15 @@ instance showMethod :: Show Method where
     show (CustomMethod method) = method
 
 instance isForeignMethod :: IsForeign Method where
-    read value = case readString value of
-        Right "GET"     -> Right GET
-        Right "POST"    -> Right POST
-        Right "PUT"     -> Right PUT
-        Right "DELETE"  -> Right DELETE
-        Right "OPTIONS" -> Right OPTIONS
-        Right "HEAD"    -> Right HEAD
-        Right "TRACE"   -> Right TRACE
-        Right method    -> Right $ CustomMethod method
-        _ -> Left $ JSONError "Unknown HTTP method"
+    read value = readString value >>= case _ of
+        "GET"     -> pure GET
+        "POST"    -> pure POST
+        "PUT"     -> pure PUT
+        "DELETE"  -> pure DELETE
+        "OPTIONS" -> pure OPTIONS
+        "HEAD"    -> pure HEAD
+        "TRACE"   -> pure TRACE
+        method    -> pure $ CustomMethod method
 
 type Port = Int
 type Path = String
