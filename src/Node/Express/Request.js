@@ -12,6 +12,12 @@ exports._getRoute = function (req) {
     };
 };
 
+exports._getBody = function (req) {
+    return function () {
+        return req.body == null ? void 0 : req.body;
+    };
+};
+
 exports._getBodyParam = function (req, name) {
     return function () {
         return req.body == null ? void 0 : req.body[name];
