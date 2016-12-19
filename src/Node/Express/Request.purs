@@ -12,7 +12,7 @@ module Node.Express.Request
     ) where
 
 import Prelude
-import Data.Foreign (Foreign)
+import Data.Foreign (Foreign, MultipleErrors)
 import Data.Foreign.Class (class IsForeign, read)
 import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
 import Data.Either (Either(..))
