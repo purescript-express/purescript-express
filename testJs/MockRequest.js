@@ -28,6 +28,13 @@ MockRequest.prototype.setHeader = function(headerName) {
     };
 }
 
+// String -> MockRequest
+MockRequest.prototype.setBody = function(value) {
+    var self = this;
+    self.body = value;
+    return self;
+}
+
 // String -> String -> MockRequest
 MockRequest.prototype.setBodyParam = function(paramName) {
     var self = this;

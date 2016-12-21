@@ -4,6 +4,7 @@ module Test.Mock
     , MockCookie(..)
     , setRequestHeader
     , setRouteParam
+    , setBody
     , setBodyParam
     , setRequestCookie
     , setRequestSignedCookie
@@ -25,25 +26,25 @@ module Test.Mock
     , assertTestHeader
     ) where
 
-import Control.Monad.Aff (Aff, launchAff)
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Cont.Trans
 import Control.Monad.Except.Trans
 import Control.Monad.Reader.Trans
-import Data.Function hiding (apply)
 import Data.Maybe
-import Data.StrMap as StrMap
 import Data.Tuple
 import Node.Express.App
 import Node.Express.Handler
 import Node.Express.Types
 import Node.Express.Response
-import Prelude hiding (apply)
 import Test.Unit
 import Test.Unit.Console
 import Test.Unit.Assert
+import Data.StrMap as StrMap
+import Control.Monad.Aff (Aff, launchAff)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Data.Function hiding (apply)
+import Prelude hiding (apply)
 
 type MockCookie =
     { name    :: String
@@ -60,6 +61,7 @@ type MockResponse =
 
 newtype MockRequest = MockRequest
     { setHeader :: String -> String -> MockRequest
+    , setBody :: String -> MockRequest
     , setBodyParam :: String -> String -> MockRequest
     , setRouteParam :: String -> String -> MockRequest
     , setCookie :: String -> String -> MockRequest
@@ -68,6 +70,9 @@ newtype MockRequest = MockRequest
 
 setRequestHeader :: String -> String -> MockRequest -> MockRequest
 setRequestHeader name value (MockRequest r) = r.setHeader name value
+
+setBody :: String -> MockRequest -> MockRequest
+setBody value (MockRequest r) = r.setBody value
 
 setBodyParam :: String -> String -> MockRequest -> MockRequest
 setBodyParam name value (MockRequest r) = r.setBodyParam name value

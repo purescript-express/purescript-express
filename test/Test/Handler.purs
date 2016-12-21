@@ -4,23 +4,24 @@ import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Exception
 import Control.Monad.Trans.Class
-import Data.Array (head)
 import Data.Default
 import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
 import Node.Express.Types
-import Node.Express.App hiding (apply)
 import Node.Express.Handler
 import Node.Express.Request
 import Node.Express.Response
-import Prelude hiding (id)
-import Data.StrMap as StrMap
 import Test.Mock
 import Test.Unit
 import Test.Unit.Assert
 import Test.Unit.Console
 import Unsafe.Coerce
+import Data.StrMap as StrMap
+import Data.Array (head)
+import Data.Either (either)
+import Node.Express.App hiding (apply)
+import Prelude hiding (id)
 
 
 foreign import cwdJson :: String
@@ -35,14 +36,15 @@ sendTestRequest = sendRequest GET "http://example.com"
 muteTest :: forall e. TestMockApp e
 muteTest = lift $ assert "Muted" true
 
-id :: forall a. a -> a
-id a = a
-
 testParams = do
     testExpress "getRouteParam" $ do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
         sendTestRequest withRouteParam assertTestHeaderExists
+    testExpress "getBody" $ do
+        setupMockApp $ use paramsHandler
+        sendTestRequest withoutParams assertTestHeaderAbsent
+        sendTestRequest withBody assertTestHeaderExists
     testExpress "getBodyParam" $ do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
@@ -59,11 +61,13 @@ testParams = do
     testParam = "param"
     withoutParams  = id
     withRouteParam = setRouteParam testParam testValue
+    withBody       = setBody       testValue
     withBodyParam  = setBodyParam  testParam testValue
     urlWithQueryParam = "http://example.com?" <> testParam <> "=" <> testValue
     urlWithQueryParams = urlWithQueryParam <> "&" <> testParam <> "=someOtherValue"
     paramsHandler  = do
         getRouteParam testParam >>= maybe (pure unit) setTestHeader
+        getBody                 >>= either (pure <<< const unit) setTestHeader
         getBodyParam  testParam >>= maybe (pure unit) setTestHeader
         getQueryParam testParam >>= maybe (pure unit) setTestHeader
         map head (getQueryParams testParam) >>= maybe (pure unit) setTestHeader
