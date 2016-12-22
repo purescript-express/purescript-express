@@ -12,6 +12,16 @@ regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
 part that matched `(\d+)` and `getRouteParam 0` return whole
 route.
 
+#### `getBody`
+
+``` purescript
+getBody :: forall e a. IsForeign a => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+```
+
+Get the request's body.
+NOTE: Not parsed by default, you must attach proper middleware
+      See http://expressjs.com/4x/api.html#req.body
+
 #### `getBodyParam`
 
 ``` purescript
@@ -215,9 +225,8 @@ Return request original URL.
 setUserData :: forall a e. String -> a -> Handler e
 ```
 
-Sets the arbitrary attribute of the Request object to specified data
-Doesn't check if the attribute already exists, be careful to not override
-standard Request fields. 
+Sets the specified field of the userData object attached to the Request 
+object to specified data
 
 #### `getUserData`
 
