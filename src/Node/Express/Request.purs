@@ -1,6 +1,6 @@
 module Node.Express.Request
-    ( getRouteParam, getQueryParam, getQueryParams, getBodyParam
-    , getRoute
+    ( getRouteParam, getQueryParam, getQueryParams, getBody
+    , getBodyParam, getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
     , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
@@ -12,7 +12,7 @@ module Node.Express.Request
     ) where
 
 import Prelude
-import Data.Foreign (Foreign)
+import Data.Foreign (Foreign, MultipleErrors)
 import Data.Foreign.Class (class IsForeign, read)
 import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
 import Data.Either (Either(..))
@@ -33,6 +33,13 @@ import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
 getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getRouteParam req name)
+
+-- | Get the request's body.
+-- | NOTE: Not parsed by default, you must attach proper middleware
+-- |       See http://expressjs.com/4x/api.html#req.body
+getBody :: forall e a. (IsForeign a) => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+getBody = HandlerM \req _ _ ->
+    liftEff $ liftM1 (runExcept <<< read) (_getBody req)
 
 -- | Get param from request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
@@ -185,6 +192,8 @@ queryParams req = do
 foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
 
 foreign import _getRoute :: forall e. Request -> ExpressM e String
+
+foreign import _getBody :: forall e. Request -> ExpressM e Foreign
 
 foreign import _getBodyParam :: forall e. Fn2 Request String (ExpressM e Foreign)
 
