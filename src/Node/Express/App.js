@@ -1,7 +1,7 @@
 // module Node.Express.App
 
 exports.mkApplication = function() {
-    var express = module.require('express');
+    var express = require('express');
     return express();
 }
 
@@ -9,7 +9,7 @@ exports._listenHttp = function(app) {
     return function(port) {
         return function(cb) {
             return function() {
-                var http = module.require('http');
+                var http = require('http');
                 var server = http.createServer(app);
                 server.listen(port, function(e) {
                     return cb(e)();
@@ -25,7 +25,7 @@ exports._listenHttps = function(app) {
         return function(opts) {
             return function(cb) {
                 return function() {
-                    var https = module.require('https');
+                    var https = require('https');
                     var server = https.createServer(opts, app);
                     server.listen(port, function(e) {
                         return cb(e)();
