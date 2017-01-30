@@ -3,11 +3,11 @@
   "homepage": "https://github.com/dancingrobot84/purescript-express/tree/master/examples",
   "description": "Examples for purescript-express",
   "dependencies": {
-    "purescript-console": "^1.0.0",
-    "purescript-node-fs": "^2.0.0",
-    "purescript-strings": "^1.1.0",
-    "purescript-refs": "^1.0.0",
+    "purescript-console": "^2.0.0",
+    "purescript-node-fs": "^3.0.0",
+    "purescript-strings": "^2.1.0",
+    "purescript-refs": "^2.0.0",
     "purescript-express": "master",
-    "purescript-node-process": "^2.0.0"
+    "purescript-node-process": "^3.0.0"
   }
 }
