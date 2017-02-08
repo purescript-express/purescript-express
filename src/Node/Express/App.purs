@@ -2,7 +2,7 @@ module Node.Express.App
     ( AppM()
     , App()
     , listenHttp, listenHttps, apply
-    , use, useExternal, useAt, useOnParam, useOnError
+    , use, useExternal, useExternalWithApp, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -87,6 +87,13 @@ use middleware = AppM \app ->
 useExternal :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
 useExternal fn = AppM \app ->
     runFn2 _useExternal app fn
+
+-- | Use any function as middleware, passing the current app to
+-- | be decorated by the middleware.
+useExternalWithApp :: forall e.
+ (Application -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) -> App e
+useExternalWithApp fn = AppM \app ->
+   runFn2 _useExternal app (fn app)
 
 -- | Use specified middleware only on requests matching path.
 useAt :: forall e. Path -> Handler e -> App e
