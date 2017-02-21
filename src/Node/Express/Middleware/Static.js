@@ -4,8 +4,8 @@
 exports._static = function(root) {
   return function(req, res, nxt) {
     return function() {
-      var app = require("express");
-      return app.static(root)(req, res, nxt);
+      var express = require("express");
+      return express.static(root)(req, res, nxt);
     }
   }
 }
