@@ -5,24 +5,22 @@ module Node.Express.App
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
+    , httpMw, getMw, postMw, putMw, deleteMw, allMw
     ) where
 
-import Prelude hiding (apply)
-import Data.Foreign.Class (class IsForeign, read)
-import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn4, runFn3, runFn2)
-import Data.Maybe (Maybe)
-import Data.Foreign (Foreign, toForeign)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Except (runExcept)
-import Node.HTTP (Server ())
-
-import Node.Express.Types (class RoutePattern, EXPRESS, Application,
-                           ExpressM, Response, Request, Event, Path,
-                           Port, Method(..))
-import Node.Express.Internal.Utils (eitherToMaybe)
+import Data.Foreign (Foreign, toForeign)
+import Data.Foreign.Class (class IsForeign, read)
+import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn2, runFn3, runFn4)
+import Data.Maybe (Maybe)
 import Node.Express.Handler (Handler, runHandlerM)
+import Node.Express.Internal.Utils (eitherToMaybe)
+import Node.Express.Types (class RoutePattern, EXPRESS, Application, ExpressM, Response, Request, Event, Path, Port, Method(..))
+import Node.HTTP (Server)
+import Prelude hiding (apply)
 
 -- | Monad responsible for application related operations (initial setup mostly).
 data AppM e a = AppM (Application -> Eff e a)
@@ -122,25 +120,50 @@ http :: forall e r. (RoutePattern r) => Method -> r -> Handler e -> App e
 http method route handler = AppM \app ->
     runFn4 _http app (show method) (toForeign route) $ runHandlerM handler
 
+-- | Bind specified handler to handle request matching route and method.
+httpMw :: forall e r. (RoutePattern r) => Method -> r -> Array (Handler e) -> App e
+httpMw method route handlers = AppM \app ->
+    runFn4 _httpMw app (show method) (toForeign route) $ map runHandlerM handlers
+
 -- | Shortcut for `http GET`.
 get :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 get = http GET
+
+-- | Shortcut for `http GET` with multiple middleware handlers.
+getMw :: forall e r. (RoutePattern r) => r -> Array (Handler e) -> App e
+getMw = httpMw GET
 
 -- | Shortcut for `http POST`.
 post :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 post = http POST
 
+-- | Shortcut for `http POST` with multiple middleware handlers.
+postMw :: forall e r. (RoutePattern r) => r -> Array (Handler e) -> App e
+postMw = httpMw POST
+
 -- | Shortcut for `http PUT`.
 put :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 put = http PUT
+
+-- | Shortcut for `http PUT` with multiple middleware handlers.
+putMw :: forall e r. (RoutePattern r) => r -> Array (Handler e) -> App e
+putMw = httpMw PUT
 
 -- | Shortcut for `http DELETE`.
 delete :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 delete = http DELETE
 
+-- | Shortcut for `http DELETE` with multiple middleware handlers.
+deleteMw :: forall e r. (RoutePattern r) => r -> Array (Handler e) -> App e
+deleteMw = httpMw DELETE
+
 -- | Shortcut for `http ALL` (match on any http method).
 all :: forall e r. (RoutePattern r) => r -> Handler e -> App e
 all = http ALL
+
+-- | Shortcut for `http ALL` (match on any http method) with multiple middleware handlers.
+allMw :: forall e r. (RoutePattern r) => r -> Array (Handler e) -> App e
+allMw = httpMw ALL
 
 foreign import mkApplication :: forall e. ExpressM e Application
 
@@ -149,6 +172,8 @@ foreign import _getProp :: forall e. Fn2 Application String (ExpressM e Foreign)
 foreign import _setProp :: forall e a. Fn3 Application String a (ExpressM e Unit)
 
 foreign import _http :: forall e. Fn4 Application String Foreign (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+
+foreign import _httpMw :: forall e. Fn4 Application String Foreign (Array (HandlerFn e)) (Eff (express :: EXPRESS | e) Unit)
 
 foreign import _listenHttp :: forall e1 e2. Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
