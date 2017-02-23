@@ -1,6 +1,6 @@
 module Node.Express.Request
-    ( getRouteParam, getQueryParam, getQueryParams, getBody
-    , getBodyParam, getRoute
+    ( getRouteParam, getQueryParam, getQueryParams, getProp
+    , getBody, getBodyParam, getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
     , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
@@ -33,6 +33,11 @@ import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
 getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getRouteParam req name)
+
+-- | Get an arbitrary property from the request object.
+getProp :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+getProp k = HandlerM \req _ _ ->
+    liftEff $ liftM1 (runExcept <<< read) (runFn2 _getProp req k)
 
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
@@ -192,6 +197,8 @@ queryParams req = do
 foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
 
 foreign import _getRoute :: forall e. Request -> ExpressM e String
+
+foreign import _getProp :: forall e. Fn2 Request String (ExpressM e Foreign)
 
 foreign import _getBody :: forall e. Request -> ExpressM e Foreign
 
