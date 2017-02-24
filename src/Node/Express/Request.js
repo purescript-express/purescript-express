@@ -14,7 +14,7 @@ exports._getRoute = function (req) {
 
 exports._getProp = function (req, key) {
     return function () {
-        return req[key] == null ? void 0 : req.body;
+        return req[key] == null ? void 0 : req[key];
     };
 };
 
