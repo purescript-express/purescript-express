@@ -79,7 +79,7 @@ newtype CookieOptions = CookieOptions
     { maxAge :: Int
     , signed :: Boolean
     , path :: String
-    , httpOnly :: Bolean
+    , httpOnly :: Boolean
     }
 
 instance defaultCookieOptions :: Default CookieOptions where
