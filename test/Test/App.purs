@@ -9,8 +9,8 @@ import Data.Maybe
 import Node.Express.Types
 import Node.Express.App hiding (apply)
 import Node.Express.Handler
+import Node.Express.Test.Mock
 import Prelude
-import Test.Mock
 import Test.Unit
 import Test.Unit.Console
 
