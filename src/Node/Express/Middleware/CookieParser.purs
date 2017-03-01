@@ -9,12 +9,12 @@ import Node.Express.Types (Request, Response, ExpressM)
 
 foreign import _cookieParser :: forall eff. Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
 
-foreign import _secretCookieParser :: forall eff. Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
+foreign import _secretCookieParser :: forall eff. String -> Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
 
 cookieParser :: forall eff. Handler eff
 cookieParser = HandlerM $
   \req res nxt -> liftEff $ runFn3 _cookieParser req res nxt
 
-secretCookieParser :: forall eff. Handler eff
-secretCookieParser = HandlerM $
-  \req res nxt -> liftEff $ runFn3 _secretCookieParser req res nxt
+secretCookieParser :: forall eff. String -> Handler eff
+secretCookieParser secret = HandlerM $
+  \req res nxt -> liftEff $ runFn3 (_secretCookieParser secret) req res nxt
