@@ -16,7 +16,6 @@
     "bower_components",
     "output",
     "test",
-    "testJs",
     "example",
     "Gruntfile.js",
     "package.json",

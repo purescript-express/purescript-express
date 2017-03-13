@@ -12,7 +12,7 @@ import Node.Express.Types
 import Node.Express.Handler
 import Node.Express.Request
 import Node.Express.Response
-import Test.Mock
+import Node.Express.Test.Mock
 import Test.Unit
 import Test.Unit.Assert
 import Test.Unit.Console

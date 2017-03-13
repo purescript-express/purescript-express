@@ -1,4 +1,4 @@
-module Test.Mock
+module Node.Express.Test.Mock
     ( MockResponse(..)
     , MockRequest(..)
     , MockCookie(..)
@@ -26,25 +26,22 @@ module Test.Mock
     , assertTestHeader
     ) where
 
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
-import Control.Monad.Cont.Trans
-import Control.Monad.Except.Trans
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Reader.Trans
-import Data.Maybe
-import Data.Tuple
-import Node.Express.App
-import Node.Express.Handler
-import Node.Express.Types
-import Node.Express.Response
-import Test.Unit
-import Test.Unit.Console
-import Test.Unit.Assert
+import Data.Maybe (Maybe)
+import Node.Express.App (App, apply)
+import Node.Express.Handler (Handler)
+import Node.Express.Types (Application, EXPRESS, ExpressM, Method)
+import Node.Express.Response (setResponseHeader)
+import Test.Unit (Test, TestSuite, test)
+import Test.Unit.Console (TESTOUTPUT)
+import Test.Unit.Assert (assert)
 import Data.StrMap as StrMap
 import Control.Monad.Aff (Aff, launchAff)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Data.Function hiding (apply)
-import Prelude hiding (apply)
+
+import Prelude (class Eq, class Show, Unit, bind, map, pure, show, unit, ($), (<>), (==), (>>=))
 
 type MockCookie =
     { name    :: String
