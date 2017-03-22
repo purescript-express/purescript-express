@@ -60,6 +60,7 @@ instance isForeignMethod :: IsForeign Method where
         method    -> pure $ CustomMethod method
 
 type Port = Int
+type Pipe = String
 type Path = String
 
 class RoutePattern a

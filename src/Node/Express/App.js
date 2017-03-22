@@ -37,6 +37,8 @@ exports._listenHttps = function(app) {
     }
 }
 
+exports._listenPipe = exports._listenHttp;
+
 exports._http = function (app, method, route, handler) {
     return function () {
         app[method](route, function(req, resp, next) {
