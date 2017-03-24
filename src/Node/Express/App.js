@@ -45,6 +45,16 @@ exports._http = function (app, method, route, handler) {
     };
 };
 
+exports._httpMw = function (app, method, route, handlers) {
+    return function () {
+        app[method](route, handlers.map(function(f) {
+            return function(req, res, next) {
+                return f(req)(res)(next)();
+            }
+        }));
+    };
+};
+
 exports._use = function (app, mw) {
     return function () {
         app.use(function(req, resp, next) {
