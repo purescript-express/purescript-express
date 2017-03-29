@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, apply
+    , listenHttp, listenHttps, listenPipe, apply
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
@@ -20,7 +20,7 @@ import Node.HTTP (Server ())
 
 import Node.Express.Types (class RoutePattern, EXPRESS, Application,
                            ExpressM, Response, Request, Event, Path,
-                           Port, Method(..))
+                           Port, Pipe, Method(..))
 import Node.Express.Internal.Utils (eitherToMaybe)
 import Node.Express.Handler (Handler, runHandlerM)
 
@@ -70,6 +70,14 @@ listenHttps (AppM act) port opts cb = do
     app <- mkApplication
     act app
     _listenHttps app port opts cb
+
+-- | Run application on specified named pipe and execute callback after launch.
+-- | HTTP version
+listenPipe :: forall e1 e2. App e1 -> Pipe -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenPipe (AppM act) pipe cb = do
+    app <- mkApplication
+    act app
+    _listenPipe app pipe cb
 
 -- | Apply App actions to existent Express.js application
 apply :: forall e. App e -> Application -> ExpressM e Unit
@@ -153,6 +161,8 @@ foreign import _http :: forall e. Fn4 Application String Foreign (HandlerFn e) (
 foreign import _listenHttp :: forall e1 e2. Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 foreign import _listenHttps :: forall opts e1 e2. Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
+
+foreign import _listenPipe :: forall e1 e2. Application -> String -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 foreign import _use :: forall e. Fn2 Application (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
