@@ -84,7 +84,7 @@ setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 setRequestSignedCookie name value (MockRequest r) = r.setSignedCookie name value
 
 foreign import createMockApp ::
-    forall e. Eff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e) Application
+    forall e. Eff (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e) Application
 foreign import createMockRequest ::
     forall e. String -> String -> ExpressM e MockRequest
 foreign import sendMockRequest ::
@@ -92,14 +92,14 @@ foreign import sendMockRequest ::
 foreign import sendMockError ::
     forall e. Application -> MockRequest -> String -> ExpressM e MockResponse
 
-type TestExpress e = Aff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+type TestExpress e = Aff (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e)
 type TestMockApp e = ReaderT Application (TestExpress e) Unit
-type TestApp e = App (err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+type TestApp e = App (exception :: EXCEPTION, testOutput :: TESTOUTPUT | e)
 
 testExpress :: forall e.
     String
     -> TestMockApp e
-    -> TestSuite (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+    -> TestSuite (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e)
 testExpress testName assertions = test testName $ do
     mockApp <- liftEff $ createMockApp
     runReaderT assertions mockApp
@@ -133,14 +133,14 @@ sendError method url error testResponse = do
     response <- liftEff $ sendMockError app request error
     testResponse response
 
-assertMatch :: forall a e. (Show a, Eq a) => String -> a -> a -> Test e
+assertMatch :: forall a e. Show a => Eq a => String -> a -> a -> Test e
 assertMatch what expected actual = do
     let message = what <> " does not match: \
         \Expected [ " <> show expected <> " ], Got [ " <> show actual <> " ]"
     assert message (expected == actual)
 
 type Reporter e = Test (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
-                  -> Eff (express :: EXPRESS, err :: EXCEPTION, testOutput :: TESTOUTPUT | e) Unit
+                  -> Eff (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e) Unit
 
 assertInApp :: forall e. (Reporter e -> TestApp e) -> TestMockApp e
 assertInApp assertion = do

@@ -17,7 +17,7 @@ import Test.Unit.Console
 foreign import mockMiddleware :: forall e.
     String -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
-assertProperty :: forall a e. (Show a, Eq a, IsForeign a) =>
+assertProperty :: forall a e. Show a => Eq a => Decode a =>
     String -> Maybe a -> TestMockApp e
 assertProperty name expected = assertInApp $ \report -> do
     actual <- getProp name

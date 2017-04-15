@@ -35,7 +35,7 @@ queryGetAllTestCases =
     , {input: [Param "a" "b", Param "a" "c"],   expected: ["b", "c"]}
     ]
 
-doTest :: forall a b e. (Show b, Eq b) => (a -> b) -> TestCase a b -> Test e
+doTest :: forall a b e. Show b => Eq b => (a -> b) -> TestCase a b -> Test e
 doTest fun testCase = do
     let actual = fun testCase.input
         msg = show actual <> " should equal " <> show testCase.expected

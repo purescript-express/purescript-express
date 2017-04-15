@@ -9,7 +9,7 @@ module Node.Express.Response
     ) where
 
 import Prelude
-import Data.Foreign.Class (class IsForeign, read)
+import Data.Foreign.Class (class Decode, decode)
 import Data.Function.Uncurried (Fn3, Fn4, Fn2, runFn3, runFn4, runFn2)
 import Data.Foreign (Foreign)
 import Data.Maybe (Maybe)
@@ -26,9 +26,9 @@ setStatus val = HandlerM \_ resp _ ->
     liftEff $ runFn2 _setStatus resp val
 
 -- | Return response header value.
-getResponseHeader :: forall e a. (IsForeign a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getResponseHeader :: forall e a. (Decode a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getHeader resp field)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getHeader resp field)
 
 -- | Set response header value.
 setResponseHeader :: forall e a. String -> a -> Handler e

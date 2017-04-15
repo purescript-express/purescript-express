@@ -8,7 +8,7 @@ module Node.Express.App
     ) where
 
 import Prelude hiding (apply)
-import Data.Foreign.Class (class IsForeign, read)
+import Data.Foreign.Class (class Decode, decode)
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn4, runFn3, runFn2)
 import Data.Maybe (Maybe)
 import Data.Foreign (Foreign, toForeign)
@@ -114,13 +114,13 @@ useOnError handler = AppM \app ->
 
 -- | Get application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
-getProp :: forall e a. (IsForeign a) => String -> AppM (express :: EXPRESS | e) (Maybe a)
+getProp :: forall e a. (Decode a) => String -> AppM (express :: EXPRESS | e) (Maybe a)
 getProp name = AppM \app ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< read) (runFn2 _getProp app name)
+    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getProp app name)
 
 -- | Set application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
-setProp :: forall e a. (IsForeign a) => String -> a -> App e
+setProp :: forall e a. (Decode a) => String -> a -> App e
 setProp name val = AppM \app ->
     runFn3 _setProp app name val
 

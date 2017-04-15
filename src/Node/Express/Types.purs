@@ -2,13 +2,13 @@ module Node.Express.Types where
 
 import Prelude
 import Data.Foreign (ForeignError(..), readString, fail)
-import Data.Foreign.Class (class IsForeign)
+import Data.Foreign.Class (class Decode)
 import Data.String.Regex (Regex)
 import Data.Default (class Default)
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, kind Effect)
 
 
-foreign import data EXPRESS :: !
+foreign import data EXPRESS :: Effect
 
 -- | General monad, indicates that we're dealing with
 -- | express.js related functions.
@@ -17,10 +17,10 @@ foreign import data EXPRESS :: !
 type ExpressM e a = Eff (express :: EXPRESS | e) a
 
 
-foreign import data Application :: *
-foreign import data Event :: *
-foreign import data Response :: *
-foreign import data Request :: *
+foreign import data Application :: Type
+foreign import data Event :: Type
+foreign import data Response :: Type
+foreign import data Request :: Type
 
 data Protocol = Http | Https
 
@@ -28,8 +28,8 @@ instance showProtocol :: Show Protocol where
     show Http  = "http"
     show Https = "https"
 
-instance isForeignProtocol :: IsForeign Protocol where
-    read value = readString value >>= case _ of
+instance isForeignProtocol :: Decode Protocol where
+    decode value = readString value >>= case _ of
         "http"  -> pure Http
         "https" -> pure Https
         _ -> fail $ JSONError "Unknown protocol"
@@ -48,8 +48,8 @@ instance showMethod :: Show Method where
     show TRACE   = "trace"
     show (CustomMethod method) = method
 
-instance isForeignMethod :: IsForeign Method where
-    read value = readString value >>= case _ of
+instance isForeignMethod :: Decode Method where
+    decode value = readString value >>= case _ of
         "GET"     -> pure GET
         "POST"    -> pure POST
         "PUT"     -> pure PUT

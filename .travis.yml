@@ -2,10 +2,10 @@ language: node_js
 dist: trusty
 sudo: required
 node_js:
-  - 4.1
+  - 7.9
 install:
   - npm install bower pulp purescript -g
   - bower install
 script:
-  - psc --version
+  - purs --version
   - pulp test
