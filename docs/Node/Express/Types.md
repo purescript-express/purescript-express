@@ -52,7 +52,7 @@ data Protocol
 ##### Instances
 ``` purescript
 Show Protocol
-IsForeign Protocol
+Decode Protocol
 ```
 
 #### `Method`
@@ -73,7 +73,7 @@ data Method
 ##### Instances
 ``` purescript
 Show Method
-IsForeign Method
+Decode Method
 ```
 
 #### `Port`
@@ -91,7 +91,7 @@ type Path = String
 #### `RoutePattern`
 
 ``` purescript
-class RoutePattern a 
+class RoutePattern a
 ```
 
 ##### Instances
@@ -103,7 +103,7 @@ RoutePattern Regex
 #### `RequestParam`
 
 ``` purescript
-class RequestParam a 
+class RequestParam a
 ```
 
 ##### Instances

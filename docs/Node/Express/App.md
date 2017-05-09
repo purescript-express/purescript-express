@@ -96,7 +96,7 @@ Use error handler. Probably this should be the last middleware to attach.
 #### `getProp`
 
 ``` purescript
-getProp :: forall e a. IsForeign a => String -> AppM (express :: EXPRESS | e) (Maybe a)
+getProp :: forall e a. Decode a => String -> AppM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Get application property.
@@ -105,7 +105,7 @@ See http://expressjs.com/4x/api.html#app-settings
 #### `setProp`
 
 ``` purescript
-setProp :: forall e a. IsForeign a => String -> a -> App e
+setProp :: forall e a. Decode a => String -> a -> App e
 ```
 
 Set application property.

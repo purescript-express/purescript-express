@@ -28,7 +28,7 @@ getOne :: (Array Param) -> String -> Maybe String
 getOne params key = head $ getAll params key
 
 getAll :: (Array Param) -> String -> (Array String)
-getAll params key = 
+getAll params key =
     mapMaybe (\(Param name val) -> if name == key then Just val else Nothing) params
 
 parse :: String -> Either String (Array Param)
@@ -42,7 +42,7 @@ queryString = sepBy param (string "&")
 param :: Parser String Param
 param = do
     name <- liftM1 (decode <<< fromCharArray) $ some $ satisfy (\s -> s /= '=')
-    string "="
+    _ <- string "="
     val  <- liftM1 (decode <<< fromCharArray) $ many $ satisfy (\s -> s /= '&')
     pure $ Param name val
 

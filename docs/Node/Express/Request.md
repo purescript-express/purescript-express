@@ -15,7 +15,7 @@ route.
 #### `getBody`
 
 ``` purescript
-getBody :: forall e a. IsForeign a => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+getBody :: forall e a. Decode a => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
 ```
 
 Get the request's body.
@@ -25,7 +25,7 @@ NOTE: Not parsed by default, you must attach proper middleware
 #### `getBodyParam`
 
 ``` purescript
-getBodyParam :: forall e a. IsForeign a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getBodyParam :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Get param from request's body.
@@ -225,13 +225,13 @@ Return request original URL.
 setUserData :: forall a e. String -> a -> Handler e
 ```
 
-Sets the specified field of the userData object attached to the Request 
+Sets the specified field of the userData object attached to the Request
 object to specified data
 
 #### `getUserData`
 
 ``` purescript
-getUserData :: forall e a. IsForeign a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getUserData :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
 ```
 
 Retrieves the data from the request set with previous call to `setUserData`
