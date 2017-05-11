@@ -40,13 +40,13 @@
     "purescript-strings": "^3.0.0",
     "purescript-transformers": "^3.2.0",
     "purescript-unfoldable": "^3.0.0",
-    "purescript-foreign-generic": "^4.1.0"
+    "purescript-foreign-generic": "^4.1.0",
+    "purescript-test-unit": "^11.0.0"
   },
   "devDependencies": {
     "purescript-console": "^3.0.0",
     "purescript-maps": "^3.0.0",
     "purescript-node-fs": "^4.0.0",
-    "purescript-test-unit": "^11.0.0",
     "purescript-unsafe-coerce": "^3.0.0"
   }
 }
