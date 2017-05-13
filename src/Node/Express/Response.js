@@ -54,6 +54,13 @@ exports._send = function (resp, data) {
     };
 };
 
+exports._end = function (resp) {
+    return function () {
+        resp.end();
+    };
+};
+
+
 exports._sendJson = function (resp, data) {
     return function () {
         resp.json(data);
@@ -111,4 +118,3 @@ exports._render = function (res, view, data) {
         return res.render(view, data);
     };
 };
-

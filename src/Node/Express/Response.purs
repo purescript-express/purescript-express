@@ -6,6 +6,7 @@ module Node.Express.Response
     , redirect, redirectWithStatus, setLocation
     , sendFile, sendFileExt, download, downloadExt
     , render
+    , end
     ) where
 
 import Prelude
@@ -49,6 +50,10 @@ setCookie name val opts = HandlerM \_ resp _ ->
 clearCookie :: forall e. String -> String -> Handler e
 clearCookie name path = HandlerM \_ resp _ ->
     liftEff $ runFn3 _clearCookie resp name path
+
+-- | Ends the response process.
+end :: forall e. Handler e
+end = HandlerM \_ resp _ -> liftEff $ _end resp
 
 -- | Send a response. Could be object, string, buffer, etc.
 send :: forall e a. a -> Handler e
@@ -127,6 +132,8 @@ foreign import _setCookie :: forall e. Fn4 Response String String CookieOptions 
 
 foreign import _clearCookie :: forall e. Fn3 Response String String (ExpressM e Unit)
 
+foreign import _end :: forall e. Response -> (ExpressM e Unit)
+
 foreign import _send :: forall e a. Fn2 Response a (ExpressM e Unit)
 
 foreign import _sendJson :: forall e a. Fn2 Response a (ExpressM e Unit)
@@ -146,4 +153,3 @@ foreign import _downloadExt :: forall e. Fn4 Response String String (Error -> Ex
 foreign import _headersSent :: forall e. Response -> ExpressM e Boolean
 
 foreign import _render :: forall e a. Fn3 Response String a (ExpressM e Unit)
-
