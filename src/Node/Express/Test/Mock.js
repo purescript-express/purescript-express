@@ -165,6 +165,11 @@ MockResponse.prototype.send = function(data) {
     this.headersSent = true;
 }
 
+MockResponse.prototype.end = function() {
+    this.statusCode = 200;
+    this.headersSent = true;
+}
+
 MockResponse.prototype.json = function(obj) {
    this.send(JSON.stringify(obj));
 }
@@ -381,4 +386,3 @@ exports.sendMockError = function(mockApp) {
         };
     };
 }
-

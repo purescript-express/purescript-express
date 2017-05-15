@@ -241,7 +241,6 @@ testResponse = do
         sendTestRequest id $ assertData testValue
 
     testExpress "end" $ do
-        setupMockApp $ use $ setStatus 200
         setupMockApp $ use end
         sendTestRequest id $ \response -> do
             assertStatusCode 200 response
