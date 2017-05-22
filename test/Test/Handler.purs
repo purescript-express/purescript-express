@@ -240,6 +240,11 @@ testResponse = do
         setupMockApp $ use $ send testValue
         sendTestRequest id $ assertData testValue
 
+    testExpress "end" $ do
+        setupMockApp $ use end
+        sendTestRequest id $ \response -> do
+            assertStatusCode 200 response
+
     testExpress "sendJson" $ do
         setupMockApp $ use $ sendJson testData
         sendTestRequest id $ assertData testDataStr
