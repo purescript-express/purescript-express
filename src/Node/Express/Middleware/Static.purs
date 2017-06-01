@@ -11,6 +11,7 @@ import Prelude (($))
 
 foreign import _static :: forall eff. String -> Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
 
+-- | Handler that uses builtin 'static' middleware to serve files from specified location
 static :: forall eff. String -> Handler eff
 static root = HandlerM $
   \req res nxt -> liftEff $ runFn3 (_static root) req res nxt

@@ -42,6 +42,15 @@ listenHttps :: forall e1 e2 opts. App e1 -> Port -> opts -> (Event -> Eff e2 Uni
 Run application on specified port and execute callback after launch.
 HTTPS version
 
+#### `listenPipe`
+
+``` purescript
+listenPipe :: forall e1 e2. App e1 -> Pipe -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+```
+
+Run application on specified named pipe and execute callback after launch.
+HTTP version
+
 #### `apply`
 
 ``` purescript

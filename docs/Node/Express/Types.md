@@ -3,7 +3,7 @@
 #### `EXPRESS`
 
 ``` purescript
-data EXPRESS :: !
+data EXPRESS :: Effect
 ```
 
 #### `ExpressM`
@@ -20,25 +20,25 @@ and ExpressM in rare cases.
 #### `Application`
 
 ``` purescript
-data Application :: *
+data Application :: Type
 ```
 
 #### `Event`
 
 ``` purescript
-data Event :: *
+data Event :: Type
 ```
 
 #### `Response`
 
 ``` purescript
-data Response :: *
+data Response :: Type
 ```
 
 #### `Request`
 
 ``` purescript
-data Request :: *
+data Request :: Type
 ```
 
 #### `Protocol`
@@ -82,6 +82,12 @@ Decode Method
 type Port = Int
 ```
 
+#### `Pipe`
+
+``` purescript
+type Pipe = String
+```
+
 #### `Path`
 
 ``` purescript
@@ -91,7 +97,7 @@ type Path = String
 #### `RoutePattern`
 
 ``` purescript
-class RoutePattern a
+class RoutePattern a 
 ```
 
 ##### Instances
@@ -103,7 +109,7 @@ RoutePattern Regex
 #### `RequestParam`
 
 ``` purescript
-class RequestParam a
+class RequestParam a 
 ```
 
 ##### Instances
