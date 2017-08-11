@@ -1,4 +1,6 @@
-module Node.Express.Middleware.CookieParser where
+module Node.Express.Middleware.CookieParser
+  ( cookieParser
+  ) where
 
 import Control.Monad.Eff.Class (liftEff)
 import Data.Function (($))
