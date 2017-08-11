@@ -1,6 +1,6 @@
 {
   "name": "purescript-express-examples",
-  "homepage": "https://github.com/dancingrobot84/purescript-express/tree/master/examples",
+  "homepage": "https://github.com/nkly/purescript-express/tree/master/examples",
   "description": "Examples for purescript-express",
   "dependencies": {
     "purescript-console": "^2.0.0",

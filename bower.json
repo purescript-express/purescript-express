@@ -1,6 +1,6 @@
 {
   "name": "purescript-express",
-  "homepage": "https://github.com/dancingrobot84/purescript-express",
+  "homepage": "https://github.com/nkly/purescript-express",
   "description": "Purescript wrapper around Express.js",
   "license": "BSD-3-Clause",
   "keywords": [
@@ -8,7 +8,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/dancingrobot84/purescript-express.git"
+    "url": "git://github.com/nkly/purescript-express.git"
   },
   "ignore": [
     "**/.*",

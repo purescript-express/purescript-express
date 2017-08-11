@@ -1,6 +1,6 @@
 {
     "name": "purescript-express-examples",
-    "repository": "https://github.com/dancingrobot84/purescript-express/tree/master/examples",
+    "repository": "https://github.com/nkly/purescript-express/tree/master/examples",
     "license" : "BSD-3-Clause",
     "dependencies": {
         "express": "~4.14.0",
