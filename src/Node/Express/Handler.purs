@@ -16,7 +16,7 @@ import Node.Express.Types (EXPRESS, ExpressM, Response, Request)
 import Node.Express.Internal.Utils (nextWithError)
 
 -- | Monad responsible for handling single request.
-data HandlerM e a = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
+newtype HandlerM e a = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
 
 type Handler e = HandlerM (express :: EXPRESS | e) Unit
 
