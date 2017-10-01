@@ -58,7 +58,7 @@ setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 #### `createMockApp`
 
 ``` purescript
-createMockApp :: forall e. Eff (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e) Application
+createMockApp :: forall e. Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Application
 ```
 
 #### `createMockRequest`
@@ -70,7 +70,7 @@ createMockRequest :: forall e. String -> String -> ExpressM e MockRequest
 #### `TestExpress`
 
 ``` purescript
-type TestExpress e = Aff (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+type TestExpress e = Aff (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
 ```
 
 #### `TestMockApp`
@@ -82,7 +82,7 @@ type TestMockApp e = ReaderT Application (TestExpress e) Unit
 #### `testExpress`
 
 ``` purescript
-testExpress :: forall e. String -> TestMockApp e -> TestSuite (express :: EXPRESS, exception :: EXCEPTION, testOutput :: TESTOUTPUT | e)
+testExpress :: forall e. String -> TestMockApp e -> TestSuite (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
 ```
 
 #### `setupMockApp`

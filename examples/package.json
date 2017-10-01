@@ -1,9 +1,9 @@
 {
     "name": "purescript-express-examples",
     "repository": "https://github.com/nkly/purescript-express/tree/master/examples",
-    "license" : "BSD-3-Clause",
+    "license": "BSD-3-Clause",
     "dependencies": {
-        "express": "~4.14.0",
-        "body-parser": "~1.13.2"
+        "express": "~4.16.1",
+        "body-parser": "~1.18.2"
     }
 }
