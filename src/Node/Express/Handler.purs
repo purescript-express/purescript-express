@@ -6,14 +6,16 @@ module Node.Express.Handler
 
 
 import Prelude
-import Data.Function.Uncurried (runFn2)
-import Control.Monad.Aff (Aff, runAff)
+
+import Control.Monad.Aff (Aff, runAff_)
 import Control.Monad.Aff.Class (class MonadAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (Error)
-import Node.Express.Types (EXPRESS, ExpressM, Response, Request)
+import Data.Either (either)
+import Data.Function.Uncurried (runFn2)
 import Node.Express.Internal.Utils (nextWithError)
+import Node.Express.Types (EXPRESS, ExpressM, Response, Request)
 
 -- | Monad responsible for handling single request.
 newtype HandlerM e a = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
@@ -47,7 +49,7 @@ instance monadAffHandlerM :: MonadAff eff (HandlerM eff) where
     liftAff act = HandlerM \_ _ _ -> act
 
 runHandlerM :: forall e. Handler e -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
-runHandlerM (HandlerM h) req res nxt = void $ runAff (runFn2 nextWithError nxt) pure (h req res nxt)
+runHandlerM (HandlerM h) req res nxt = void $ runAff_ (either (runFn2 nextWithError nxt) pure) (h req res nxt)
 
 -- | Call next handler/middleware in a chain.
 next :: forall e. Handler e
