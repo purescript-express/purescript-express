@@ -5,6 +5,22 @@ exports.mkApplication = function() {
     return express();
 }
 
+exports._httpServer = function(app) {
+    return function() {
+        var http = require('http');
+        var server = http.createServer(app);
+        return server;
+    }
+}
+
+exports._httpsServer = function(app) {
+    return function() {
+        var https = require('https');
+        var server = https.createServer(app);
+        return server;
+    }
+}
+
 exports._listenHttp = function(app) {
     return function(port) {
         return function(cb) {

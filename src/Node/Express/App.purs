@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, listenPipe, apply
+    , listenHttp, listenHttps, listenPipe, httpServer, httpsServer, apply
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
@@ -53,6 +53,22 @@ instance monadAppM :: Monad (AppM e)
 instance monadEffAppM :: MonadEff eff (AppM eff) where
     liftEff act = AppM \_ -> act
 
+
+-- | Create a Node.HTTP server from the Express application.
+-- | HTTP version
+httpServer :: forall e1. App e1 -> ExpressM e1 Server
+httpServer (AppM act) = do
+    app <- mkApplication
+    act app
+    _httpServer app
+
+-- | Create a Node.HTTP server from the Express application.
+-- | HTTPS version
+httpsServer :: forall e1. App e1 -> ExpressM e1 Server
+httpsServer (AppM act) = do
+    app <- mkApplication
+    act app
+    _httpsServer app
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTP version
@@ -157,6 +173,10 @@ foreign import _getProp :: forall e. Fn2 Application String (ExpressM e Foreign)
 foreign import _setProp :: forall e a. Fn3 Application String a (ExpressM e Unit)
 
 foreign import _http :: forall e. Fn4 Application String Foreign (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+
+foreign import _httpServer :: forall e1. Application -> ExpressM e1 Server
+
+foreign import _httpsServer :: forall e1. Application -> ExpressM e1 Server
 
 foreign import _listenHttp :: forall e1 e2. Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
