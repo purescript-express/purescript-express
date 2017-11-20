@@ -1,5 +1,5 @@
 module Node.Express.Request
-    ( getRouteParam, getQueryParam, getQueryParams, getBody
+    ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
     , getBodyParam, getRoute
     , getCookie, getSignedCookie
     , getRequestHeader
@@ -40,6 +40,13 @@ getRouteParam name = HandlerM \req _ _ ->
 getBody :: forall e a. (Decode a) => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
 getBody = HandlerM \req _ _ ->
     liftEff $ liftM1 (runExcept <<< decode) (_getBody req)
+
+-- | Get the request's body without a `Decode` parsing.
+-- | NOTE: Not parsed by default, you must attach proper middleware
+-- |       See http://expressjs.com/4x/api.html#req.body
+getBody' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getBody' = HandlerM \req _ _ ->
+    liftEff $ _getBody req
 
 -- | Get param from request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
