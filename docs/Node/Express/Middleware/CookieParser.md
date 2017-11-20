@@ -1,11 +1,5 @@
 ## Module Node.Express.Middleware.CookieParser
 
-#### `_cookieParser`
-
-``` purescript
-_cookieParser :: forall eff. Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
-```
-
 #### `cookieParser`
 
 ``` purescript

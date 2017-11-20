@@ -1,7 +1,7 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, listenPipe, httpServer, httpsServer, apply
+    , listenHttp, listenHttps, listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
@@ -56,16 +56,16 @@ instance monadEffAppM :: MonadEff eff (AppM eff) where
 
 -- | Create a Node.HTTP server from the Express application.
 -- | HTTP version
-httpServer :: forall e1. App e1 -> ExpressM e1 Server
-httpServer (AppM act) = do
+makeHttpServer :: forall e1. App e1 -> ExpressM e1 Server
+makeHttpServer (AppM act) = do
     app <- mkApplication
     act app
     _httpServer app
 
 -- | Create a Node.HTTP server from the Express application.
 -- | HTTPS version
-httpsServer :: forall e1. App e1 -> ExpressM e1 Server
-httpsServer (AppM act) = do
+makeHttpsServer :: forall e1. App e1 -> ExpressM e1 Server
+makeHttpsServer (AppM act) = do
     app <- mkApplication
     act app
     _httpsServer app

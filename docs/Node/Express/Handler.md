@@ -3,7 +3,7 @@
 #### `HandlerM`
 
 ``` purescript
-data HandlerM e a
+newtype HandlerM e a
   = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
 ```
 

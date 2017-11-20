@@ -22,6 +22,16 @@ Get the request's body.
 NOTE: Not parsed by default, you must attach proper middleware
       See http://expressjs.com/4x/api.html#req.body
 
+#### `getBody'`
+
+``` purescript
+getBody' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+```
+
+Get the request's body without a `Decode` parsing.
+NOTE: Not parsed by default, you must attach proper middleware
+      See http://expressjs.com/4x/api.html#req.body
+
 #### `getBodyParam`
 
 ``` purescript

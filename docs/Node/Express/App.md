@@ -24,6 +24,24 @@ MonadEff eff (AppM eff)
 type App e = AppM (express :: EXPRESS | e) Unit
 ```
 
+#### `makeHttpServer`
+
+``` purescript
+makeHttpServer :: forall e1. App e1 -> ExpressM e1 Server
+```
+
+Create a Node.HTTP server from the Express application.
+HTTP version
+
+#### `makeHttpsServer`
+
+``` purescript
+makeHttpsServer :: forall e1. App e1 -> ExpressM e1 Server
+```
+
+Create a Node.HTTP server from the Express application.
+HTTPS version
+
 #### `listenHttp`
 
 ``` purescript
