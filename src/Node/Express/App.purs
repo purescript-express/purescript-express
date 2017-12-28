@@ -1,7 +1,8 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, listenPipe, makeHttpServer, makeHttpsServer, apply
+    , listenHttp, listenHttps, listenHostHttp, listenHostHttps
+    , listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
