@@ -55,6 +55,42 @@ exports._listenHttps = function(app) {
 
 exports._listenPipe = exports._listenHttp;
 
+exports._listenHostHttp = function(app) {
+    return function(port) {
+        return function(host) {
+            return function(cb) {
+                return function() {
+                    var http = require('http');
+                    var server = http.createServer(app);
+                    server.listen(port, host, function(e) {
+                        return cb(e)();
+                    });
+                    return server;
+                }
+            }
+        }
+    }
+}
+
+exports._listenHostHttps = function(app) {
+    return function(port) {
+        return function(host) {
+            return function(opts) {
+                return function(cb) {
+                    return function() {
+                        var https = require('https');
+                        var server = https.createServer(opts, app);
+                        server.listen(port, host, function(e) {
+                            return cb(e)();
+                        });
+                        return server;
+                    }
+                }
+            }
+        }
+    }
+}
+
 exports._http = function (app, method, route, handler) {
     return function () {
         app[method](route, function(req, resp, next) {

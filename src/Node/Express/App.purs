@@ -1,7 +1,8 @@
 module Node.Express.App
     ( AppM()
     , App()
-    , listenHttp, listenHttps, listenPipe, makeHttpServer, makeHttpsServer, apply
+    , listenHttp, listenHttps, listenHostHttp, listenHostHttps
+    , listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
@@ -19,8 +20,8 @@ import Control.Monad.Except (runExcept)
 import Node.HTTP (Server ())
 
 import Node.Express.Types (class RoutePattern, EXPRESS, Application,
-                           ExpressM, Response, Request, Event, Path,
-                           Port, Pipe, Method(..))
+                           ExpressM, Response, Request, Event, Host,
+                           Path, Port, Pipe, Method(..))
 import Node.Express.Internal.Utils (eitherToMaybe)
 import Node.Express.Handler (Handler, runHandlerM)
 
@@ -86,6 +87,23 @@ listenHttps (AppM act) port opts cb = do
     app <- mkApplication
     act app
     _listenHttps app port opts cb
+
+-- | Run application on specified port & host and execute callback after launch.
+-- | HTTP version
+listenHostHttp :: forall e1 e2. App e1 -> Port -> Host -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHostHttp (AppM act) port host cb = do
+    app <- mkApplication
+    act app
+    _listenHostHttp app port host cb
+
+-- | Run application on specified port & host and execute callback after launch.
+-- | HTTPS version
+listenHostHttps :: forall e1 e2 opts.
+    App e1 -> Port -> Host-> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHostHttps (AppM act) port host opts cb = do
+    app <- mkApplication
+    act app
+    _listenHostHttps app port host opts cb
 
 -- | Run application on specified named pipe and execute callback after launch.
 -- | HTTP version
@@ -181,6 +199,10 @@ foreign import _httpsServer :: forall e1. Application -> ExpressM e1 Server
 foreign import _listenHttp :: forall e1 e2. Application -> Int -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 foreign import _listenHttps :: forall opts e1 e2. Application -> Int -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
+
+foreign import _listenHostHttp :: forall e1 e2. Application -> Int -> String -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
+
+foreign import _listenHostHttps :: forall opts e1 e2. Application -> Int -> String -> opts -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 
 foreign import _listenPipe :: forall e1 e2. Application -> String -> (Event -> Eff e1 Unit) -> ExpressM e2 Server
 

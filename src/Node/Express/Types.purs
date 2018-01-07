@@ -58,7 +58,8 @@ instance isForeignMethod :: Decode Method where
         "HEAD"    -> pure HEAD
         "TRACE"   -> pure TRACE
         method    -> pure $ CustomMethod method
-
+        
+type Host = String
 type Port = Int
 type Pipe = String
 type Path = String
