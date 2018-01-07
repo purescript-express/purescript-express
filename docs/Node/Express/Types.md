@@ -76,6 +76,12 @@ Show Method
 Decode Method
 ```
 
+#### `Host`
+
+``` purescript
+type Host = String
+```
+
 #### `Port`
 
 ``` purescript

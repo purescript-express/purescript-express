@@ -1,11 +1,5 @@
 ## Module Node.Express.Test.Mock
 
-#### `MockCookie`
-
-``` purescript
-type MockCookie = { name :: String, value :: String, options :: String }
-```
-
 #### `MockResponse`
 
 ``` purescript
@@ -19,10 +13,22 @@ newtype MockRequest
   = MockRequest { setHeader :: String -> String -> MockRequest, setBody :: String -> MockRequest, setBodyParam :: String -> String -> MockRequest, setRouteParam :: String -> String -> MockRequest, setCookie :: String -> String -> MockRequest, setSignedCookie :: String -> String -> MockRequest }
 ```
 
+#### `MockCookie`
+
+``` purescript
+type MockCookie = { name :: String, value :: String, options :: String }
+```
+
 #### `setRequestHeader`
 
 ``` purescript
 setRequestHeader :: String -> String -> MockRequest -> MockRequest
+```
+
+#### `setRouteParam`
+
+``` purescript
+setRouteParam :: String -> String -> MockRequest -> MockRequest
 ```
 
 #### `setBody`
@@ -37,12 +43,6 @@ setBody :: String -> MockRequest -> MockRequest
 setBodyParam :: String -> String -> MockRequest -> MockRequest
 ```
 
-#### `setRouteParam`
-
-``` purescript
-setRouteParam :: String -> String -> MockRequest -> MockRequest
-```
-
 #### `setRequestCookie`
 
 ``` purescript
@@ -55,18 +55,6 @@ setRequestCookie :: String -> String -> MockRequest -> MockRequest
 setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 ```
 
-#### `createMockApp`
-
-``` purescript
-createMockApp :: forall e. Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Application
-```
-
-#### `createMockRequest`
-
-``` purescript
-createMockRequest :: forall e. String -> String -> ExpressM e MockRequest
-```
-
 #### `TestExpress`
 
 ``` purescript
@@ -77,6 +65,18 @@ type TestExpress e = Aff (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
 
 ``` purescript
 type TestMockApp e = ReaderT Application (TestExpress e) Unit
+```
+
+#### `createMockApp`
+
+``` purescript
+createMockApp :: forall e. Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Application
+```
+
+#### `createMockRequest`
+
+``` purescript
+createMockRequest :: forall e. String -> String -> ExpressM e MockRequest
 ```
 
 #### `testExpress`

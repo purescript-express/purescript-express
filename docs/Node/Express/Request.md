@@ -12,6 +12,24 @@ regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
 part that matched `(\d+)` and `getRouteParam 0` return whole
 route.
 
+#### `getQueryParam`
+
+``` purescript
+getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+```
+
+Get param from query string (part of URL behind '?').
+If there are multiple params having equal keys
+return the first one.
+
+#### `getQueryParams`
+
+``` purescript
+getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
+```
+
+Get all params from query string having specified key.
+
 #### `getBody`
 
 ``` purescript
@@ -41,24 +59,6 @@ getBodyParam :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS |
 Get param from request's body.
 NOTE: Not parsed by default, you must attach proper middleware
       See http://expressjs.com/4x/api.html#req.body
-
-#### `getQueryParam`
-
-``` purescript
-getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
-```
-
-Get param from query string (part of URL behind '?').
-If there are multiple params having equal keys
-return the first one.
-
-#### `getQueryParams`
-
-``` purescript
-getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
-```
-
-Get all params from query string having specified key.
 
 #### `getRoute`
 
@@ -229,6 +229,14 @@ getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
 
 Return request original URL.
 
+#### `getUserData`
+
+``` purescript
+getUserData :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+```
+
+Retrieves the data from the request set with previous call to `setUserData`
+
 #### `setUserData`
 
 ``` purescript
@@ -237,13 +245,5 @@ setUserData :: forall a e. String -> a -> Handler e
 
 Sets the specified field of the userData object attached to the Request
 object to specified data
-
-#### `getUserData`
-
-``` purescript
-getUserData :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
-```
-
-Retrieves the data from the request set with previous call to `setUserData`
 
 

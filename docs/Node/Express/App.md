@@ -24,24 +24,6 @@ MonadEff eff (AppM eff)
 type App e = AppM (express :: EXPRESS | e) Unit
 ```
 
-#### `makeHttpServer`
-
-``` purescript
-makeHttpServer :: forall e1. App e1 -> ExpressM e1 Server
-```
-
-Create a Node.HTTP server from the Express application.
-HTTP version
-
-#### `makeHttpsServer`
-
-``` purescript
-makeHttpsServer :: forall e1. App e1 -> ExpressM e1 Server
-```
-
-Create a Node.HTTP server from the Express application.
-HTTPS version
-
 #### `listenHttp`
 
 ``` purescript
@@ -60,6 +42,24 @@ listenHttps :: forall e1 e2 opts. App e1 -> Port -> opts -> (Event -> Eff e2 Uni
 Run application on specified port and execute callback after launch.
 HTTPS version
 
+#### `listenHostHttp`
+
+``` purescript
+listenHostHttp :: forall e1 e2. App e1 -> Port -> Host -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+```
+
+Run application on specified port & host and execute callback after launch.
+HTTP version
+
+#### `listenHostHttps`
+
+``` purescript
+listenHostHttps :: forall e1 e2 opts. App e1 -> Port -> Host -> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+```
+
+Run application on specified port & host and execute callback after launch.
+HTTPS version
+
 #### `listenPipe`
 
 ``` purescript
@@ -68,6 +68,24 @@ listenPipe :: forall e1 e2. App e1 -> Pipe -> (Event -> Eff e2 Unit) -> ExpressM
 
 Run application on specified named pipe and execute callback after launch.
 HTTP version
+
+#### `makeHttpServer`
+
+``` purescript
+makeHttpServer :: forall e1. App e1 -> ExpressM e1 Server
+```
+
+Create a Node.HTTP server from the Express application.
+HTTP version
+
+#### `makeHttpsServer`
+
+``` purescript
+makeHttpsServer :: forall e1. App e1 -> ExpressM e1 Server
+```
+
+Create a Node.HTTP server from the Express application.
+HTTPS version
 
 #### `apply`
 

@@ -32,6 +32,14 @@ headersSent :: forall e. HandlerM (express :: EXPRESS | e) Boolean
 
 Check if headers have been sent already
 
+#### `setContentType`
+
+``` purescript
+setContentType :: forall e. String -> Handler e
+```
+
+Set Content-Type header.
+
 #### `setCookie`
 
 ``` purescript
@@ -47,14 +55,6 @@ clearCookie :: forall e. String -> String -> Handler e
 ```
 
 Clear cookie.
-
-#### `end`
-
-``` purescript
-end :: forall e. Handler e
-```
-
-Ends the response process.
 
 #### `send`
 
@@ -104,14 +104,6 @@ setLocation :: forall e. String -> Handler e
 
 Set Location header.
 
-#### `setContentType`
-
-``` purescript
-setContentType :: forall e. String -> Handler e
-```
-
-Set Content-Type header.
-
 #### `sendFile`
 
 ``` purescript
@@ -152,5 +144,13 @@ render :: forall e a. String -> a -> Handler e
 ```
 
 Render a view with a view model object. Could be object, string, buffer, etc.
+
+#### `end`
+
+``` purescript
+end :: forall e. Handler e
+```
+
+Ends the response process.
 
 
