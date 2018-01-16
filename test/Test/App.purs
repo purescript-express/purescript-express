@@ -79,6 +79,11 @@ testApplicationUseAt = testExpress "useAt" $ do
     sendTestRequest GET "http://example.com/" assertTestHeaderAbsent
     sendTestRequest GET "http://example.com/some/path" assertTestHeaderExists
 
+testApplicationUseAtExternal = testExpress "useAtExternal" $ do
+    setupMockApp $ useAtExternal "/some/path" (mockMiddleware testValue)
+    sendTestRequest GET "http://example.com/" assertTestHeaderAbsent
+    sendTestRequest GET "http://example.com/some/path" assertTestHeaderExists
+
 testApplicationUseOnParam = testExpress "useOnParam" $ do
     setupMockApp $ useOnParam "param" setTestHeader
     sendTestRequest GET "http://example.com/some/path" assertTestHeaderAbsent
@@ -98,6 +103,7 @@ testSuite = suite "Application" do
     testApplicationUseOnError
     testApplicationUseExternal
     testApplicationUseAt
+    testApplicationUseAtExternal
     testApplicationUseOnParam
     testApplicationHttpMethod GET
     testApplicationHttpMethod POST

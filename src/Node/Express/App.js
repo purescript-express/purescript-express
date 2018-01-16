@@ -148,3 +148,9 @@ exports._useExternal = function (app, mw) {
         app.use(mw);
     };
 };
+
+exports._useAtExternal = function (app, route, mw) {
+    return function () {
+        app.use(route, mw);
+    };
+};
