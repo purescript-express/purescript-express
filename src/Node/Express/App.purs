@@ -3,7 +3,7 @@ module Node.Express.App
     , App()
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
     , listenPipe, makeHttpServer, makeHttpsServer, apply
-    , use, useExternal, useAt, useOnParam, useOnError
+    , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
     ) where
@@ -135,6 +135,14 @@ useAt :: forall e. Path -> Handler e -> App e
 useAt route middleware = AppM \app ->
     runFn3 _useAt app route $ runHandlerM middleware
 
+-- | Use any function as middleware only on requests matching path.
+-- | Introduced to ease usage of a bunch of external
+-- | middleware written for express.js.
+-- | See http://expressjs.com/4x/api.html#middleware
+useAtExternal :: forall e. Path -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+useAtExternal route fn = AppM \app ->
+    runFn3 _useAtExternal app route fn
+
 -- | Process route param with specified handler.
 useOnParam :: forall e. String -> (String -> Handler e) -> App e
 useOnParam param handler = AppM \app ->
@@ -211,6 +219,8 @@ foreign import _use :: forall e. Fn2 Application (HandlerFn e) (Eff (express :: 
 foreign import _useExternal :: forall e. Fn2 Application (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
 
 foreign import _useAt :: forall e. Fn3 Application String (HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
+
+foreign import _useAtExternal :: forall e. Fn3 Application String (Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)) (ExpressM e Unit)
 
 foreign import _useOnParam :: forall e. Fn3 Application String (String -> HandlerFn e) (Eff (express :: EXPRESS | e) Unit)
 
