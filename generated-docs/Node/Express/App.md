@@ -122,6 +122,17 @@ useAt :: forall e. Path -> Handler e -> App e
 
 Use specified middleware only on requests matching path.
 
+#### `useAtExternal`
+
+``` purescript
+useAtExternal :: forall e. Path -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+```
+
+Use any function as middleware only on requests matching path.
+Introduced to ease usage of a bunch of external
+middleware written for express.js.
+See http://expressjs.com/4x/api.html#middleware
+
 #### `useOnParam`
 
 ``` purescript
