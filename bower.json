@@ -20,8 +20,7 @@
     "Gruntfile.js",
     "package.json",
     "bower.json",
-    "README.md",
-    "DOCS.md"
+    "README.md"
   ],
   "dependencies": {
     "purescript-aff": "^4.0.0",
