@@ -5,6 +5,7 @@ module Node.Express.Test.Mock
     , setRequestHeader
     , setRouteParam
     , setBody
+    , setBody'
     , setBodyParam
     , setRequestCookie
     , setRequestSignedCookie
@@ -29,6 +30,8 @@ module Node.Express.Test.Mock
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Reader.Trans
+import Data.Foreign (Foreign)
+import Data.Foreign.Class (encode)
 import Data.Maybe (Maybe)
 import Node.Express.App (App, apply)
 import Node.Express.Handler (Handler)
@@ -57,7 +60,7 @@ type MockResponse =
 
 newtype MockRequest = MockRequest
     { setHeader :: String -> String -> MockRequest
-    , setBody :: String -> MockRequest
+    , setBody :: Foreign -> MockRequest
     , setBodyParam :: String -> String -> MockRequest
     , setRouteParam :: String -> String -> MockRequest
     , setCookie :: String -> String -> MockRequest
@@ -68,7 +71,10 @@ setRequestHeader :: String -> String -> MockRequest -> MockRequest
 setRequestHeader name value (MockRequest r) = r.setHeader name value
 
 setBody :: String -> MockRequest -> MockRequest
-setBody value (MockRequest r) = r.setBody value
+setBody value (MockRequest r) = r.setBody $ encode value
+
+setBody' :: Foreign -> MockRequest -> MockRequest
+setBody' value (MockRequest r) = r.setBody value
 
 setBodyParam :: String -> String -> MockRequest -> MockRequest
 setBodyParam name value (MockRequest r) = r.setBodyParam name value

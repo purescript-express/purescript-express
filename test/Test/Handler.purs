@@ -8,11 +8,13 @@ import Data.Default
 import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
+import Node.Express.App hiding (apply)
 import Node.Express.Handler
 import Node.Express.Request
 import Node.Express.Response
 import Node.Express.Test.Mock
 import Node.Express.Types
+import Prelude hiding (id)
 import Test.Unit
 import Test.Unit.Assert
 import Test.Unit.Console
@@ -21,11 +23,9 @@ import Unsafe.Coerce
 import Control.Monad.Except (runExcept)
 import Data.Array (head)
 import Data.Either (either)
-import Data.Foreign (readString)
+import Data.Foreign (readString, toForeign)
 import Data.StrMap as StrMap
 import Global.Unsafe (unsafeStringify)
-import Node.Express.App hiding (apply)
-import Prelude hiding (id)
 
 
 foreign import cwdJson :: String
@@ -53,6 +53,7 @@ testParams = do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
         sendTestRequest withBody assertTestHeaderExists
+        sendTestRequest withBody' assertTestHeaderExists
     testExpress "getBodyParam" $ do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
@@ -70,6 +71,7 @@ testParams = do
     withoutParams  = id
     withRouteParam = setRouteParam testParam testValue
     withBody       = setBody       testValue
+    withBody'      = setBody' $ toForeign testValue
     withBodyParam  = setBodyParam  testParam testValue
     urlWithQueryParam = "http://example.com?" <> testParam <> "=" <> testValue
     urlWithQueryParams = urlWithQueryParam <> "&" <> testParam <> "=someOtherValue"
