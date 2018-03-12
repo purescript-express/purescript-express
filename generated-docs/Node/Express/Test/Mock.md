@@ -10,7 +10,7 @@ type MockResponse = { statusCode :: Int, headers :: StrMap String, "data" :: Str
 
 ``` purescript
 newtype MockRequest
-  = MockRequest { setHeader :: String -> String -> MockRequest, setBody :: String -> MockRequest, setBodyParam :: String -> String -> MockRequest, setRouteParam :: String -> String -> MockRequest, setCookie :: String -> String -> MockRequest, setSignedCookie :: String -> String -> MockRequest }
+  = MockRequest { setHeader :: String -> String -> MockRequest, setBody :: Foreign -> MockRequest, setBodyParam :: String -> String -> MockRequest, setRouteParam :: String -> String -> MockRequest, setCookie :: String -> String -> MockRequest, setSignedCookie :: String -> String -> MockRequest }
 ```
 
 #### `MockCookie`
@@ -35,6 +35,12 @@ setRouteParam :: String -> String -> MockRequest -> MockRequest
 
 ``` purescript
 setBody :: String -> MockRequest -> MockRequest
+```
+
+#### `setBody'`
+
+``` purescript
+setBody' :: Foreign -> MockRequest -> MockRequest
 ```
 
 #### `setBodyParam`
