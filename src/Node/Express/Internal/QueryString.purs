@@ -6,14 +6,16 @@ module Node.Express.Internal.QueryString
     ) where
 
 import Prelude
+
+import Control.Monad.Trampoline (runTrampoline)
 import Data.Array (head, many, mapMaybe, some)
-import Data.List (List, toUnfoldable)
 import Data.Either (Either(..))
+import Data.List (List, toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.String (fromCharArray)
-import Text.Parsing.Parser (Parser, parseErrorMessage, runParser)
+import Text.Parsing.Parser (ParserT, parseErrorMessage, runParserT)
 import Text.Parsing.Parser.Combinators (sepBy)
-import Text.Parsing.Parser.String (satisfy, string)
+import Text.Parsing.Parser.String (class StringLike, satisfy, string)
 
 
 data Param = Param String String
@@ -32,14 +34,14 @@ getAll params key =
     mapMaybe (\(Param name val) -> if name == key then Just val else Nothing) params
 
 parse :: String -> Either String (Array Param)
-parse str = case runParser str queryString of
+parse str = case runTrampoline $ runParserT str queryString of
     Left err -> Left $ parseErrorMessage err
     Right result -> Right $ toUnfoldable result
 
-queryString :: Parser String (List Param)
+queryString :: ∀ m i. Monad m => StringLike i => ParserT i m (List Param)
 queryString = sepBy param (string "&")
 
-param :: Parser String Param
+param :: ∀ m i. Monad m => StringLike i => ParserT i m Param
 param = do
     name <- liftM1 (decode <<< fromCharArray) $ some $ satisfy (\s -> s /= '=')
     _ <- string "="
