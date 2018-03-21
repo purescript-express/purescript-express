@@ -1,8 +1,9 @@
 module Node.Express.Request
-    ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
+    ( getRouteParam, getAllRouteParams', getQueryParam, getQueryParams
+    , getBody, getBody'
     , getBodyParam, getRoute
     , getCookie, getSignedCookie
-    , getRequestHeader
+    , getRequestHeader, getAllHeaders'
     , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
     , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
     , isFresh, isStale
@@ -33,6 +34,11 @@ import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
 getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getRouteParam req name)
+
+-- | Get all route params.
+getAllRouteParams' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getAllRouteParams' = HandlerM \req _ _ ->
+    liftEff $ _getAllRouteParams req
 
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
@@ -88,6 +94,11 @@ getSignedCookie name = HandlerM \req _ _ ->
 getRequestHeader :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getHeader req field)
+
+-- | Get all request headers.
+getAllHeaders' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getAllHeaders' = HandlerM \req _ _ ->
+    liftEff $ _getAllHeaders req
 
 -- | Check if specified response type will be accepted by a client.
 accepts :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
@@ -198,6 +209,8 @@ queryParams req = do
 
 foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
 
+foreign import _getAllRouteParams :: forall e. Request -> ExpressM e Foreign
+
 foreign import _getRoute :: forall e. Request -> ExpressM e String
 
 foreign import _getBody :: forall e. Request -> ExpressM e Foreign
@@ -211,6 +224,8 @@ foreign import _getCookie :: forall e. Fn2 Request String (ExpressM e Foreign)
 foreign import _getSignedCookie :: forall e. Fn2 Request String (ExpressM e Foreign)
 
 foreign import _getHeader :: forall e. Fn2 Request String (ExpressM e Foreign)
+
+foreign import _getAllHeaders :: forall e. Request -> ExpressM e Foreign
 
 foreign import _accepts :: forall e. Fn2 Request String (ExpressM e Foreign)
 

@@ -6,6 +6,12 @@ exports._getRouteParam = function (req, name) {
     };
 };
 
+exports._getAllRouteParams = function (req) {
+    return function () {
+        return req.params;
+    };
+};
+
 exports._getRoute = function (req) {
     return function () {
         return req.route.path;
@@ -45,6 +51,12 @@ exports._getSignedCookie = function (req, name) {
 exports._getHeader = function (req, field) {
     return function () {
         return req.get(field);
+    };
+};
+
+exports._getAllHeaders = function (req) {
+    return function () {
+        return req.headers;
     };
 };
 
@@ -156,4 +168,3 @@ exports._setData = function (req, field, val) {
         req.userData[field] = val;
     };
 };
-
