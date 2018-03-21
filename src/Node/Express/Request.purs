@@ -54,6 +54,10 @@ getBodyParam :: forall e a. (Decode a) => String -> HandlerM (express :: EXPRESS
 getBodyParam name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getBodyParam req name)
 
+getBody' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getBody' = HandlerM \req _ _ ->
+    liftEff $ _getBody req
+
 -- | Get param from query string (part of URL behind '?').
 -- | If there are multiple params having equal keys
 -- | return the first one.
