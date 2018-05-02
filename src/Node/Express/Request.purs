@@ -18,6 +18,7 @@ import Data.Foreign.Class (class Decode, decode)
 import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromMaybe, maybe)
+import Data.StrMap (StrMap)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except (runExcept)
 import Node.Express.Handler (Handler, HandlerM(..))
@@ -36,7 +37,7 @@ getRouteParam name = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getRouteParam req name)
 
 -- | Get all route params.
-getAllRouteParams' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getAllRouteParams' :: forall e. HandlerM (express :: EXPRESS | e) (StrMap Foreign)
 getAllRouteParams' = HandlerM \req _ _ ->
     liftEff $ _getAllRouteParams req
 
@@ -93,7 +94,7 @@ getRequestHeader field = HandlerM \req _ _ ->
     liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getHeader req field)
 
 -- | Get all request headers.
-getAllHeaders' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getAllHeaders' :: forall e. HandlerM (express :: EXPRESS | e) (StrMap Foreign)
 getAllHeaders' = HandlerM \req _ _ ->
     liftEff $ _getAllHeaders req
 
@@ -206,7 +207,7 @@ queryParams req = do
 
 foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
 
-foreign import _getAllRouteParams :: forall e. Request -> ExpressM e Foreign
+foreign import _getAllRouteParams :: forall e. Request -> ExpressM e (StrMap Foreign)
 
 foreign import _getRoute :: forall e. Request -> ExpressM e String
 
@@ -222,7 +223,7 @@ foreign import _getSignedCookie :: forall e. Fn2 Request String (ExpressM e Fore
 
 foreign import _getHeader :: forall e. Fn2 Request String (ExpressM e Foreign)
 
-foreign import _getAllHeaders :: forall e. Request -> ExpressM e Foreign
+foreign import _getAllHeaders :: forall e. Request -> ExpressM e (StrMap Foreign)
 
 foreign import _accepts :: forall e. Fn2 Request String (ExpressM e Foreign)
 
