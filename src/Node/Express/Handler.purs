@@ -16,6 +16,7 @@ import Data.Either (either)
 import Data.Function.Uncurried (runFn2)
 import Node.Express.Internal.Utils (nextWithError)
 import Node.Express.Types (EXPRESS, ExpressM, Response, Request)
+import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError, catchError)
 
 -- | Monad responsible for handling single request.
 newtype HandlerM e a = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
@@ -59,3 +60,10 @@ next = HandlerM \_ _ nxt -> liftEff nxt
 nextThrow :: forall e a. Error -> HandlerM (express :: EXPRESS | e) a
 nextThrow err = HandlerM \_ _ nxt ->
     liftEff $ runFn2 nextWithError nxt err
+
+instance monadThrowHandlerM :: MonadThrow Error (HandlerM eff) where
+    throwError err = HandlerM \_ _ nxt -> throwError err
+
+instance monadErrorHandlerM ∷ MonadError Error (HandlerM eff) where
+    catchError (HandlerM m) h = HandlerM $ \req res nxt ->
+        catchError (m req res nxt) $ \e -> case h e of HandlerM m0 -> m0 req res nxt
