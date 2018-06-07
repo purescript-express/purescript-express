@@ -5,19 +5,18 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Either (Either(..))
 import Data.Int (fromString)
 import Data.Array    as A
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE(), log)
-import Control.Monad.Eff.Exception (Error, error, message)
-import Control.Monad.Eff.Ref (REF, Ref, modifyRef', readRef, newRef)
-import Node.Express.Types (EXPRESS)
+import Effect (Effect)
+import Effect.Class (liftEffect)
+import Effect.Console (log)
+import Effect.Exception (Error, error, message)
+import Effect.Ref (Ref, modify', read, new)
 import Node.Express.App (App, listenHttp, useOnError, get, use, setProp)
 import Node.Express.Handler (Handler, nextThrow, next)
 import Node.Express.Request (getRouteParam, getQueryParam, getOriginalUrl,
                              setUserData, getUserData)
 import Node.Express.Response (sendJson, setStatus)
-import Node.HTTP (Server())
-import Node.Process (PROCESS, lookupEnv)
+import Node.HTTP (Server)
+import Node.Process (lookupEnv)
 
 --- Model type definitions
 type Todo        = { desc :: String, isDone :: Boolean }
@@ -28,8 +27,8 @@ type AppStateData = Array Todo
 type AppState     = Ref AppStateData
 type AppError     = String
 
-initState :: forall e. Eff (ref :: REF|e) AppState
-initState = newRef ([] :: AppStateData)
+initState :: Effect AppState
+initState = new ([] :: AppStateData)
 
 {-
   Model manipulation functions
@@ -76,15 +75,15 @@ parseInt str = fromMaybe 0 $ fromString str
 
 
 -- Monadic handlers
-logger :: forall e. AppState -> Handler (console :: CONSOLE, ref :: REF | e)
+logger :: AppState -> Handler
 logger state = do
-  todos <- liftEff $ readRef state
+  todos <- liftEffect $ read state
   url   <- getOriginalUrl
-  liftEff $ log (">>> " <> url <> " count =" <> (show $ A.length todos))
+  liftEffect $ log (">>> " <> url <> " count =" <> (show $ A.length todos))
   setUserData "logged" url
   next
 
-errorHandler :: forall e. AppState -> Error -> Handler e
+errorHandler :: AppState -> Error -> Handler
 errorHandler state err = do
   setStatus 400
   sendJson {error: message err}
@@ -101,68 +100,68 @@ help = { name: "Todo example"
      , forkMe: "https://github.com/dancingrobot84/purescript-express"
      }
 
-indexHandler :: forall e. AppState -> Handler e
+indexHandler :: AppState -> Handler
 indexHandler _ = do
   sendJson help
 
--- demonstrates middleware-to-handler communication through 
+-- demonstrates middleware-to-handler communication through
 -- setUserData/getUserData functions
-getLoggerStatus :: forall e. AppState -> Handler (ref :: REF|e)
+getLoggerStatus :: AppState -> Handler
 getLoggerStatus _ = do
   userdata <- getUserData "logged"
   sendJson $ fromMaybe "missing" userdata
 
-listTodosHandler :: forall e. AppState -> Handler (ref :: REF|e)
+listTodosHandler :: AppState -> Handler
 listTodosHandler state = do
-  todos <- liftEff $ readRef state
+  todos <- liftEffect $ read state
   sendJson $ getTodosWithIndexes todos
 
-createTodoHandler :: forall e. AppState -> Handler (ref :: REF | e)
+createTodoHandler :: AppState -> Handler
 createTodoHandler state = do
   descParam <- getQueryParam "desc"
   case descParam of
     Nothing -> nextThrow $ error "Description is required"
     Just desc -> do
-      newId <- liftEff $ modifyRef' state $ addTodo { desc: desc, isDone: false }
+      newId <- liftEffect $ modify' (addTodo { desc: desc, isDone: false }) state
       sendJson {status: "Created", id: newId}
 
-updateTodoHandler :: forall e. AppState -> Handler (ref :: REF | e)
+updateTodoHandler :: AppState -> Handler
 updateTodoHandler state = do
   idParam   <- getRouteParam "id"
   descParam <- getQueryParam "desc"
   case [idParam, descParam] of
     [Just id, Just desc] -> do
-      res <- liftEff $ modifyRef' state $ updateTodo (parseInt id) desc
+      res <- liftEffect $ modify' (updateTodo (parseInt id) desc) state
       case res of
         Left msg -> nextThrow $ error msg
         _        -> sendJson {status: "Updated"}
     _ -> nextThrow $ error "Id and Description are required"
 
-deleteTodoHandler :: forall e. AppState -> Handler (ref :: REF | e)
+deleteTodoHandler :: AppState -> Handler
 deleteTodoHandler state = do
   idParam <- getRouteParam "id"
   case idParam of
     Nothing -> nextThrow $ error "Id is required"
     Just id -> do
-      res <- liftEff $ modifyRef' state $ deleteTodo (parseInt id)
+      res <- liftEffect $ modify' (deleteTodo (parseInt id)) state
       case res of
         Left msg -> nextThrow $ error msg
         _        -> sendJson {status: "Deleted"}
 
-doTodoHandler :: forall e. AppState -> Handler (ref :: REF | e)
+doTodoHandler :: AppState -> Handler
 doTodoHandler state = do
   idParam <- getRouteParam "id"
   case idParam of
     Nothing -> nextThrow $ error "Id is required"
     Just id -> do
-      res <- liftEff $ modifyRef' state $ setDone (parseInt id)
+      res <- liftEffect $ modify' (setDone (parseInt id)) state
       case res of
         Left msg -> nextThrow $ error msg
         _        -> sendJson {status: "Done"}
 
-appSetup :: forall e. AppState -> App (ref :: REF, console :: CONSOLE | e)
+appSetup :: AppState -> App
 appSetup state = do
-  liftEff $ log "Setting up"
+  liftEffect $ log "Setting up"
   setProp "json spaces" 4.0
   use               (logger            state)
   get "/"           (indexHandler      state)
@@ -174,12 +173,9 @@ appSetup state = do
   get "/logger"     (getLoggerStatus   state)
   useOnError        (errorHandler      state)
 
-main :: forall e. Eff (ref :: REF, express :: EXPRESS, 
-                       console :: CONSOLE, process :: PROCESS | e) 
-                      Server
+main :: forall e. Effect Server
 main = do
   state <- initState
   port <- (parseInt <<< fromMaybe "8080") <$> lookupEnv "PORT"
   listenHttp (appSetup state) port \_ ->
     log $ "Listening on " <> show port
-
