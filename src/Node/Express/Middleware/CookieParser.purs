@@ -2,16 +2,17 @@ module Node.Express.Middleware.CookieParser
   ( cookieParser
   ) where
 
-import Control.Monad.Eff.Class (liftEff)
+import Effect (Effect)
+import Effect.Class (liftEffect)
 import Data.Function (($))
 import Data.Function.Uncurried (Fn3, runFn3)
 import Data.Unit (Unit)
 import Node.Express.Handler (Handler, HandlerM(..))
-import Node.Express.Types (Request, Response, ExpressM)
+import Node.Express.Types (Request, Response)
 
-foreign import _cookieParser :: forall eff. Fn3 Request Response (ExpressM eff Unit) (ExpressM eff Unit)
+foreign import _cookieParser :: Fn3 Request Response (Effect Unit) (Effect Unit)
 
 -- | Handler that parses cookies using 'cookie-parser' middleware.
-cookieParser :: forall eff. Handler eff
+cookieParser :: Handler
 cookieParser = HandlerM $
-  \req res nxt -> liftEff $ runFn3 _cookieParser req res nxt
+  \req res nxt -> liftEffect $ runFn3 _cookieParser req res nxt

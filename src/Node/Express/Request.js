@@ -26,7 +26,7 @@ exports._getBodyParam = function (req, name) {
 
 exports._getQueryParams = function (req) {
     return function () {
-        return req.url.split('?')[1] || '';
+        return req.query || {};
     };
 };
 

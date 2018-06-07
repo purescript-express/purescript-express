@@ -27,21 +27,19 @@ module Node.Express.Test.Mock
     , assertTestHeader
     ) where
 
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
+import Effect (Effect)
+import Effect.Class (liftEffect)
 import Control.Monad.Reader.Trans
-import Data.Foreign (Foreign)
-import Data.Foreign.Class (encode)
+import Data.Argonaut.Core (Json, fromString)
+import Foreign.Object (Object, lookup)
 import Data.Maybe (Maybe)
 import Node.Express.App (App, apply)
 import Node.Express.Handler (Handler)
-import Node.Express.Types (Application, EXPRESS, ExpressM, Method)
+import Node.Express.Types (Application, Method)
 import Node.Express.Response (setResponseHeader)
 import Test.Unit (Test, TestSuite, test)
-import Test.Unit.Console (TESTOUTPUT)
 import Test.Unit.Assert (assert)
-import Data.StrMap as StrMap
-import Control.Monad.Aff (Aff, launchAff)
+import Effect.Aff (Aff, launchAff)
 
 import Prelude (class Eq, class Show, Unit, bind, map, pure, show, unit, ($), (<>), (==), (>>=))
 
@@ -53,14 +51,14 @@ type MockCookie =
 
 type MockResponse =
     { statusCode  :: Int
-    , headers     :: StrMap.StrMap String
+    , headers     :: Object String
     , data        :: String
-    , cookies     :: StrMap.StrMap MockCookie
+    , cookies     :: Object MockCookie
     }
 
 newtype MockRequest = MockRequest
     { setHeader :: String -> String -> MockRequest
-    , setBody :: Foreign -> MockRequest
+    , setBody :: Json -> MockRequest
     , setBodyParam :: String -> String -> MockRequest
     , setRouteParam :: String -> String -> MockRequest
     , setCookie :: String -> String -> MockRequest
@@ -71,9 +69,9 @@ setRequestHeader :: String -> String -> MockRequest -> MockRequest
 setRequestHeader name value (MockRequest r) = r.setHeader name value
 
 setBody :: String -> MockRequest -> MockRequest
-setBody value (MockRequest r) = r.setBody $ encode value
+setBody value (MockRequest r) = r.setBody $ fromString value
 
-setBody' :: Foreign -> MockRequest -> MockRequest
+setBody' :: Json -> MockRequest -> MockRequest
 setBody' value (MockRequest r) = r.setBody value
 
 setBodyParam :: String -> String -> MockRequest -> MockRequest
@@ -88,91 +86,88 @@ setRequestCookie name value (MockRequest r) = r.setCookie name value
 setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 setRequestSignedCookie name value (MockRequest r) = r.setSignedCookie name value
 
-foreign import createMockApp ::
-    forall e. Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Application
-foreign import createMockRequest ::
-    forall e. String -> String -> ExpressM e MockRequest
+foreign import createMockApp :: Effect Application
+foreign import createMockRequest :: String -> String -> Effect MockRequest
 foreign import sendMockRequest ::
-    forall e. Application -> MockRequest -> ExpressM e MockResponse
+    Application -> MockRequest -> Effect MockResponse
 foreign import sendMockError ::
-    forall e. Application -> MockRequest -> String -> ExpressM e MockResponse
+    Application -> MockRequest -> String -> Effect MockResponse
 
-type TestExpress e = Aff (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
-type TestMockApp e = ReaderT Application (TestExpress e) Unit
-type TestApp e = App (testOutput :: TESTOUTPUT | e)
+type TestExpress = Aff
+type TestMockApp = ReaderT Application TestExpress Unit
+type TestApp = App
 
-testExpress :: forall e.
+testExpress ::
     String
-    -> TestMockApp e
-    -> TestSuite (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+    -> TestMockApp
+    -> TestSuite
 testExpress testName assertions = test testName $ do
-    mockApp <- liftEff $ createMockApp
+    mockApp <- liftEffect $ createMockApp
     runReaderT assertions mockApp
 
-setupMockApp :: forall e. TestApp e -> TestMockApp e
+setupMockApp :: TestApp -> TestMockApp
 setupMockApp app = do
     mockApp <- ask
-    liftEff $ apply app mockApp
+    liftEffect $ apply app mockApp
 
-sendRequest :: forall e.
+sendRequest ::
     Method
     -> String
     -> (MockRequest -> MockRequest)
-    -> (MockResponse -> TestMockApp e)
-    -> TestMockApp e
+    -> (MockResponse -> TestMockApp)
+    -> TestMockApp
 sendRequest method url setupRequest testResponse = do
     app <- ask
-    request <- liftEff $ map setupRequest $ createMockRequest (show method) url
-    response <- liftEff $ sendMockRequest app request
+    request <- liftEffect $ map setupRequest $ createMockRequest (show method) url
+    response <- liftEffect $ sendMockRequest app request
     testResponse response
 
-sendError :: forall e.
+sendError ::
     Method
     -> String
     -> String
-    -> (MockResponse -> TestMockApp e)
-    -> TestMockApp e
+    -> (MockResponse -> TestMockApp)
+    -> TestMockApp
 sendError method url error testResponse = do
     app <- ask
-    request <- liftEff $ createMockRequest (show method) url
-    response <- liftEff $ sendMockError app request error
+    request <- liftEffect $ createMockRequest (show method) url
+    response <- liftEffect $ sendMockError app request error
     testResponse response
 
-assertMatch :: forall a e. Show a => Eq a => String -> a -> a -> Test e
+assertMatch :: forall a. Show a => Eq a => String -> a -> a -> Test
 assertMatch what expected actual = do
     let message = what <> " does not match: \
         \Expected [ " <> show expected <> " ], Got [ " <> show actual <> " ]"
     assert message (expected == actual)
 
-type Reporter e = Test (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
-                  -> Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Unit
+type Reporter = Test -> Effect Unit
 
-assertInApp :: forall e. (Reporter e -> TestApp e) -> TestMockApp e
+assertInApp :: (Reporter -> TestApp) -> TestMockApp
 assertInApp assertion = do
     mockApp <- ask
     let reporter result = launchAff result >>= \_ -> pure unit
-    liftEff $ apply (assertion reporter) mockApp
+    liftEffect $ apply (assertion reporter) mockApp
 
-assertStatusCode :: forall e. Int -> MockResponse -> TestMockApp e
+assertStatusCode :: Int -> MockResponse -> TestMockApp
 assertStatusCode expected response =
     lift $ assertMatch "Status code" expected response.statusCode
 
-assertHeader :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertHeader :: String -> Maybe String -> MockResponse -> TestMockApp
 assertHeader name expected response = do
-    let actual = StrMap.lookup name response.headers
+    let actual = lookup name response.headers
     lift $ assertMatch ("Header '" <> name <> "'") expected actual
 
-assertData :: forall e. String -> MockResponse -> TestMockApp e
+assertData :: String -> MockResponse -> TestMockApp
 assertData expected response =
     lift $ assertMatch "Response data" expected response.data
 
-assertCookieValue :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertCookieValue :: String -> Maybe String -> MockResponse -> TestMockApp
 assertCookieValue name expected response = do
-    let actual = map (\r -> r.value) $ StrMap.lookup name response.cookies
+    let actual = map (\r -> r.value) $ lookup name response.cookies
     lift $ assertMatch ("Cookie '" <> name <> "'") expected actual
 
-setTestHeader :: forall e. String -> Handler e
+setTestHeader :: String -> Handler
 setTestHeader = setResponseHeader "X-Test-Response-Header"
 
-assertTestHeader :: forall e. Maybe String -> MockResponse -> TestMockApp e
+assertTestHeader :: Maybe String -> MockResponse -> TestMockApp
 assertTestHeader value response = assertHeader "X-Test-Response-Header" value response
