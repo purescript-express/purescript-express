@@ -1,249 +1,237 @@
 module Node.Express.Request
-    ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
-    , getBodyParam, getRoute
-    , getCookie, getSignedCookie
-    , getRequestHeader
-    , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
-    , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
-    , isFresh, isStale
-    , isXhr, getProtocol, getMethod
-    , getUrl, getOriginalUrl
-    , getUserData, setUserData
-    ) where
+  ( getRouteParam, getQueryParam, getBody, getBody'
+  , getBodyParam, getRoute
+  , getCookie, getSignedCookie
+  , getRequestHeader
+  , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
+  , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
+  , isFresh, isStale
+  , isXhr, getProtocol, getMethod
+  , getUrl, getOriginalUrl
+  , getUserData, setUserData
+  ) where
 
 import Prelude
-import Data.Foreign (Foreign, MultipleErrors)
-import Data.Foreign.Class (class Decode, decode)
-import Data.Function.Uncurried (Fn2(), Fn3(), runFn2, runFn3)
-import Data.Either (Either(..))
+import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
+import Data.Either (Either)
 import Data.Maybe (Maybe, fromMaybe, maybe)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Except (runExcept)
+import Effect (Effect)
+import Effect.Class (liftEffect)
 import Node.Express.Handler (Handler, HandlerM(..))
-import Node.Express.Types (class RequestParam, ExpressM, Request, EXPRESS,
-                           Method, Protocol)
+import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
 import Node.Express.Internal.Utils (eitherToMaybe)
-import Node.Express.Internal.QueryString (Param, parse, getAll, getOne)
+import Data.Argonaut.Core (Json)
+import Foreign.Object (Object, lookup)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 
 -- | Get route param value. If it is named route, e.g `/user/:id` then
 -- | `getRouteParam "id"` return matched part of route. If it is
 -- | regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
 -- | part that matched `(\d+)` and `getRouteParam 0` return whole
 -- | route.
-getRouteParam :: forall e a. (RequestParam a) => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getRouteParam req name)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getRouteParam req name)
 
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBody :: forall e a. (Decode a) => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+getBody :: forall a. (DecodeJson a) => HandlerM (Either String a)
 getBody = HandlerM \req _ _ ->
-    liftEff $ liftM1 (runExcept <<< decode) (_getBody req)
+    liftEffect $ liftM1 decodeJson (_getBody req)
 
 -- | Get the request's body without a `Decode` parsing.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBody' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getBody' :: HandlerM Json
 getBody' = HandlerM \req _ _ ->
-    liftEff $ _getBody req
+    liftEffect $ _getBody req
 
 -- | Get param from request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBodyParam :: forall e a. (Decode a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getBodyParam :: forall a. (DecodeJson a) => String -> HandlerM (Maybe a)
 getBodyParam name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getBodyParam req name)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getBodyParam req name)
 
 -- | Get param from query string (part of URL behind '?').
 -- | If there are multiple params having equal keys
 -- | return the first one.
-getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getQueryParam :: String -> HandlerM (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
-    params <- liftEff $ queryParams req
-    pure $ getOne params name
-
--- | Get all params from query string having specified key.
-getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
-getQueryParams name = HandlerM \req _ _ -> do
-    params <- liftEff $ queryParams req
-    pure $ getAll params name
+    params <- liftEffect $ queryParams req
+    pure $ lookup name params
 
 -- | Return route that matched this request.
-getRoute :: forall e. HandlerM (express :: EXPRESS | e) String
+getRoute :: HandlerM String
 getRoute = HandlerM \req _ _ ->
-    liftEff $ _getRoute req
+    liftEffect $ _getRoute req
 
 -- | Get cookie param by its key.
-getCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getCookie :: String -> HandlerM (Maybe String)
 getCookie name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getCookie req name)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getCookie req name)
 
 -- | Get signed cookie param by its key.
-getSignedCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getSignedCookie :: String -> HandlerM (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getSignedCookie req name)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getSignedCookie req name)
 
 -- | Get request header param.
-getRequestHeader :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getRequestHeader :: String -> HandlerM (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getHeader req field)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getHeader req field)
 
 -- | Check if specified response type will be accepted by a client.
-accepts :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+accepts :: String -> HandlerM (Maybe String)
 accepts types = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _accepts req types)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _accepts req types)
 
 -- | Execute specified handler if client accepts specified response type.
-ifAccepts :: forall e. String -> Handler e -> Handler e
+ifAccepts :: String -> Handler -> Handler
 ifAccepts type_ act = do
     isAccepted <- liftM1 (maybe false (const true)) $ accepts type_
     when isAccepted act
 
 -- | Check if specified charset is accepted.
-acceptsCharset :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+acceptsCharset :: String -> HandlerM (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _acceptsCharset req charset)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _acceptsCharset req charset)
 
 -- | Check if specified language is accepted.
-acceptsLanguage :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+acceptsLanguage :: String -> HandlerM (Maybe String)
 acceptsLanguage language = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _acceptsLanguage req language)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _acceptsLanguage req language)
 
 -- | Check if request's Content-Type field matches type.
 -- | See http://expressjs.com/4x/api.html#req.is
-hasType :: forall e. String -> HandlerM (express :: EXPRESS | e) Boolean
+hasType :: String -> HandlerM Boolean
 hasType type_ = HandlerM \req _ _ -> do
-    val <- liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _hasType req type_)
+    val <- liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _hasType req type_)
     pure $ fromMaybe false val
 
 -- | Return remote or upstream address.
-getRemoteIp :: forall e. HandlerM (express :: EXPRESS | e) String
+getRemoteIp :: HandlerM String
 getRemoteIp = HandlerM \req _ _ ->
-    liftEff $ _getRemoteIp req
+    liftEffect $ _getRemoteIp req
 
 -- | Return list of X-Forwarded-For proxies if any.
-getRemoteIps :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
+getRemoteIps :: HandlerM (Array String)
 getRemoteIps = HandlerM \req _ _ ->
-    liftEff $ _getRemoteIps req
+    liftEffect $ _getRemoteIps req
 
 -- | Return request URL pathname.
-getPath :: forall e. HandlerM (express :: EXPRESS | e) String
+getPath :: HandlerM String
 getPath = HandlerM \req _ _ ->
-    liftEff $ _getPath req
+    liftEffect $ _getPath req
 
 -- | Return Host header field.
-getHostname :: forall e. HandlerM (express :: EXPRESS | e) String
+getHostname :: HandlerM String
 getHostname = HandlerM \req _ _ ->
-    liftEff $ _getHostname req
+    liftEffect $ _getHostname req
 
 -- | Return array of subdomains.
-getSubdomains :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
+getSubdomains :: HandlerM (Array String)
 getSubdomains = HandlerM \req _ _ ->
-    liftEff $ _getSubdomains req
+    liftEffect $ _getSubdomains req
 
 -- | Check that Last-Modified and/or ETag still matches.
-isFresh :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isFresh :: HandlerM Boolean
 isFresh = HandlerM \req _ _ ->
-    liftEff $ _isFresh req
+    liftEffect $ _isFresh req
 
 -- | Check that Last-Modified and/or ETag do not match.
-isStale :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isStale :: HandlerM Boolean
 isStale = HandlerM \req _ _ ->
-    liftEff $ _isStale req
+    liftEffect $ _isStale req
 
 -- | Check if request was issued by XMLHttpRequest.
-isXhr :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isXhr :: HandlerM Boolean
 isXhr = HandlerM \req _ _ ->
-    liftEff $ _isXhr req
+    liftEffect $ _isXhr req
 
 -- | Return request protocol.
-getProtocol :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Protocol)
+getProtocol :: HandlerM (Maybe Protocol)
 getProtocol = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (_getProtocol req)
+    liftEffect $ liftM1 decodeProtocol (_getProtocol req)
 
 -- | Return request HTTP method
-getMethod :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Method)
+getMethod :: HandlerM Method
 getMethod = HandlerM \req _ _ ->
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (_getMethod req)
+    liftEffect $ liftM1 decodeMethod (_getMethod req)
 
 -- | Return request URL (may be modified by other handlers/middleware).
-getUrl :: forall e. HandlerM (express :: EXPRESS | e) String
+getUrl :: HandlerM String
 getUrl = HandlerM \req _ _ ->
-    liftEff $ _getUrl req
+    liftEffect $ _getUrl req
 
 -- | Return request original URL.
-getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
+getOriginalUrl :: HandlerM String
 getOriginalUrl = HandlerM \req _ _ ->
-    liftEff $ _getOriginalUrl req
+    liftEffect $ _getOriginalUrl req
 
 -- | Sets the specified field of the userData object attached to the Request
 -- | object to specified data
-setUserData :: forall a e. String -> a -> Handler e
+setUserData :: forall a. String -> a -> Handler
 setUserData field val = HandlerM \req _ _ ->
-    liftEff $ runFn3 _setData req field val
+    liftEffect $ runFn3 _setData req field val
 
 -- | Retrieves the data from the request set with previous call to `setUserData`
-getUserData :: forall e a. (Decode a) => String ->
-                           HandlerM (express :: EXPRESS | e) (Maybe a)
+getUserData :: forall a. (DecodeJson a) => String -> HandlerM (Maybe a)
 getUserData field = HandlerM \req _ _ -> do
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getData req field)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getData req field)
 
-queryParams :: forall e. Request -> ExpressM e (Array Param)
-queryParams req = do
-    query <- _getQueryParams req
-    case parse query of
-        Left _ -> pure []
-        Right params -> pure params
+queryParams :: Request -> Effect (Object String)
+queryParams = _getQueryParams
 
-foreign import _getRouteParam :: forall e a. Fn2 Request a (ExpressM e Foreign)
+foreign import _getRouteParam :: forall a. Fn2 Request a (Effect Json)
 
-foreign import _getRoute :: forall e. Request -> ExpressM e String
+foreign import _getRoute :: Request -> Effect String
 
-foreign import _getBody :: forall e. Request -> ExpressM e Foreign
+foreign import _getBody :: Request -> Effect Json
 
-foreign import _getBodyParam :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _getBodyParam :: Fn2 Request String (Effect Json)
 
-foreign import _getQueryParams :: forall e. Request -> ExpressM e String
+foreign import _getQueryParams :: Request -> Effect (Object String)
 
-foreign import _getCookie :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _getCookie :: Fn2 Request String (Effect Json)
 
-foreign import _getSignedCookie :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _getSignedCookie :: Fn2 Request String (Effect Json)
 
-foreign import _getHeader :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _getHeader :: Fn2 Request String (Effect Json)
 
-foreign import _accepts :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _accepts :: Fn2 Request String (Effect Json)
 
-foreign import _acceptsCharset :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _acceptsCharset :: Fn2 Request String (Effect Json)
 
-foreign import _acceptsLanguage :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _acceptsLanguage :: Fn2 Request String (Effect Json)
 
-foreign import _hasType :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _hasType :: Fn2 Request String (Effect Json)
 
-foreign import _getRemoteIp :: forall e. Request -> ExpressM e String
+foreign import _getRemoteIp :: Request -> Effect String
 
-foreign import _getRemoteIps :: forall e. Request -> ExpressM e (Array String)
+foreign import _getRemoteIps :: Request -> Effect (Array String)
 
-foreign import _getPath :: forall e. Request -> ExpressM e String
+foreign import _getPath :: Request -> Effect String
 
-foreign import _getHostname :: forall e. Request -> ExpressM e String
+foreign import _getHostname :: Request -> Effect String
 
-foreign import _getSubdomains :: forall e. Request -> ExpressM e (Array String)
+foreign import _getSubdomains :: Request -> Effect (Array String)
 
-foreign import _isFresh :: forall e. Request -> ExpressM e Boolean
+foreign import _isFresh :: Request -> Effect Boolean
 
-foreign import _isStale :: forall e. Request -> ExpressM e Boolean
+foreign import _isStale :: Request -> Effect Boolean
 
-foreign import _isXhr :: forall e. Request -> ExpressM e Boolean
+foreign import _isXhr :: Request -> Effect Boolean
 
-foreign import _getProtocol :: forall e. Request -> ExpressM e Foreign
+foreign import _getProtocol :: Request -> Effect String
 
-foreign import _getMethod :: forall e. Request -> ExpressM e Foreign
+foreign import _getMethod :: Request -> Effect String
 
-foreign import _getUrl :: forall e. Request -> ExpressM e String
+foreign import _getUrl :: Request -> Effect String
 
-foreign import _getOriginalUrl :: forall e. Request -> ExpressM e String
+foreign import _getOriginalUrl :: Request -> Effect String
 
-foreign import _setData :: forall a e. Fn3 Request String a (ExpressM e Unit)
+foreign import _setData :: forall a. Fn3 Request String a (Effect Unit)
 
-foreign import _getData :: forall e. Fn2 Request String (ExpressM e Foreign)
+foreign import _getData :: Fn2 Request String (Effect Json)

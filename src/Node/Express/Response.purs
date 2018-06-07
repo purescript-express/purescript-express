@@ -10,146 +10,146 @@ module Node.Express.Response
     ) where
 
 import Prelude
-import Data.Foreign.Class (class Decode, decode)
 import Data.Function.Uncurried (Fn3, Fn4, Fn2, runFn3, runFn4, runFn2)
-import Data.Foreign (Foreign)
 import Data.Maybe (Maybe)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Exception (Error)
-import Control.Monad.Except (runExcept)
+import Effect.Class (liftEffect)
+import Effect (Effect)
+import Effect.Exception (Error)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Internal.Utils (eitherToMaybe)
-import Node.Express.Types (ExpressM, Response, CookieOptions, EXPRESS)
+import Node.Express.Types (Response, CookieOptions)
+import Data.Argonaut.Core (Json)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 
 -- | Set status code.
-setStatus :: forall e. Int -> Handler e
+setStatus :: Int -> Handler
 setStatus val = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _setStatus resp val
+    liftEffect $ runFn2 _setStatus resp val
 
 -- | Return response header value.
-getResponseHeader :: forall e a. (Decode a) => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getResponseHeader :: forall a. DecodeJson a => String -> HandlerM (Maybe a)
 getResponseHeader field = HandlerM \_ resp _ -> do
-    liftEff $ liftM1 (eitherToMaybe <<< runExcept <<< decode) (runFn2 _getHeader resp field)
+    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getHeader resp field)
 
 -- | Set response header value.
-setResponseHeader :: forall e a. String -> a -> Handler e
+setResponseHeader :: forall a. String -> a -> Handler
 setResponseHeader field val = HandlerM \_ resp _ ->
-    liftEff $ runFn3 _setHeader resp field val
+    liftEffect $ runFn3 _setHeader resp field val
 
 -- | Check if headers have been sent already
-headersSent :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+headersSent :: HandlerM Boolean
 headersSent = HandlerM \_ resp _ ->
-    liftEff $ _headersSent resp
+    liftEffect $ _headersSent resp
 
 -- | Set cookie by its name using specified options (maxAge, path, etc).
-setCookie :: forall e. String -> String -> CookieOptions -> Handler e
+setCookie :: String -> String -> CookieOptions -> Handler
 setCookie name val opts = HandlerM \_ resp _ ->
-    liftEff $ runFn4 _setCookie resp name val opts
+    liftEffect $ runFn4 _setCookie resp name val opts
 
 -- | Clear cookie.
-clearCookie :: forall e. String -> String -> Handler e
+clearCookie :: String -> String -> Handler
 clearCookie name path = HandlerM \_ resp _ ->
-    liftEff $ runFn3 _clearCookie resp name path
+    liftEffect $ runFn3 _clearCookie resp name path
 
 -- | Ends the response process.
-end :: forall e. Handler e
-end = HandlerM \_ resp _ -> liftEff $ _end resp
+end :: Handler
+end = HandlerM \_ resp _ -> liftEffect $ _end resp
 
 -- | Send a response. Could be object, string, buffer, etc.
-send :: forall e a. a -> Handler e
+send :: forall a. a -> Handler
 send data_ = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _send resp data_
+    liftEffect $ runFn2 _send resp data_
 
 -- | Send a JSON response. Necessary headers are set automatically.
-sendJson :: forall e a. a -> Handler e
+sendJson :: forall a. a -> Handler
 sendJson data_ = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _sendJson resp data_
+    liftEffect $ runFn2 _sendJson resp data_
 
 -- | Send a JSON response with JSONP support.
-sendJsonp :: forall e a. a -> Handler e
+sendJsonp :: forall a. a -> Handler
 sendJsonp data_ = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _sendJsonp resp data_
+    liftEffect $ runFn2 _sendJsonp resp data_
 
 -- | Redirect to the given URL setting status to 302.
-redirect :: forall e. String -> Handler e
+redirect :: String -> Handler
 redirect = redirectWithStatus 302
 
 -- | Redirect to the given URL using custom status.
-redirectWithStatus :: forall e. Int -> String -> Handler e
+redirectWithStatus :: Int -> String -> Handler
 redirectWithStatus status url = HandlerM \_ resp _ ->
-    liftEff $ runFn3 _redirectWithStatus resp status url
+    liftEffect $ runFn3 _redirectWithStatus resp status url
 
 -- | Set Location header.
-setLocation :: forall e. String -> Handler e
+setLocation :: String -> Handler
 setLocation url = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _setLocation resp url
+    liftEffect $ runFn2 _setLocation resp url
 
 -- | Set the HTTP response Content-Disposition header field.
-setAttachment :: forall e. String -> Handler e
+setAttachment :: String -> Handler
 setAttachment url = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _setAttachment resp url
+    liftEffect $ runFn2 _setAttachment resp url
 
 -- | Set Content-Type header.
-setContentType :: forall e. String -> Handler e
+setContentType :: String -> Handler
 setContentType t = HandlerM \_ resp _ ->
-    liftEff $ runFn2 _setContentType resp t
+    liftEffect $ runFn2 _setContentType resp t
 
 -- | Send file by its path.
-sendFile :: forall e. String -> Handler e
+sendFile :: String -> Handler
 sendFile path = sendFileExt path {root: _cwd unit} (\_ -> pure unit)
 
 -- | Send file by its path using specified options and error handler.
 -- | See http://expressjs.com/4x/api.html#res.sendfile
-sendFileExt :: forall e o. String -> { | o } -> (Error -> ExpressM e Unit) -> Handler e
+sendFileExt :: forall o. String -> { | o } -> (Error -> Effect Unit) -> Handler
 sendFileExt path opts callback = HandlerM \_ resp _ ->
-    liftEff $ runFn4 _sendFileExt resp path opts callback
+    liftEffect $ runFn4 _sendFileExt resp path opts callback
 
 -- | Transfer file as an attachment (will prompt user to download).
-download :: forall e. String -> Handler e
+download :: String -> Handler
 download path = downloadExt path "" (\_ -> pure unit)
 
 -- | Transfer file as an attachment using specified filename and error handler.
-downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e
+downloadExt :: String -> String -> (Error -> Effect Unit) -> Handler
 downloadExt path filename callback = HandlerM \_ resp _ ->
-    liftEff $ runFn4 _downloadExt resp path filename callback
+    liftEffect $ runFn4 _downloadExt resp path filename callback
 
 -- | Render a view with a view model object. Could be object, string, buffer, etc.
-render :: forall e a. String -> a -> Handler e
+render :: forall a. String -> a -> Handler
 render view data_ = HandlerM \_ resp _ ->
-    liftEff $ runFn3 _render resp view data_
+    liftEffect $ runFn3 _render resp view data_
 
 foreign import _cwd :: Unit -> String
 
-foreign import _setStatus :: forall e. Fn2 Response Int (ExpressM e Unit)
+foreign import _setStatus :: Fn2 Response Int (Effect Unit)
 
-foreign import _setContentType :: forall e. Fn2 Response String (ExpressM e Unit)
+foreign import _setContentType :: Fn2 Response String (Effect Unit)
 
-foreign import _getHeader :: forall e. Fn2 Response String (ExpressM e Foreign)
+foreign import _getHeader :: Fn2 Response String (Effect Json)
 
-foreign import _setHeader :: forall e a. Fn3 Response String a (ExpressM e Unit)
+foreign import _setHeader :: forall a. Fn3 Response String a (Effect Unit)
 
-foreign import _setCookie :: forall e. Fn4 Response String String CookieOptions (ExpressM e Unit)
+foreign import _setCookie :: Fn4 Response String String CookieOptions (Effect Unit)
 
-foreign import _clearCookie :: forall e. Fn3 Response String String (ExpressM e Unit)
+foreign import _clearCookie :: Fn3 Response String String (Effect Unit)
 
-foreign import _end :: forall e. Response -> (ExpressM e Unit)
+foreign import _end :: Response -> (Effect Unit)
 
-foreign import _send :: forall e a. Fn2 Response a (ExpressM e Unit)
+foreign import _send :: forall a. Fn2 Response a (Effect Unit)
 
-foreign import _sendJson :: forall e a. Fn2 Response a (ExpressM e Unit)
+foreign import _sendJson :: forall a. Fn2 Response a (Effect Unit)
 
-foreign import _sendJsonp :: forall e a. Fn2 Response a (ExpressM e Unit)
+foreign import _sendJsonp :: forall a. Fn2 Response a (Effect Unit)
 
-foreign import _redirectWithStatus :: forall e. Fn3 Response Int String (ExpressM e Unit)
+foreign import _redirectWithStatus :: Fn3 Response Int String (Effect Unit)
 
-foreign import _setLocation :: forall e. Fn2 Response String (ExpressM e Unit)
+foreign import _setLocation :: Fn2 Response String (Effect Unit)
 
-foreign import _setAttachment :: forall e. Fn2 Response String (ExpressM e Unit)
+foreign import _setAttachment :: Fn2 Response String (Effect Unit)
 
-foreign import _sendFileExt :: forall e opts. Fn4 Response String { | opts } (Error -> ExpressM e Unit) (ExpressM e Unit)
+foreign import _sendFileExt :: forall opts. Fn4 Response String { | opts } (Error -> Effect Unit) (Effect Unit)
 
-foreign import _downloadExt :: forall e. Fn4 Response String String (Error -> ExpressM e Unit) (ExpressM e Unit)
+foreign import _downloadExt :: Fn4 Response String String (Error -> Effect Unit) (Effect Unit)
 
-foreign import _headersSent :: forall e. Response -> ExpressM e Boolean
+foreign import _headersSent :: Response -> Effect Boolean
 
-foreign import _render :: forall e a. Fn3 Response String a (ExpressM e Unit)
+foreign import _render :: forall a. Fn3 Response String a (Effect Unit)
