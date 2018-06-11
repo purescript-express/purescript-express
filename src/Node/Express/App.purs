@@ -2,7 +2,7 @@ module Node.Express.App
     ( AppM
     , App
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
-    , listenPipe, makeHttpServer, makeHttpsServer, apply
+    , listenPipe, makeHttpServer, makeHttpsServer, apply, mount
     , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
@@ -153,6 +153,10 @@ useOnError :: (Error -> Handler) -> App
 useOnError handler = AppM \app ->
     runFn2 _useOnError app (runHandlerM <<< handler)
 
+
+-- | Mount the third part express application
+mount :: forall a. (Application -> Effect a) -> AppM a
+mount f = AppM f
 
 -- | Get application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
