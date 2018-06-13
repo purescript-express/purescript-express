@@ -10,16 +10,14 @@ module Node.Express.Response
     ) where
 
 import Prelude
+
 import Data.Function.Uncurried (Fn3, Fn4, Fn2, runFn3, runFn4, runFn2)
-import Data.Maybe (Maybe)
-import Effect.Class (liftEffect)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import Node.Express.Handler (Handler, HandlerM(..))
-import Node.Express.Internal.Utils (eitherToMaybe)
 import Node.Express.Types (Response, CookieOptions)
-import Data.Argonaut.Core (Json)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 
 -- | Set status code.
 setStatus :: Int -> Handler
@@ -27,9 +25,9 @@ setStatus val = HandlerM \_ resp _ ->
     liftEffect $ runFn2 _setStatus resp val
 
 -- | Return response header value.
-getResponseHeader :: forall a. DecodeJson a => String -> HandlerM (Maybe a)
-getResponseHeader field = HandlerM \_ resp _ -> do
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getHeader resp field)
+getResponseHeader :: String -> HandlerM (Maybe String)
+getResponseHeader field = HandlerM \_ resp _ ->
+    liftEffect $ runFn4 _getHeader resp field Nothing Just
 
 -- | Set response header value.
 setResponseHeader :: forall a. String -> a -> Handler
@@ -124,7 +122,7 @@ foreign import _setStatus :: Fn2 Response Int (Effect Unit)
 
 foreign import _setContentType :: Fn2 Response String (Effect Unit)
 
-foreign import _getHeader :: Fn2 Response String (Effect Json)
+foreign import _getHeader :: Fn4 Response String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
 foreign import _setHeader :: forall a. Fn3 Response String a (Effect Unit)
 

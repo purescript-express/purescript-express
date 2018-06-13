@@ -24,9 +24,12 @@ exports._setContentType = function (resp, t) {
     };
 };
 
-exports._getHeader = function (resp, field) {
+exports._getHeader = function (resp, field, nothing, just) {
     return function () {
-        return resp.get(field);
+        if (resp.get(field) != null) {
+            return just(resp.get(field));
+        }
+        return nothing;
     };
 };
 
