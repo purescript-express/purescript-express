@@ -1,8 +1,11 @@
 // module Node.Express.Request
 
-exports._getRouteParam = function (req, name) {
+exports._getRouteParam = function (req, name, nothing, just) {
     return function () {
-        return req.params[name];
+        if (req.params[name] != null) {
+            return just(req.params[name]);
+        }
+        return nothing;
     };
 };
 
@@ -14,13 +17,16 @@ exports._getRoute = function (req) {
 
 exports._getBody = function (req) {
     return function () {
-        return req.body == null ? void 0 : req.body;
+        return req.body;
     };
 };
 
-exports._getBodyParam = function (req, name) {
+exports._getBodyParam = function (req, name, nothing, just) {
     return function () {
-        return req.body == null ? void 0 : req.body[name];
+        if (req.body && req.body[name] != null) {
+            return just(req.body[name]);
+        }
+        return nothing;
     };
 };
 
@@ -30,39 +36,57 @@ exports._getQueryParams = function (req) {
     };
 };
 
-exports._getCookie = function (req, name) {
+exports._getCookie = function (req, name, nothing, just) {
     return function () {
-        return req.cookies[name];
+        if (req.cookies[name] != null) {
+            return just(req.cookies[name]);
+        }
+        return nothing;
     }
 };
 
-exports._getSignedCookie = function (req, name) {
+exports._getSignedCookie = function (req, name, nothing, just) {
     return function () {
-        return req.signedCookies[name];
+        if (req.signedCookies[name] != null) {
+            return just(req.signedCookies[name]);
+        }
+        return nothing;
     };
 };
 
-exports._getHeader = function (req, field) {
+exports._getHeader = function (req, field, nothing, just) {
     return function () {
-        return req.get(field);
+        if (req.get(field) != null) {
+            return just(req.get(field));
+        }
+        return nothing;
     };
 };
 
-exports._accepts = function (req, types) {
+exports._accepts = function (req, types, nothing, just) {
     return function () {
-        return req.accepts(types);
+        if (req.accepts(types) != null) {
+            return just(req.accepts(types));
+        }
+        return nothing;
     };
 };
 
-exports._acceptsCharset = function (req, charset) {
+exports._acceptsCharset = function (req, charset, nothing, just) {
     return function () {
-        return req.acceptsCharset(charset);
+        if (req.acceptsCharset(charset) != null) {
+            return just(req.acceptsCharset(charset));
+        }
+        return nothing;
     };
 };
 
-exports._acceptsLanguage = function (req, language) {
+exports._acceptsLanguage = function (req, language, nothing, just) {
     return function () {
-        return req.acceptsLanguage(language);
+        if (req.acceptsLanguage(language) != null) {
+            return just(req.acceptsLanguage(language));
+        }
+        return nothing;
     };
 };
 
@@ -144,9 +168,12 @@ exports._getOriginalUrl = function (req) {
     };
 };
 
-exports._getData = function (req, field) {
+exports._getData = function (req, field, nothing, just) {
     return function () {
-        return req.userData && req.userData[field];
+        if (req.userData && req.userData[field] != null) {
+            return just(req.userData[field]);
+        }
+        return nothing;
     };
 };
 

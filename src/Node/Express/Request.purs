@@ -12,17 +12,17 @@ module Node.Express.Request
   ) where
 
 import Prelude
-import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
+
+import Data.Argonaut.Core (Json)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Either (Either)
-import Data.Maybe (Maybe, fromMaybe, maybe)
+import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn2, runFn3, runFn4)
+import Data.Maybe (Maybe(..), maybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
+import Foreign.Object (Object, lookup)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
-import Node.Express.Internal.Utils (eitherToMaybe)
-import Data.Argonaut.Core (Json)
-import Foreign.Object (Object, lookup)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 
 -- | Get route param value. If it is named route, e.g `/user/:id` then
 -- | `getRouteParam "id"` return matched part of route. If it is
@@ -31,7 +31,7 @@ import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 -- | route.
 getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getRouteParam req name)
+    liftEffect $ runFn4 _getRouteParam req name Nothing Just
 
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
@@ -50,9 +50,9 @@ getBody' = HandlerM \req _ _ ->
 -- | Get param from request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBodyParam :: forall a. (DecodeJson a) => String -> HandlerM (Maybe a)
+getBodyParam :: forall a. String -> HandlerM (Maybe a)
 getBodyParam name = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getBodyParam req name)
+    liftEffect $ runFn4 _getBodyParam req name Nothing Just
 
 -- | Get param from query string (part of URL behind '?').
 -- | If there are multiple params having equal keys
@@ -70,22 +70,22 @@ getRoute = HandlerM \req _ _ ->
 -- | Get cookie param by its key.
 getCookie :: String -> HandlerM (Maybe String)
 getCookie name = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getCookie req name)
+    liftEffect $ runFn4 _getCookie req name Nothing Just
 
 -- | Get signed cookie param by its key.
 getSignedCookie :: String -> HandlerM (Maybe String)
 getSignedCookie name = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getSignedCookie req name)
+    liftEffect $ runFn4 _getSignedCookie req name Nothing Just
 
 -- | Get request header param.
 getRequestHeader :: String -> HandlerM (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getHeader req field)
+    liftEffect $ runFn4 _getHeader req field Nothing Just
 
 -- | Check if specified response type will be accepted by a client.
 accepts :: String -> HandlerM (Maybe String)
 accepts types = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _accepts req types)
+    liftEffect $ runFn4 _accepts req types Nothing Just
 
 -- | Execute specified handler if client accepts specified response type.
 ifAccepts :: String -> Handler -> Handler
@@ -96,19 +96,18 @@ ifAccepts type_ act = do
 -- | Check if specified charset is accepted.
 acceptsCharset :: String -> HandlerM (Maybe String)
 acceptsCharset charset = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _acceptsCharset req charset)
+    liftEffect $ runFn4 _acceptsCharset req charset Nothing Just
 
 -- | Check if specified language is accepted.
 acceptsLanguage :: String -> HandlerM (Maybe String)
 acceptsLanguage language = HandlerM \req _ _ ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _acceptsLanguage req language)
+    liftEffect $ runFn4 _acceptsLanguage req language Nothing Just
 
 -- | Check if request's Content-Type field matches type.
 -- | See http://expressjs.com/4x/api.html#req.is
 hasType :: String -> HandlerM Boolean
-hasType type_ = HandlerM \req _ _ -> do
-    val <- liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _hasType req type_)
-    pure $ fromMaybe false val
+hasType type_ = HandlerM \req _ _ ->
+    liftEffect $ runFn2 _hasType req type_
 
 -- | Return remote or upstream address.
 getRemoteIp :: HandlerM String
@@ -177,36 +176,36 @@ setUserData field val = HandlerM \req _ _ ->
     liftEffect $ runFn3 _setData req field val
 
 -- | Retrieves the data from the request set with previous call to `setUserData`
-getUserData :: forall a. (DecodeJson a) => String -> HandlerM (Maybe a)
+getUserData :: forall a. String -> HandlerM (Maybe a)
 getUserData field = HandlerM \req _ _ -> do
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getData req field)
+    liftEffect $ runFn4 _getData req field Nothing Just
 
 queryParams :: Request -> Effect (Object String)
 queryParams = _getQueryParams
 
-foreign import _getRouteParam :: forall a. Fn2 Request a (Effect Json)
+foreign import _getRouteParam :: forall a. Fn4 Request a (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
 foreign import _getRoute :: Request -> Effect String
 
 foreign import _getBody :: Request -> Effect Json
 
-foreign import _getBodyParam :: Fn2 Request String (Effect Json)
+foreign import _getBodyParam :: forall a. Fn4 Request String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
 
 foreign import _getQueryParams :: Request -> Effect (Object String)
 
-foreign import _getCookie :: Fn2 Request String (Effect Json)
+foreign import _getCookie :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _getSignedCookie :: Fn2 Request String (Effect Json)
+foreign import _getSignedCookie :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _getHeader :: Fn2 Request String (Effect Json)
+foreign import _getHeader :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _accepts :: Fn2 Request String (Effect Json)
+foreign import _accepts :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _acceptsCharset :: Fn2 Request String (Effect Json)
+foreign import _acceptsCharset :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _acceptsLanguage :: Fn2 Request String (Effect Json)
+foreign import _acceptsLanguage :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
-foreign import _hasType :: Fn2 Request String (Effect Json)
+foreign import _hasType :: Fn2 Request String (Effect Boolean)
 
 foreign import _getRemoteIp :: Request -> Effect String
 
@@ -234,4 +233,4 @@ foreign import _getOriginalUrl :: Request -> Effect String
 
 foreign import _setData :: forall a. Fn3 Request String a (Effect Unit)
 
-foreign import _getData :: Fn2 Request String (Effect Json)
+foreign import _getData :: forall a. Fn4 Request String (Maybe a) (a -> Maybe a) (Effect (Maybe a))

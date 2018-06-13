@@ -9,21 +9,16 @@ module Node.Express.App
     ) where
 
 import Prelude hiding (apply)
+
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn4, runFn3, runFn2)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
-import Node.HTTP (Server)
-
-import Node.Express.Types (class RoutePattern, Application,
-                           Response, Request, Event, Host,
-                           Path, Port, Pipe, Method(..))
-import Node.Express.Internal.Utils (eitherToMaybe)
-import Node.Express.Handler (Handler, runHandlerM)
 import Foreign (Foreign, unsafeToForeign)
-import Data.Argonaut.Core (Json)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
+import Node.Express.Handler (Handler, runHandlerM)
+import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..))
+import Node.HTTP (Server)
 
 -- | Monad responsible for application related operations (initial setup mostly).
 data AppM a = AppM (Application -> Effect a)
@@ -156,13 +151,13 @@ useOnError handler = AppM \app ->
 
 -- | Get application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
-getProp :: forall a. (DecodeJson a) => String -> AppM (Maybe a)
+getProp :: forall a. String -> AppM (Maybe a)
 getProp name = AppM \app ->
-    liftEffect $ liftM1 (eitherToMaybe <<< decodeJson) (runFn2 _getProp app name)
+    liftEffect $ runFn4 _getProp app name Nothing Just
 
 -- | Set application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
-setProp :: forall a. (DecodeJson a) => String -> a -> App
+setProp :: forall a. String -> a -> App
 setProp name val = AppM \app ->
     runFn3 _setProp app name val
 
@@ -194,7 +189,7 @@ all = http ALL
 
 foreign import mkApplication :: Effect Application
 
-foreign import _getProp :: Fn2 Application String (Effect Json)
+foreign import _getProp :: forall a. Fn4 Application String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
 
 foreign import _setProp :: forall a. Fn3 Application String a (Effect Unit)
 
