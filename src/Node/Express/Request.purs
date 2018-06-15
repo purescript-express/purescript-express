@@ -1,5 +1,5 @@
 module Node.Express.Request
-  ( getRouteParam, getQueryParam, getBody, getBody'
+  ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
   , getBodyParam, getRoute
   , getCookie, getSignedCookie
   , getRequestHeader
@@ -55,12 +55,14 @@ getBodyParam name = HandlerM \req _ _ ->
     liftEffect $ runFn4 _getBodyParam req name Nothing Just
 
 -- | Get param from query string (part of URL behind '?').
--- | If there are multiple params having equal keys
--- | return the first one.
 getQueryParam :: String -> HandlerM (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
     params <- liftEffect $ queryParams req
     pure $ lookup name params
+
+-- | Get all query params.
+getQueryParams :: HandlerM (Object String)
+getQueryParams = HandlerM $ \req _ _ -> liftEffect $ queryParams req
 
 -- | Return route that matched this request.
 getRoute :: HandlerM String
