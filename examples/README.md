@@ -18,6 +18,10 @@ $ pulp run -m <example-name>
 
 ## Available examples
 
+#### `HelloWorldServer`
+
+Listens on `8080` and displays `Hello, World!`, nothing else.
+
 #### `ToDoServer`
 
 Simple Todo application. Nothing fancy, just plain text.
