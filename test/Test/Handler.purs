@@ -22,11 +22,10 @@ import Unsafe.Coerce
 import Control.Monad.Except (runExcept)
 import Data.Array (head)
 import Data.Either (either)
+import Foreign (Foreign, unsafeToForeign, readString)
+import Foreign.Class (encode, decode)
 import Foreign.Object (Object)
 import Global.Unsafe (unsafeStringify)
-import Foreign (Foreign, unsafeToForeign, readString)
-import Data.Argonaut.Core (fromString)
-import Data.Argonaut.Decode (decodeJson)
 
 
 foreign import cwdJson :: String
@@ -71,15 +70,15 @@ testParams = do
     withoutParams  = id
     withRouteParam = setRouteParam testParam testValue
     withBody       = setBody       testValue
-    withBody'      = setBody' $ fromString testValue
+    withBody'      = setBody' $ encode testValue
     withBodyParam  = setBodyParam  testParam testValue
     urlWithQueryParam = "http://example.com?" <> testParam <> "=" <> testValue
     urlWithQueryParams = urlWithQueryParam <> "&" <> testParam <> "=someOtherValue"
-    getBody'_ = getBody' <#> decodeJson
+    getBody'_ = getBody' <#> decode
     paramsHandler  = do
         getRouteParam testParam >>= maybe (pure unit) setTestHeader
-        getBody                 >>= either (pure <<< const unit) setTestHeader
-        getBody'_               >>= either (pure <<< const unit) setTestHeader
+        getBody >>= either (pure <<< const unit) setTestHeader <<< runExcept
+        getBody'_ >>= either (pure <<< const unit) setTestHeader <<< runExcept
         getBodyParam  testParam >>= maybe (pure unit) setTestHeader
         getQueryParam testParam >>= maybe (pure unit) setTestHeader
 

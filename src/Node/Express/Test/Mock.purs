@@ -30,7 +30,8 @@ module Node.Express.Test.Mock
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Control.Monad.Reader.Trans
-import Data.Argonaut.Core (Json, fromString)
+import Foreign (Foreign)
+import Foreign.Class (encode)
 import Foreign.Object (Object, lookup)
 import Data.Maybe (Maybe)
 import Node.Express.App (App, apply)
@@ -58,7 +59,7 @@ type MockResponse =
 
 newtype MockRequest = MockRequest
     { setHeader :: String -> String -> MockRequest
-    , setBody :: Json -> MockRequest
+    , setBody :: Foreign -> MockRequest
     , setBodyParam :: String -> String -> MockRequest
     , setRouteParam :: String -> String -> MockRequest
     , setCookie :: String -> String -> MockRequest
@@ -69,9 +70,9 @@ setRequestHeader :: String -> String -> MockRequest -> MockRequest
 setRequestHeader name value (MockRequest r) = r.setHeader name value
 
 setBody :: String -> MockRequest -> MockRequest
-setBody value (MockRequest r) = r.setBody $ fromString value
+setBody value (MockRequest r) = r.setBody $ encode value
 
-setBody' :: Json -> MockRequest -> MockRequest
+setBody' :: Foreign -> MockRequest -> MockRequest
 setBody' value (MockRequest r) = r.setBody value
 
 setBodyParam :: String -> String -> MockRequest -> MockRequest

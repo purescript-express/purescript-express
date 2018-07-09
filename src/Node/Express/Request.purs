@@ -13,13 +13,12 @@ module Node.Express.Request
 
 import Prelude
 
-import Data.Argonaut.Core (Json)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
-import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn2, runFn3, runFn4)
 import Data.Maybe (Maybe(..), maybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
+import Foreign (F, Foreign)
+import Foreign.Class (class Decode, decode)
 import Foreign.Object (Object, lookup)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
@@ -36,14 +35,14 @@ getRouteParam name = HandlerM \req _ _ ->
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBody :: forall a. (DecodeJson a) => HandlerM (Either String a)
+getBody :: forall a. Decode a => HandlerM (F a)
 getBody = HandlerM \req _ _ ->
-    liftEffect $ liftM1 decodeJson (_getBody req)
+    liftEffect $ liftM1 decode (_getBody req)
 
 -- | Get the request's body without a `Decode` parsing.
 -- | NOTE: Not parsed by default, you must attach proper middleware
 -- |       See http://expressjs.com/4x/api.html#req.body
-getBody' :: HandlerM Json
+getBody' :: HandlerM Foreign
 getBody' = HandlerM \req _ _ ->
     liftEffect $ _getBody req
 
@@ -187,7 +186,7 @@ foreign import _getRouteParam :: forall a. Fn4 Request a (Maybe String) (String 
 
 foreign import _getRoute :: Request -> Effect String
 
-foreign import _getBody :: Request -> Effect Json
+foreign import _getBody :: Request -> Effect Foreign
 
 foreign import _getBodyParam :: forall a. Fn4 Request String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
 

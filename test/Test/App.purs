@@ -3,6 +3,7 @@ module Test.App (testSuite) where
 import Effect
 import Effect.Class
 import Effect.Exception
+import Foreign.Class (class Decode)
 import Control.Monad.Trans.Class
 import Data.Function.Uncurried
 import Data.Maybe
@@ -13,12 +14,11 @@ import Node.Express.Test.Mock
 import Prelude
 import Test.Unit
 import Test.Unit.Console
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 
 foreign import mockMiddleware ::
     String -> Fn3 Request Response (Effect Unit) (Effect Unit)
 
-assertProperty :: forall a. Show a => Eq a => DecodeJson a =>
+assertProperty :: forall a. Show a => Eq a => Decode a =>
     String -> Maybe a -> TestMockApp
 assertProperty name expected = assertInApp $ \report -> do
     actual <- getProp name
