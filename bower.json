@@ -23,7 +23,8 @@
     "README.md"
   ],
   "dependencies": {
-    "purescript-argonaut-codecs": "^4.0.0",
+    "purescript-foreign": "^5.0.0",
+    "purescript-foreign-generic": "^7.0.0",
     "purescript-node-http": "^5.0.0",
     "purescript-data-default": "^0.1.0"
   },
