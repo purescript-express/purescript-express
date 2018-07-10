@@ -1,5 +1,5 @@
 module Node.Express.Request
-  ( getRouteParam, getQueryParam, getBody, getBody'
+  ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
   , getBodyParam, getRoute
   , getCookie, getSignedCookie
   , getRequestHeader
@@ -15,6 +15,8 @@ import Prelude
 
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn2, runFn3, runFn4)
 import Data.Maybe (Maybe(..), maybe)
+import Data.String (CodePoint, codePointFromChar, drop, dropWhile, null, takeWhile)
+import Data.Array ((:))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Foreign (F, Foreign)
@@ -22,6 +24,7 @@ import Foreign.Class (class Decode, decode)
 import Foreign.Object (Object, lookup)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
+import Node.Express.Internal.Utils (decodeURI)
 
 -- | Get route param value. If it is named route, e.g `/user/:id` then
 -- | `getRouteParam "id"` return matched part of route. If it is
@@ -60,6 +63,30 @@ getQueryParam :: String -> HandlerM (Maybe String)
 getQueryParam name = HandlerM \req _ _ -> do
     params <- liftEffect $ queryParams req
     pure $ lookup name params
+
+-- | Get all params from query string having specified key.
+getQueryParams :: String -> HandlerM (Array String)
+getQueryParams name =
+    go <<< drop 1 <<< dropWhile (_ == codePointFromChar '?') <$> getUrl
+    where getKey :: String -> String
+          getKey = takeWhile isEq
+
+          getVal :: String -> String
+          getVal = decodeURI <<< takeWhile isAnd <<< drop 1 <<< dropWhile isEq
+
+          getRemain :: String -> String
+          getRemain = drop 1 <<< dropWhile isAnd
+
+          isEq :: CodePoint -> Boolean
+          isEq c = c == codePointFromChar '='
+
+          isAnd :: CodePoint -> Boolean
+          isAnd c = c == codePointFromChar '&'
+
+          go :: String -> Array String
+          go s | null s = []
+               | getKey s == name = getVal s : go (getRemain s)
+               | otherwise = go (getRemain s)
 
 -- | Return route that matched this request.
 getRoute :: HandlerM String

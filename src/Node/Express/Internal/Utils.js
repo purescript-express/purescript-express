@@ -5,3 +5,11 @@ exports.nextWithError = function (nxt, err) {
         nxt(err);
     };
 };
+
+exports.decodeURI = function(str) {
+    try {
+        return decodeURIComponent(str.replace(/\+/g, ' '));
+    } catch(err) {
+        return str;
+    }
+}

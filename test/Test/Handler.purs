@@ -65,6 +65,10 @@ testParams = do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
         sendRequest GET urlWithQueryParam id assertTestHeaderExists
+    testExpress "getQueryParams" $ do
+        setupMockApp $ use paramsHandler
+        sendTestRequest withoutParams assertTestHeaderAbsent
+        -- sendRequest GET urlWithQueryParams id assertTestHeaderExists
   where
     testParam = "param"
     withoutParams  = id

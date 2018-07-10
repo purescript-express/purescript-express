@@ -6,3 +6,5 @@ import Effect.Exception (Error)
 import Effect (Effect)
 
 foreign import nextWithError :: forall a. Fn2 (Effect Unit) Error (Effect a)
+
+foreign import decodeURI :: String -> String
