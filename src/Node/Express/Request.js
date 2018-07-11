@@ -23,7 +23,7 @@ exports._getBody = function (req) {
 
 exports._getBodyParam = function (req, name, nothing, just) {
     return function () {
-        if (req.body && req.body[name] != null) {
+        if (req.body && name in req.body && req.body[name] != null) {
             return just(req.body[name]);
         }
         return nothing;
