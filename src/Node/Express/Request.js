@@ -30,9 +30,12 @@ exports._getBodyParam = function (req, name, nothing, just) {
     };
 };
 
-exports._getQueryParams = function (req) {
+exports._getQueryParam = function (req, name, nothing, just) {
     return function () {
-        return req.query || {};
+        if (req.query && name in req.query && req.query[name] != null) {
+            return just(req.query[name]);
+        }
+        return nothing;
     };
 };
 

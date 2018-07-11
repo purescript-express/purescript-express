@@ -57,36 +57,18 @@ getBodyParam name = HandlerM \req _ _ ->
     liftEffect $ runFn4 _getBodyParam req name Nothing Just
 
 -- | Get param from query string (part of URL behind '?').
--- | If there are multiple params having equal keys
--- | return the first one.
-getQueryParam :: String -> HandlerM (Maybe String)
+-- | It could be any JS object, e.g. an array in case multiple repeating query
+-- | parameters, or an object in case of nested query parameters (this
+-- | particular behavior depends on the type of query parser - 'simple' won't
+-- | parse complex objects, see
+-- | https://github.com/expressjs/express/blob/master/test/req.query.js)
+getQueryParam :: forall a. String -> HandlerM (Maybe a)
 getQueryParam name = HandlerM \req _ _ -> do
-    params <- liftEffect $ queryParams req
-    pure $ lookup name params
+    liftEffect $ runFn4 _getQueryParam req name Nothing Just
 
--- | Get all params from query string having specified key.
-getQueryParams :: String -> HandlerM (Array String)
-getQueryParams name =
-    go <<< drop 1 <<< dropWhile (_ == codePointFromChar '?') <$> getUrl
-    where getKey :: String -> String
-          getKey = takeWhile isEq
-
-          getVal :: String -> String
-          getVal = decodeURI <<< takeWhile isAnd <<< drop 1 <<< dropWhile isEq
-
-          getRemain :: String -> String
-          getRemain = drop 1 <<< dropWhile isAnd
-
-          isEq :: CodePoint -> Boolean
-          isEq c = c == codePointFromChar '='
-
-          isAnd :: CodePoint -> Boolean
-          isAnd c = c == codePointFromChar '&'
-
-          go :: String -> Array String
-          go s | null s = []
-               | getKey s == name = getVal s : go (getRemain s)
-               | otherwise = go (getRemain s)
+-- | Shortcut for `getQueryParam paramName :: HandlerM (Maybe (Array a))`
+getQueryParams :: forall a. String -> HandlerM (Maybe (Array a))
+getQueryParams = getQueryParam
 
 -- | Return route that matched this request.
 getRoute :: HandlerM String
@@ -206,9 +188,6 @@ getUserData :: forall a. String -> HandlerM (Maybe a)
 getUserData field = HandlerM \req _ _ -> do
     liftEffect $ runFn4 _getData req field Nothing Just
 
-queryParams :: Request -> Effect (Object String)
-queryParams = _getQueryParams
-
 foreign import _getRouteParam :: forall a. Fn4 Request a (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
 foreign import _getRoute :: Request -> Effect String
@@ -217,7 +196,7 @@ foreign import _getBody :: Request -> Effect Foreign
 
 foreign import _getBodyParam :: forall a. Fn4 Request String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
 
-foreign import _getQueryParams :: Request -> Effect (Object String)
+foreign import _getQueryParam :: forall a. Fn4 Request String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
 
 foreign import _getCookie :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 

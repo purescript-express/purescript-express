@@ -20,7 +20,7 @@ import Test.Unit.Console
 import Unsafe.Coerce
 
 import Control.Monad.Except (runExcept)
-import Data.Array (head)
+import Data.Array (head, null)
 import Data.Either (either)
 import Foreign (Foreign, unsafeToForeign, readString)
 import Foreign.Class (encode, decode)
@@ -61,14 +61,17 @@ testParams = do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
         sendTestRequest withBodyParam assertTestHeaderExists
-    testExpress "getQueryParam" $ do
-        setupMockApp $ use paramsHandler
+    testExpress "getQueryParam (without params)" $ do
+        setupMockApp $ use $ queryParamHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
-        sendRequest GET urlWithQueryParam id assertTestHeaderExists
-    testExpress "getQueryParams" $ do
-        setupMockApp $ use paramsHandler
-        sendTestRequest withoutParams assertTestHeaderAbsent
-        -- sendRequest GET urlWithQueryParams id assertTestHeaderExists
+    testExpress "getQueryParam (string)" $ do
+        setupMockApp $ use $ queryParamHandler
+        let url = "http://example.com/?param=testValue"
+        sendRequest GET url id $ assertTestHeaderWith "testValue"
+    testExpress "getQueryParam (array)" $ do
+        setupMockApp $ use $ queryParamArrayHandler
+        let url = "http://example.com/?param=1&param=2"
+        sendRequest GET url id $ assertTestHeaderWith $ show ["1", "2"]
   where
     testParam = "param"
     withoutParams  = id
@@ -76,15 +79,16 @@ testParams = do
     withBody       = setBody       testValue
     withBody'      = setBody' $ encode testValue
     withBodyParam  = setBodyParam  testParam testValue
-    urlWithQueryParam = "http://example.com?" <> testParam <> "=" <> testValue
-    urlWithQueryParams = urlWithQueryParam <> "&" <> testParam <> "=someOtherValue"
     getBody'_ = getBody' <#> decode
-    paramsHandler  = do
+    paramsHandler = do
         getRouteParam testParam >>= maybe (pure unit) setTestHeader
         getBody >>= either (pure <<< const unit) setTestHeader <<< runExcept
         getBody'_ >>= either (pure <<< const unit) setTestHeader <<< runExcept
         getBodyParam  testParam >>= maybe (pure unit) setTestHeader
+    queryParamHandler =
         getQueryParam testParam >>= maybe (pure unit) setTestHeader
+    queryParamArrayHandler =
+        getQueryParams testParam >>= maybe (pure unit) (\val -> setTestHeader $ show (val :: Array String))
 
 testHeaders = do
     testExpress "getRequestHeader" $ do
