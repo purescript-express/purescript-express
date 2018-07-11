@@ -1,21 +1,9 @@
 module Node.Express.Types where
 
 import Prelude
-import Data.Foreign (ForeignError(..), readString, fail)
-import Data.Foreign.Class (class Decode)
 import Data.String.Regex (Regex)
 import Data.Default (class Default)
-import Control.Monad.Eff (Eff, kind Effect)
-
-
-foreign import data EXPRESS :: Effect
-
--- | General monad, indicates that we're dealing with
--- | express.js related functions.
--- | Applications should use HandlerM and AppM primarily
--- | and ExpressM in rare cases.
-type ExpressM e a = Eff (express :: EXPRESS | e) a
-
+import Data.Maybe (Maybe (..))
 
 foreign import data Application :: Type
 foreign import data Event :: Type
@@ -28,12 +16,10 @@ instance showProtocol :: Show Protocol where
     show Http  = "http"
     show Https = "https"
 
-instance isForeignProtocol :: Decode Protocol where
-    decode value = readString value >>= case _ of
-        "http"  -> pure Http
-        "https" -> pure Https
-        _ -> fail $ JSONError "Unknown protocol"
-
+decodeProtocol :: String -> Maybe Protocol
+decodeProtocol "http" = Just Http
+decodeProtocol "https" = Just Https
+decodeProtocol _ = Nothing
 
 data Method = ALL | GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CustomMethod String
 
@@ -48,17 +34,16 @@ instance showMethod :: Show Method where
     show TRACE   = "trace"
     show (CustomMethod method) = method
 
-instance isForeignMethod :: Decode Method where
-    decode value = readString value >>= case _ of
-        "GET"     -> pure GET
-        "POST"    -> pure POST
-        "PUT"     -> pure PUT
-        "DELETE"  -> pure DELETE
-        "OPTIONS" -> pure OPTIONS
-        "HEAD"    -> pure HEAD
-        "TRACE"   -> pure TRACE
-        method    -> pure $ CustomMethod method
-        
+decodeMethod :: String -> Method
+decodeMethod "GET"     = GET
+decodeMethod "POST"    = POST
+decodeMethod "PUT"     = PUT
+decodeMethod "DELETE"  = DELETE
+decodeMethod "OPTIONS" = OPTIONS
+decodeMethod "HEAD"    = HEAD
+decodeMethod "TRACE"   = TRACE
+decodeMethod method    = CustomMethod method
+
 type Host = String
 type Port = Int
 type Pipe = String

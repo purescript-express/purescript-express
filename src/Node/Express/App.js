@@ -131,9 +131,12 @@ exports._useOnError = function (app, cb) {
     };
 };
 
-exports._getProp = function (app, name) {
+exports._getProp = function (app, name, nothing, just) {
     return function () {
-        return app.get(name);
+        if (app.get(name) != null) {
+            return just(app.get(name));
+        }
+        return nothing;
     };
 };
 

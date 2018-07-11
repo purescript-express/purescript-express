@@ -23,29 +23,12 @@
     "README.md"
   ],
   "dependencies": {
-    "purescript-aff": "^4.0.0",
-    "purescript-arrays": "^4.2.1",
-    "purescript-control": "^3.3.1",
-    "purescript-data-default": "^0.1.0",
-    "purescript-eff": "^3.1.0",
-    "purescript-either": "^3.1.0",
-    "purescript-exceptions": "^3.1.0",
-    "purescript-foldable-traversable": "^3.6.1",
-    "purescript-foreign": "^4.0.1",
-    "purescript-lists": "^4.10.0",
-    "purescript-maybe": "^3.0.0",
-    "purescript-node-http": "^4.1.0",
-    "purescript-parsing": "^4.3.1",
-    "purescript-strings": "^3.3.1",
-    "purescript-transformers": "^3.4.0",
-    "purescript-unfoldable": "^3.0.0",
-    "purescript-foreign-generic": "^5.0.0",
-    "purescript-test-unit": "^13.0.0"
+    "purescript-foreign": "^5.0.0",
+    "purescript-foreign-generic": "^7.0.0",
+    "purescript-node-http": "^5.0.0",
+    "purescript-data-default": "^0.1.0"
   },
   "devDependencies": {
-    "purescript-console": "^3.0.0",
-    "purescript-maps": "^3.5.2",
-    "purescript-node-fs": "^4.0.0",
-    "purescript-unsafe-coerce": "^3.0.0"
+    "purescript-test-unit": "^14.0.0"
   }
 }
