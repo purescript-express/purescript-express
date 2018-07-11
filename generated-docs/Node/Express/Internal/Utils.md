@@ -1,15 +1,15 @@
 ## Module Node.Express.Internal.Utils
 
-#### `eitherToMaybe`
-
-``` purescript
-eitherToMaybe :: forall a e. Either e a -> Maybe a
-```
-
 #### `nextWithError`
 
 ``` purescript
-nextWithError :: forall e a. Fn2 (ExpressM e Unit) Error (ExpressM e a)
+nextWithError :: forall a. Fn2 (Effect Unit) Error (Effect a)
+```
+
+#### `decodeURI`
+
+``` purescript
+decodeURI :: String -> String
 ```
 
 

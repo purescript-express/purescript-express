@@ -3,7 +3,7 @@
 #### `MockResponse`
 
 ``` purescript
-type MockResponse = { statusCode :: Int, headers :: StrMap String, "data" :: String, cookies :: StrMap MockCookie }
+type MockResponse = { statusCode :: Int, headers :: Object String, "data" :: String, cookies :: Object MockCookie }
 ```
 
 #### `MockRequest`
@@ -64,97 +64,97 @@ setRequestSignedCookie :: String -> String -> MockRequest -> MockRequest
 #### `TestExpress`
 
 ``` purescript
-type TestExpress e = Aff (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+type TestExpress = Aff
 ```
 
 #### `TestMockApp`
 
 ``` purescript
-type TestMockApp e = ReaderT Application (TestExpress e) Unit
+type TestMockApp = ReaderT Application TestExpress Unit
 ```
 
 #### `createMockApp`
 
 ``` purescript
-createMockApp :: forall e. Eff (express :: EXPRESS, testOutput :: TESTOUTPUT | e) Application
+createMockApp :: Effect Application
 ```
 
 #### `createMockRequest`
 
 ``` purescript
-createMockRequest :: forall e. String -> String -> ExpressM e MockRequest
+createMockRequest :: String -> String -> Effect MockRequest
 ```
 
 #### `testExpress`
 
 ``` purescript
-testExpress :: forall e. String -> TestMockApp e -> TestSuite (express :: EXPRESS, testOutput :: TESTOUTPUT | e)
+testExpress :: String -> TestMockApp -> TestSuite
 ```
 
 #### `setupMockApp`
 
 ``` purescript
-setupMockApp :: forall e. TestApp e -> TestMockApp e
+setupMockApp :: TestApp -> TestMockApp
 ```
 
 #### `sendRequest`
 
 ``` purescript
-sendRequest :: forall e. Method -> String -> (MockRequest -> MockRequest) -> (MockResponse -> TestMockApp e) -> TestMockApp e
+sendRequest :: Method -> String -> (MockRequest -> MockRequest) -> (MockResponse -> TestMockApp) -> TestMockApp
 ```
 
 #### `sendError`
 
 ``` purescript
-sendError :: forall e. Method -> String -> String -> (MockResponse -> TestMockApp e) -> TestMockApp e
+sendError :: Method -> String -> String -> (MockResponse -> TestMockApp) -> TestMockApp
 ```
 
 #### `assertMatch`
 
 ``` purescript
-assertMatch :: forall a e. Show a => Eq a => String -> a -> a -> Test e
+assertMatch :: forall a. Show a => Eq a => String -> a -> a -> Test
 ```
 
 #### `assertInApp`
 
 ``` purescript
-assertInApp :: forall e. (Reporter e -> TestApp e) -> TestMockApp e
+assertInApp :: (Reporter -> TestApp) -> TestMockApp
 ```
 
 #### `assertStatusCode`
 
 ``` purescript
-assertStatusCode :: forall e. Int -> MockResponse -> TestMockApp e
+assertStatusCode :: Int -> MockResponse -> TestMockApp
 ```
 
 #### `assertHeader`
 
 ``` purescript
-assertHeader :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertHeader :: String -> Maybe String -> MockResponse -> TestMockApp
 ```
 
 #### `assertData`
 
 ``` purescript
-assertData :: forall e. String -> MockResponse -> TestMockApp e
+assertData :: String -> MockResponse -> TestMockApp
 ```
 
 #### `assertCookieValue`
 
 ``` purescript
-assertCookieValue :: forall e. String -> Maybe String -> MockResponse -> TestMockApp e
+assertCookieValue :: String -> Maybe String -> MockResponse -> TestMockApp
 ```
 
 #### `setTestHeader`
 
 ``` purescript
-setTestHeader :: forall e. String -> Handler e
+setTestHeader :: String -> Handler
 ```
 
 #### `assertTestHeader`
 
 ``` purescript
-assertTestHeader :: forall e. Maybe String -> MockResponse -> TestMockApp e
+assertTestHeader :: Maybe String -> MockResponse -> TestMockApp
 ```
 
 

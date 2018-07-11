@@ -3,7 +3,7 @@
 #### `cookieParser`
 
 ``` purescript
-cookieParser :: forall eff. Handler eff
+cookieParser :: Handler
 ```
 
 Handler that parses cookies using 'cookie-parser' middleware.

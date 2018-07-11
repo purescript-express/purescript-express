@@ -3,39 +3,41 @@
 #### `HandlerM`
 
 ``` purescript
-newtype HandlerM e a
-  = HandlerM (Request -> Response -> Eff e Unit -> Aff e a)
+newtype HandlerM a
+  = HandlerM (Request -> Response -> Effect Unit -> Aff a)
 ```
 
 Monad responsible for handling single request.
 
 ##### Instances
 ``` purescript
-Functor (HandlerM e)
-Apply (HandlerM e)
-Applicative (HandlerM e)
-Bind (HandlerM e)
-Monad (HandlerM e)
-MonadEff eff (HandlerM eff)
-MonadAff eff (HandlerM eff)
+Functor HandlerM
+Apply HandlerM
+Applicative HandlerM
+Bind HandlerM
+Monad HandlerM
+MonadEffect HandlerM
+MonadAff HandlerM
+MonadThrow Error HandlerM
+MonadError Error HandlerM
 ```
 
 #### `Handler`
 
 ``` purescript
-type Handler e = HandlerM (express :: EXPRESS | e) Unit
+type Handler = HandlerM Unit
 ```
 
 #### `runHandlerM`
 
 ``` purescript
-runHandlerM :: forall e. Handler e -> Request -> Response -> ExpressM e Unit -> ExpressM e Unit
+runHandlerM :: Handler -> Request -> Response -> Effect Unit -> Effect Unit
 ```
 
 #### `next`
 
 ``` purescript
-next :: forall e. Handler e
+next :: Handler
 ```
 
 Call next handler/middleware in a chain.
@@ -43,7 +45,7 @@ Call next handler/middleware in a chain.
 #### `nextThrow`
 
 ``` purescript
-nextThrow :: forall e a. Error -> HandlerM (express :: EXPRESS | e) a
+nextThrow :: forall a. Error -> HandlerM a
 ```
 
 Call next handler/middleware and pass error to it.

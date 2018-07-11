@@ -3,7 +3,7 @@
 #### `setStatus`
 
 ``` purescript
-setStatus :: forall e. Int -> Handler e
+setStatus :: Int -> Handler
 ```
 
 Set status code.
@@ -11,7 +11,7 @@ Set status code.
 #### `getResponseHeader`
 
 ``` purescript
-getResponseHeader :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getResponseHeader :: String -> HandlerM (Maybe String)
 ```
 
 Return response header value.
@@ -19,7 +19,7 @@ Return response header value.
 #### `setResponseHeader`
 
 ``` purescript
-setResponseHeader :: forall e a. String -> a -> Handler e
+setResponseHeader :: forall a. String -> a -> Handler
 ```
 
 Set response header value.
@@ -27,7 +27,7 @@ Set response header value.
 #### `headersSent`
 
 ``` purescript
-headersSent :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+headersSent :: HandlerM Boolean
 ```
 
 Check if headers have been sent already
@@ -35,7 +35,7 @@ Check if headers have been sent already
 #### `setContentType`
 
 ``` purescript
-setContentType :: forall e. String -> Handler e
+setContentType :: String -> Handler
 ```
 
 Set Content-Type header.
@@ -43,7 +43,7 @@ Set Content-Type header.
 #### `setCookie`
 
 ``` purescript
-setCookie :: forall e. String -> String -> CookieOptions -> Handler e
+setCookie :: String -> String -> CookieOptions -> Handler
 ```
 
 Set cookie by its name using specified options (maxAge, path, etc).
@@ -51,7 +51,7 @@ Set cookie by its name using specified options (maxAge, path, etc).
 #### `clearCookie`
 
 ``` purescript
-clearCookie :: forall e. String -> String -> Handler e
+clearCookie :: String -> String -> Handler
 ```
 
 Clear cookie.
@@ -59,7 +59,7 @@ Clear cookie.
 #### `send`
 
 ``` purescript
-send :: forall e a. a -> Handler e
+send :: forall a. a -> Handler
 ```
 
 Send a response. Could be object, string, buffer, etc.
@@ -67,7 +67,7 @@ Send a response. Could be object, string, buffer, etc.
 #### `sendJson`
 
 ``` purescript
-sendJson :: forall e a. a -> Handler e
+sendJson :: forall a. a -> Handler
 ```
 
 Send a JSON response. Necessary headers are set automatically.
@@ -75,7 +75,7 @@ Send a JSON response. Necessary headers are set automatically.
 #### `sendJsonp`
 
 ``` purescript
-sendJsonp :: forall e a. a -> Handler e
+sendJsonp :: forall a. a -> Handler
 ```
 
 Send a JSON response with JSONP support.
@@ -83,7 +83,7 @@ Send a JSON response with JSONP support.
 #### `redirect`
 
 ``` purescript
-redirect :: forall e. String -> Handler e
+redirect :: String -> Handler
 ```
 
 Redirect to the given URL setting status to 302.
@@ -91,7 +91,7 @@ Redirect to the given URL setting status to 302.
 #### `redirectWithStatus`
 
 ``` purescript
-redirectWithStatus :: forall e. Int -> String -> Handler e
+redirectWithStatus :: Int -> String -> Handler
 ```
 
 Redirect to the given URL using custom status.
@@ -99,7 +99,7 @@ Redirect to the given URL using custom status.
 #### `setLocation`
 
 ``` purescript
-setLocation :: forall e. String -> Handler e
+setLocation :: String -> Handler
 ```
 
 Set Location header.
@@ -107,7 +107,7 @@ Set Location header.
 #### `sendFile`
 
 ``` purescript
-sendFile :: forall e. String -> Handler e
+sendFile :: String -> Handler
 ```
 
 Send file by its path.
@@ -115,7 +115,7 @@ Send file by its path.
 #### `sendFileExt`
 
 ``` purescript
-sendFileExt :: forall e o. String -> {  | o } -> (Error -> ExpressM e Unit) -> Handler e
+sendFileExt :: forall o. String -> {  | o } -> (Error -> Effect Unit) -> Handler
 ```
 
 Send file by its path using specified options and error handler.
@@ -124,7 +124,7 @@ See http://expressjs.com/4x/api.html#res.sendfile
 #### `download`
 
 ``` purescript
-download :: forall e. String -> Handler e
+download :: String -> Handler
 ```
 
 Transfer file as an attachment (will prompt user to download).
@@ -132,7 +132,7 @@ Transfer file as an attachment (will prompt user to download).
 #### `downloadExt`
 
 ``` purescript
-downloadExt :: forall e. String -> String -> (Error -> ExpressM e Unit) -> Handler e
+downloadExt :: String -> String -> (Error -> Effect Unit) -> Handler
 ```
 
 Transfer file as an attachment using specified filename and error handler.
@@ -140,7 +140,7 @@ Transfer file as an attachment using specified filename and error handler.
 #### `render`
 
 ``` purescript
-render :: forall e a. String -> a -> Handler e
+render :: forall a. String -> a -> Handler
 ```
 
 Render a view with a view model object. Could be object, string, buffer, etc.
@@ -148,7 +148,7 @@ Render a view with a view model object. Could be object, string, buffer, etc.
 #### `end`
 
 ``` purescript
-end :: forall e. Handler e
+end :: Handler
 ```
 
 Ends the response process.

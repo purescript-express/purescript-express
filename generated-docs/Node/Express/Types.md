@@ -1,22 +1,5 @@
 ## Module Node.Express.Types
 
-#### `EXPRESS`
-
-``` purescript
-data EXPRESS :: Effect
-```
-
-#### `ExpressM`
-
-``` purescript
-type ExpressM e a = Eff (express :: EXPRESS | e) a
-```
-
-General monad, indicates that we're dealing with
-express.js related functions.
-Applications should use HandlerM and AppM primarily
-and ExpressM in rare cases.
-
 #### `Application`
 
 ``` purescript
@@ -52,7 +35,12 @@ data Protocol
 ##### Instances
 ``` purescript
 Show Protocol
-Decode Protocol
+```
+
+#### `decodeProtocol`
+
+``` purescript
+decodeProtocol :: String -> Maybe Protocol
 ```
 
 #### `Method`
@@ -73,7 +61,12 @@ data Method
 ##### Instances
 ``` purescript
 Show Method
-Decode Method
+```
+
+#### `decodeMethod`
+
+``` purescript
+decodeMethod :: String -> Method
 ```
 
 #### `Host`

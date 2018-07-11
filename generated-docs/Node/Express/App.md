@@ -3,31 +3,31 @@
 #### `AppM`
 
 ``` purescript
-data AppM e a
+data AppM a
 ```
 
 Monad responsible for application related operations (initial setup mostly).
 
 ##### Instances
 ``` purescript
-Functor (AppM e)
-Apply (AppM e)
-Applicative (AppM e)
-Bind (AppM e)
-Monad (AppM e)
-MonadEff eff (AppM eff)
+Functor AppM
+Apply AppM
+Applicative AppM
+Bind AppM
+Monad AppM
+MonadEffect AppM
 ```
 
 #### `App`
 
 ``` purescript
-type App e = AppM (express :: EXPRESS | e) Unit
+type App = AppM Unit
 ```
 
 #### `listenHttp`
 
 ``` purescript
-listenHttp :: forall e1 e2. App e1 -> Port -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHttp :: App -> Port -> (Event -> Effect Unit) -> Effect Server
 ```
 
 Run application on specified port and execute callback after launch.
@@ -36,7 +36,7 @@ HTTP version
 #### `listenHttps`
 
 ``` purescript
-listenHttps :: forall e1 e2 opts. App e1 -> Port -> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHttps :: forall opts. App -> Port -> opts -> (Event -> Effect Unit) -> Effect Server
 ```
 
 Run application on specified port and execute callback after launch.
@@ -45,7 +45,7 @@ HTTPS version
 #### `listenHostHttp`
 
 ``` purescript
-listenHostHttp :: forall e1 e2. App e1 -> Port -> Host -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHostHttp :: App -> Port -> Host -> (Event -> Effect Unit) -> Effect Server
 ```
 
 Run application on specified port & host and execute callback after launch.
@@ -54,7 +54,7 @@ HTTP version
 #### `listenHostHttps`
 
 ``` purescript
-listenHostHttps :: forall e1 e2 opts. App e1 -> Port -> Host -> opts -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenHostHttps :: forall opts. App -> Port -> Host -> opts -> (Event -> Effect Unit) -> Effect Server
 ```
 
 Run application on specified port & host and execute callback after launch.
@@ -63,7 +63,7 @@ HTTPS version
 #### `listenPipe`
 
 ``` purescript
-listenPipe :: forall e1 e2. App e1 -> Pipe -> (Event -> Eff e2 Unit) -> ExpressM e1 Server
+listenPipe :: App -> Pipe -> (Event -> Effect Unit) -> Effect Server
 ```
 
 Run application on specified named pipe and execute callback after launch.
@@ -72,7 +72,7 @@ HTTP version
 #### `makeHttpServer`
 
 ``` purescript
-makeHttpServer :: forall e1. App e1 -> ExpressM e1 Server
+makeHttpServer :: App -> Effect Server
 ```
 
 Create a Node.HTTP server from the Express application.
@@ -81,7 +81,7 @@ HTTP version
 #### `makeHttpsServer`
 
 ``` purescript
-makeHttpsServer :: forall e1. App e1 -> ExpressM e1 Server
+makeHttpsServer :: App -> Effect Server
 ```
 
 Create a Node.HTTP server from the Express application.
@@ -90,7 +90,7 @@ HTTPS version
 #### `apply`
 
 ``` purescript
-apply :: forall e. App e -> Application -> ExpressM e Unit
+apply :: App -> Application -> Effect Unit
 ```
 
 Apply App actions to existent Express.js application
@@ -98,7 +98,7 @@ Apply App actions to existent Express.js application
 #### `use`
 
 ``` purescript
-use :: forall e. Handler e -> App e
+use :: Handler -> App
 ```
 
 Use specified middleware handler.
@@ -106,7 +106,7 @@ Use specified middleware handler.
 #### `useExternal`
 
 ``` purescript
-useExternal :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+useExternal :: Fn3 Request Response (Effect Unit) (Effect Unit) -> App
 ```
 
 Use any function as middleware.
@@ -117,7 +117,7 @@ See http://expressjs.com/4x/api.html#middleware
 #### `useAt`
 
 ``` purescript
-useAt :: forall e. Path -> Handler e -> App e
+useAt :: Path -> Handler -> App
 ```
 
 Use specified middleware only on requests matching path.
@@ -125,7 +125,7 @@ Use specified middleware only on requests matching path.
 #### `useAtExternal`
 
 ``` purescript
-useAtExternal :: forall e. Path -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit) -> App e
+useAtExternal :: Path -> Fn3 Request Response (Effect Unit) (Effect Unit) -> App
 ```
 
 Use any function as middleware only on requests matching path.
@@ -136,7 +136,7 @@ See http://expressjs.com/4x/api.html#middleware
 #### `useOnParam`
 
 ``` purescript
-useOnParam :: forall e. String -> (String -> Handler e) -> App e
+useOnParam :: String -> (String -> Handler) -> App
 ```
 
 Process route param with specified handler.
@@ -144,7 +144,7 @@ Process route param with specified handler.
 #### `useOnError`
 
 ``` purescript
-useOnError :: forall e. (Error -> Handler e) -> App e
+useOnError :: (Error -> Handler) -> App
 ```
 
 Use error handler. Probably this should be the last middleware to attach.
@@ -152,7 +152,7 @@ Use error handler. Probably this should be the last middleware to attach.
 #### `getProp`
 
 ``` purescript
-getProp :: forall e a. Decode a => String -> AppM (express :: EXPRESS | e) (Maybe a)
+getProp :: forall a. String -> AppM (Maybe a)
 ```
 
 Get application property.
@@ -161,7 +161,7 @@ See http://expressjs.com/4x/api.html#app-settings
 #### `setProp`
 
 ``` purescript
-setProp :: forall e a. Decode a => String -> a -> App e
+setProp :: forall a. String -> a -> App
 ```
 
 Set application property.
@@ -170,7 +170,7 @@ See http://expressjs.com/4x/api.html#app-settings
 #### `http`
 
 ``` purescript
-http :: forall e r. RoutePattern r => Method -> r -> Handler e -> App e
+http :: forall r. RoutePattern r => Method -> r -> Handler -> App
 ```
 
 Bind specified handler to handle request matching route and method.
@@ -178,7 +178,7 @@ Bind specified handler to handle request matching route and method.
 #### `get`
 
 ``` purescript
-get :: forall e r. RoutePattern r => r -> Handler e -> App e
+get :: forall r. RoutePattern r => r -> Handler -> App
 ```
 
 Shortcut for `http GET`.
@@ -186,7 +186,7 @@ Shortcut for `http GET`.
 #### `post`
 
 ``` purescript
-post :: forall e r. RoutePattern r => r -> Handler e -> App e
+post :: forall r. RoutePattern r => r -> Handler -> App
 ```
 
 Shortcut for `http POST`.
@@ -194,7 +194,7 @@ Shortcut for `http POST`.
 #### `put`
 
 ``` purescript
-put :: forall e r. RoutePattern r => r -> Handler e -> App e
+put :: forall r. RoutePattern r => r -> Handler -> App
 ```
 
 Shortcut for `http PUT`.
@@ -202,7 +202,7 @@ Shortcut for `http PUT`.
 #### `delete`
 
 ``` purescript
-delete :: forall e r. RoutePattern r => r -> Handler e -> App e
+delete :: forall r. RoutePattern r => r -> Handler -> App
 ```
 
 Shortcut for `http DELETE`.
@@ -210,7 +210,7 @@ Shortcut for `http DELETE`.
 #### `all`
 
 ``` purescript
-all :: forall e r. RoutePattern r => r -> Handler e -> App e
+all :: forall r. RoutePattern r => r -> Handler -> App
 ```
 
 Shortcut for `http ALL` (match on any http method).

@@ -3,7 +3,7 @@
 #### `getRouteParam`
 
 ``` purescript
-getRouteParam :: forall e a. RequestParam a => a -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getRouteParam :: forall a. RequestParam a => a -> HandlerM (Maybe String)
 ```
 
 Get route param value. If it is named route, e.g `/user/:id` then
@@ -15,25 +15,28 @@ route.
 #### `getQueryParam`
 
 ``` purescript
-getQueryParam :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getQueryParam :: forall a. String -> HandlerM (Maybe a)
 ```
 
 Get param from query string (part of URL behind '?').
-If there are multiple params having equal keys
-return the first one.
+It could be any JS object, e.g. an array in case multiple repeating query
+parameters, or an object in case of nested query parameters (this
+particular behavior depends on the type of query parser - 'simple' won't
+parse complex objects, see
+https://github.com/expressjs/express/blob/master/test/req.query.js)
 
 #### `getQueryParams`
 
 ``` purescript
-getQueryParams :: forall e. String -> HandlerM (express :: EXPRESS | e) (Array String)
+getQueryParams :: forall a. String -> HandlerM (Maybe (Array a))
 ```
 
-Get all params from query string having specified key.
+Shortcut for `getQueryParam paramName :: HandlerM (Maybe (Array a))`
 
 #### `getBody`
 
 ``` purescript
-getBody :: forall e a. Decode a => HandlerM (express :: EXPRESS | e) (Either MultipleErrors a)
+getBody :: forall a. Decode a => HandlerM (F a)
 ```
 
 Get the request's body.
@@ -43,7 +46,7 @@ NOTE: Not parsed by default, you must attach proper middleware
 #### `getBody'`
 
 ``` purescript
-getBody' :: forall e. HandlerM (express :: EXPRESS | e) Foreign
+getBody' :: HandlerM Foreign
 ```
 
 Get the request's body without a `Decode` parsing.
@@ -53,7 +56,7 @@ NOTE: Not parsed by default, you must attach proper middleware
 #### `getBodyParam`
 
 ``` purescript
-getBodyParam :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getBodyParam :: forall a. String -> HandlerM (Maybe a)
 ```
 
 Get param from request's body.
@@ -63,7 +66,7 @@ NOTE: Not parsed by default, you must attach proper middleware
 #### `getRoute`
 
 ``` purescript
-getRoute :: forall e. HandlerM (express :: EXPRESS | e) String
+getRoute :: HandlerM String
 ```
 
 Return route that matched this request.
@@ -71,7 +74,7 @@ Return route that matched this request.
 #### `getCookie`
 
 ``` purescript
-getCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getCookie :: String -> HandlerM (Maybe String)
 ```
 
 Get cookie param by its key.
@@ -79,7 +82,7 @@ Get cookie param by its key.
 #### `getSignedCookie`
 
 ``` purescript
-getSignedCookie :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getSignedCookie :: String -> HandlerM (Maybe String)
 ```
 
 Get signed cookie param by its key.
@@ -87,7 +90,7 @@ Get signed cookie param by its key.
 #### `getRequestHeader`
 
 ``` purescript
-getRequestHeader :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+getRequestHeader :: String -> HandlerM (Maybe String)
 ```
 
 Get request header param.
@@ -95,7 +98,7 @@ Get request header param.
 #### `accepts`
 
 ``` purescript
-accepts :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+accepts :: String -> HandlerM (Maybe String)
 ```
 
 Check if specified response type will be accepted by a client.
@@ -103,7 +106,7 @@ Check if specified response type will be accepted by a client.
 #### `ifAccepts`
 
 ``` purescript
-ifAccepts :: forall e. String -> Handler e -> Handler e
+ifAccepts :: String -> Handler -> Handler
 ```
 
 Execute specified handler if client accepts specified response type.
@@ -111,7 +114,7 @@ Execute specified handler if client accepts specified response type.
 #### `acceptsCharset`
 
 ``` purescript
-acceptsCharset :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+acceptsCharset :: String -> HandlerM (Maybe String)
 ```
 
 Check if specified charset is accepted.
@@ -119,7 +122,7 @@ Check if specified charset is accepted.
 #### `acceptsLanguage`
 
 ``` purescript
-acceptsLanguage :: forall e. String -> HandlerM (express :: EXPRESS | e) (Maybe String)
+acceptsLanguage :: String -> HandlerM (Maybe String)
 ```
 
 Check if specified language is accepted.
@@ -127,7 +130,7 @@ Check if specified language is accepted.
 #### `hasType`
 
 ``` purescript
-hasType :: forall e. String -> HandlerM (express :: EXPRESS | e) Boolean
+hasType :: String -> HandlerM Boolean
 ```
 
 Check if request's Content-Type field matches type.
@@ -136,7 +139,7 @@ See http://expressjs.com/4x/api.html#req.is
 #### `getRemoteIp`
 
 ``` purescript
-getRemoteIp :: forall e. HandlerM (express :: EXPRESS | e) String
+getRemoteIp :: HandlerM String
 ```
 
 Return remote or upstream address.
@@ -144,7 +147,7 @@ Return remote or upstream address.
 #### `getRemoteIps`
 
 ``` purescript
-getRemoteIps :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
+getRemoteIps :: HandlerM (Array String)
 ```
 
 Return list of X-Forwarded-For proxies if any.
@@ -152,7 +155,7 @@ Return list of X-Forwarded-For proxies if any.
 #### `getPath`
 
 ``` purescript
-getPath :: forall e. HandlerM (express :: EXPRESS | e) String
+getPath :: HandlerM String
 ```
 
 Return request URL pathname.
@@ -160,7 +163,7 @@ Return request URL pathname.
 #### `getHostname`
 
 ``` purescript
-getHostname :: forall e. HandlerM (express :: EXPRESS | e) String
+getHostname :: HandlerM String
 ```
 
 Return Host header field.
@@ -168,7 +171,7 @@ Return Host header field.
 #### `getSubdomains`
 
 ``` purescript
-getSubdomains :: forall e. HandlerM (express :: EXPRESS | e) (Array String)
+getSubdomains :: HandlerM (Array String)
 ```
 
 Return array of subdomains.
@@ -176,7 +179,7 @@ Return array of subdomains.
 #### `isFresh`
 
 ``` purescript
-isFresh :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isFresh :: HandlerM Boolean
 ```
 
 Check that Last-Modified and/or ETag still matches.
@@ -184,7 +187,7 @@ Check that Last-Modified and/or ETag still matches.
 #### `isStale`
 
 ``` purescript
-isStale :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isStale :: HandlerM Boolean
 ```
 
 Check that Last-Modified and/or ETag do not match.
@@ -192,7 +195,7 @@ Check that Last-Modified and/or ETag do not match.
 #### `isXhr`
 
 ``` purescript
-isXhr :: forall e. HandlerM (express :: EXPRESS | e) Boolean
+isXhr :: HandlerM Boolean
 ```
 
 Check if request was issued by XMLHttpRequest.
@@ -200,7 +203,7 @@ Check if request was issued by XMLHttpRequest.
 #### `getProtocol`
 
 ``` purescript
-getProtocol :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Protocol)
+getProtocol :: HandlerM (Maybe Protocol)
 ```
 
 Return request protocol.
@@ -208,7 +211,7 @@ Return request protocol.
 #### `getMethod`
 
 ``` purescript
-getMethod :: forall e. HandlerM (express :: EXPRESS | e) (Maybe Method)
+getMethod :: HandlerM Method
 ```
 
 Return request HTTP method
@@ -216,7 +219,7 @@ Return request HTTP method
 #### `getUrl`
 
 ``` purescript
-getUrl :: forall e. HandlerM (express :: EXPRESS | e) String
+getUrl :: HandlerM String
 ```
 
 Return request URL (may be modified by other handlers/middleware).
@@ -224,7 +227,7 @@ Return request URL (may be modified by other handlers/middleware).
 #### `getOriginalUrl`
 
 ``` purescript
-getOriginalUrl :: forall e. HandlerM (express :: EXPRESS | e) String
+getOriginalUrl :: HandlerM String
 ```
 
 Return request original URL.
@@ -232,7 +235,7 @@ Return request original URL.
 #### `getUserData`
 
 ``` purescript
-getUserData :: forall e a. Decode a => String -> HandlerM (express :: EXPRESS | e) (Maybe a)
+getUserData :: forall a. String -> HandlerM (Maybe a)
 ```
 
 Retrieves the data from the request set with previous call to `setUserData`
@@ -240,7 +243,7 @@ Retrieves the data from the request set with previous call to `setUserData`
 #### `setUserData`
 
 ``` purescript
-setUserData :: forall a e. String -> a -> Handler e
+setUserData :: forall a. String -> a -> Handler
 ```
 
 Sets the specified field of the userData object attached to the Request
