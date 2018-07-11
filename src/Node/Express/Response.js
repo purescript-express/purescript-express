@@ -82,12 +82,6 @@ exports._redirectWithStatus = function (resp, status, url) {
     };
 };
 
-exports._redirectWithStatus = function (resp, status, url) {
-    return function () {
-        resp.redirect(status, url);
-    };
-};
-
 exports._setLocation = function (resp, url) {
     return function () {
         resp.location(url);
