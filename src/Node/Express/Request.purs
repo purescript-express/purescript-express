@@ -24,7 +24,6 @@ import Foreign.Class (class Decode, decode)
 import Foreign.Object (Object, lookup)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
-import Node.Express.Internal.Utils (decodeURI)
 
 -- | Get route param value. If it is named route, e.g `/user/:id` then
 -- | `getRouteParam "id"` return matched part of route. If it is

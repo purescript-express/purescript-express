@@ -13,8 +13,7 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
 import Data.Either (either)
-import Data.Function.Uncurried (runFn2)
-import Node.Express.Internal.Utils (nextWithError)
+import Data.Function.Uncurried (Fn2, runFn2)
 import Node.Express.Types (Response, Request)
 import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError, catchError)
 
@@ -50,7 +49,7 @@ instance monadAffHandlerM :: MonadAff HandlerM where
     liftAff act = HandlerM \_ _ _ -> act
 
 runHandlerM :: Handler -> Request -> Response -> Effect Unit -> Effect Unit
-runHandlerM (HandlerM h) req res nxt = void $ runAff_ (either (runFn2 nextWithError nxt) pure) (h req res nxt)
+runHandlerM (HandlerM h) req res nxt = void $ runAff_ (either (runFn2 _nextWithError nxt) pure) (h req res nxt)
 
 -- | Call next handler/middleware in a chain.
 next :: Handler
@@ -59,7 +58,7 @@ next = HandlerM \_ _ nxt -> liftEffect nxt
 -- | Call next handler/middleware and pass error to it.
 nextThrow :: forall a. Error -> HandlerM a
 nextThrow err = HandlerM \_ _ nxt ->
-    liftEffect $ runFn2 nextWithError nxt err
+    liftEffect $ runFn2 _nextWithError nxt err
 
 instance monadThrowHandlerM :: MonadThrow Error HandlerM where
     throwError err = HandlerM \_ _ nxt -> throwError err
@@ -67,3 +66,5 @@ instance monadThrowHandlerM :: MonadThrow Error HandlerM where
 instance monadErrorHandlerM ∷ MonadError Error HandlerM where
     catchError (HandlerM m) h = HandlerM $ \req res nxt ->
         catchError (m req res nxt) $ \e -> case h e of HandlerM m0 -> m0 req res nxt
+
+foreign import _nextWithError :: forall a. Fn2 (Effect Unit) Error (Effect a)
