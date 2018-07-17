@@ -18,6 +18,9 @@ import Test.Unit.Console
 foreign import mockMiddleware ::
     String -> Fn3 Request Response (Effect Unit) (Effect Unit)
 
+foreign import mockThirdMain ::
+    String -> Application -> Effect Unit
+
 assertProperty :: forall a. Show a => Eq a => Decode a =>
     String -> Maybe a -> TestMockApp
 assertProperty name expected = assertInApp $ \report -> do
@@ -75,6 +78,10 @@ testApplicationUseExternal = testExpress "useExternal" $ do
     setupMockApp $ useExternal (mockMiddleware testValue)
     sendTestRequest GET "http://example.com/" assertTestHeaderExists
 
+testApplicationMount = testExpress "mount" $ do
+    setupMockApp $ mount (mockThirdMain testValue)
+    sendTestRequest GET "http://example.com/" assertTestHeaderExists
+
 testApplicationUseAt = testExpress "useAt" $ do
     setupMockApp $ useAt "/some/path" $ setTestHeader testValue
     sendTestRequest GET "http://example.com/" assertTestHeaderAbsent
@@ -103,6 +110,7 @@ testSuite = suite "Application" do
     testApplicationUse
     testApplicationUseOnError
     testApplicationUseExternal
+    testApplicationMount
     testApplicationUseAt
     testApplicationUseAtExternal
     testApplicationUseOnParam
