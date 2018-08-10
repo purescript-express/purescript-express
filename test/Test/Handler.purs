@@ -4,7 +4,6 @@ import Effect
 import Effect.Class
 import Effect.Exception
 import Control.Monad.Trans.Class
-import Data.Default
 import Data.Function
 import Data.Maybe
 import Node.Express.App hiding (apply)
@@ -244,7 +243,7 @@ testResponse = do
         sendTestRequest id assertTestHeaderExists
 
     testExpress "setCookie" $ do
-        setupMockApp $ use $ setCookie testCookie testValue def
+        setupMockApp $ use $ setCookie testCookie testValue defaultCookieOptions
         sendTestRequest id (assertCookieValue testCookie $ Just testValue)
 
     testExpress "clearCookie" $ do

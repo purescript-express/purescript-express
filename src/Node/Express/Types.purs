@@ -2,7 +2,6 @@ module Node.Express.Types where
 
 import Prelude
 import Data.String.Regex (Regex)
-import Data.Default (class Default)
 import Data.Maybe (Maybe (..))
 
 foreign import data Application :: Type
@@ -67,6 +66,8 @@ newtype CookieOptions = CookieOptions
     , path :: String
     }
 
-instance defaultCookieOptions :: Default CookieOptions where
-    def = CookieOptions { maxAge: oneYear, signed: false, path: "/" }
-      where oneYear = 365 * 24 * 60 * 60 * 1000
+defaultCookieOptions :: CookieOptions
+defaultCookieOptions =
+    CookieOptions { maxAge: oneYear, signed: false, path: "/" }
+  where
+    oneYear = 365 * 24 * 60 * 60 * 1000
