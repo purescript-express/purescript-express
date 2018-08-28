@@ -15,13 +15,10 @@ import Prelude
 
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn2, runFn3, runFn4)
 import Data.Maybe (Maybe(..), maybe)
-import Data.String (CodePoint, codePointFromChar, drop, dropWhile, null, takeWhile)
-import Data.Array ((:))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Foreign (F, Foreign)
 import Foreign.Class (class Decode, decode)
-import Foreign.Object (Object, lookup)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
 
