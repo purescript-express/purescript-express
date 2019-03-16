@@ -28,8 +28,8 @@ instance functorHandlerM :: Functor HandlerM where
 
 instance applyHandlerM :: Apply HandlerM where
     apply (HandlerM f) (HandlerM h) = HandlerM \req resp nxt -> do
-        res   <- h req resp nxt
         trans <- f req resp nxt
+        res   <- h req resp nxt
         pure $ trans res
 
 instance applicativeHandlerM :: Applicative HandlerM where
