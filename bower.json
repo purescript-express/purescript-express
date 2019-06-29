@@ -24,12 +24,12 @@
   ],
   "dependencies": {
     "purescript-foreign": "^5.0.0",
-    "purescript-foreign-generic": "^7.0.0",
-    "purescript-node-http": "^5.0.0",
-    "purescript-test-unit": "^14.0.0",
-    "purescript-aff": "^5.0.2"
+    "purescript-foreign-generic": "^10.0.0",
+    "purescript-node-http": "^5.0.1",
+    "purescript-test-unit": "^15.0.0",
+    "purescript-aff": "^5.1.1"
   },
   "devDependencies": {
-    "purescript-test-unit": "^14.0.0"
+    "purescript-test-unit": "^15.0.0"
   }
 }
