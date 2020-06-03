@@ -157,3 +157,9 @@ exports._useAtExternal = function (app, route, mw) {
         app.use(route, mw);
     };
 };
+
+exports._enable = function (app, val) {
+  return function () {
+    app.enable(val);
+  };
+};

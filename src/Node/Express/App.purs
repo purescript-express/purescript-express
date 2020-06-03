@@ -5,7 +5,7 @@ module Node.Express.App
     , listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
-    , http, get, post, put, delete, all
+    , http, get, post, put, delete, all, enable
     ) where
 
 import Prelude hiding (apply)
@@ -187,6 +187,12 @@ delete = http DELETE
 all :: forall r. (RoutePattern r) => r -> Handler -> App
 all = http ALL
 
+-- | Sets the Boolean setting name to true.
+-- | See http://expressjs.com/en/4x/api.html#app.enable
+enable :: String -> App
+enable val = AppM \app ->
+    runFn2 _enable app val
+
 foreign import mkApplication :: Effect Application
 
 foreign import _getProp :: forall a. Fn4 Application String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
@@ -220,3 +226,5 @@ foreign import _useAtExternal :: Fn3 Application String (Fn3 Request Response (E
 foreign import _useOnParam :: Fn3 Application String (String -> HandlerFn) (Effect Unit)
 
 foreign import _useOnError :: Fn2 Application (Error -> HandlerFn) (Effect Unit)
+
+foreign import _enable :: Fn2 Application String (Effect Unit)
