@@ -1,19 +1,20 @@
 module JSMiddleware where
 
 import Prelude hiding (apply)
+
 import Data.Maybe (Maybe(..))
-import Data.Function.Uncurried (Fn3)
 import Effect (Effect)
 import Effect.Console (log)
-import Node.Express.Types (Response, Request)
+import Effect.Uncurried (EffectFn3)
 import Node.Express.App (App, listenHttp, post, get, useExternal)
 import Node.Express.Handler (Handler)
 import Node.Express.Request (getBodyParam)
 import Node.Express.Response (send)
+import Node.Express.Types (Response, Request)
 import Node.HTTP (Server)
 
 
-foreign import jsonBodyParser :: Fn3 Request Response (Effect Unit) (Effect Unit)
+foreign import jsonBodyParser :: EffectFn3 Request Response (Effect Unit) Unit
 
 indexHandler :: Handler
 indexHandler = send "Make POST request with JSON body like {\"message\": <msg>} to get your message back"

@@ -2,10 +2,5 @@
 "use strict";
 
 exports._static = function(root) {
-  return function(req, res, nxt) {
-    return function() {
-      var express = require("express");
-      return express.static(root)(req, res, nxt);
-    }
-  }
+  return require("express").static(root)
 }
