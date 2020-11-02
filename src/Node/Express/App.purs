@@ -15,10 +15,9 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
-import Effect.Uncurried (EffectFn3)
 import Foreign (Foreign, unsafeToForeign)
 import Node.Express.Handler (Handler, runHandlerM)
-import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..))
+import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..), Middleware)
 import Node.HTTP (Server)
 
 -- | Monad responsible for application related operations (initial setup mostly).
@@ -122,7 +121,7 @@ use middleware = AppM \app ->
 -- | Introduced to ease usage of a bunch of external
 -- | middleware written for express.js.
 -- | See http://expressjs.com/4x/api.html#middleware
-useExternal :: EffectFn3 Request Response (Effect Unit) Unit -> App
+useExternal :: Middleware -> App
 useExternal fn = AppM \app ->
     runFn2 _useExternal app fn
 
@@ -135,7 +134,7 @@ useAt route middleware = AppM \app ->
 -- | Introduced to ease usage of a bunch of external
 -- | middleware written for express.js.
 -- | See http://expressjs.com/4x/api.html#middleware
-useAtExternal :: Path -> EffectFn3 Request Response (Effect Unit) Unit -> App
+useAtExternal :: Path -> Middleware -> App
 useAtExternal route fn = AppM \app ->
     runFn3 _useAtExternal app route fn
 
@@ -212,11 +211,11 @@ foreign import _listenPipe :: Application -> String -> (Event -> Effect Unit) ->
 
 foreign import _use :: Fn2 Application HandlerFn (Effect Unit)
 
-foreign import _useExternal :: Fn2 Application (EffectFn3 Request Response (Effect Unit) Unit) (Effect Unit)
+foreign import _useExternal :: Fn2 Application Middleware (Effect Unit)
 
 foreign import _useAt :: Fn3 Application String (HandlerFn) (Effect Unit)
 
-foreign import _useAtExternal :: Fn3 Application String (EffectFn3 Request Response (Effect Unit) Unit) (Effect Unit)
+foreign import _useAtExternal :: Fn3 Application String Middleware (Effect Unit)
 
 foreign import _useOnParam :: Fn3 Application String (String -> HandlerFn) (Effect Unit)
 

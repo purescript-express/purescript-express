@@ -2,15 +2,13 @@ module Node.Express.Middleware.CookieParser
   ( cookieParser
   ) where
 
-import Effect (Effect)
 import Effect.Class (liftEffect)
 import Data.Function (($))
-import Data.Unit (Unit)
 import Node.Express.Handler (Handler, HandlerM(..))
-import Node.Express.Types (Request, Response)
-import Effect.Uncurried (EffectFn3, runEffectFn3)
+import Node.Express.Types (Middleware)
+import Effect.Uncurried (runEffectFn3)
 
-foreign import _cookieParser :: EffectFn3 Request Response (Effect Unit) Unit
+foreign import _cookieParser :: Middleware
 
 -- | Handler that parses cookies using 'cookie-parser' middleware.
 cookieParser :: Handler

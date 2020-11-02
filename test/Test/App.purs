@@ -18,7 +18,7 @@ import Effect.Uncurried (EffectFn3)
 import Foreign.Class (class Decode)
 
 foreign import mockMiddleware ::
-    String -> EffectFn3 Request Response (Effect Unit) Unit
+    String -> Middleware
 
 assertProperty :: forall a. Show a => Eq a => Decode a =>
     String -> Maybe a -> TestMockApp

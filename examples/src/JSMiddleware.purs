@@ -10,11 +10,10 @@ import Node.Express.App (App, listenHttp, post, get, useExternal)
 import Node.Express.Handler (Handler)
 import Node.Express.Request (getBodyParam)
 import Node.Express.Response (send)
-import Node.Express.Types (Response, Request)
+import Node.Express.Types (Middleware)
 import Node.HTTP (Server)
 
-
-foreign import jsonBodyParser :: EffectFn3 Request Response (Effect Unit) Unit
+foreign import jsonBodyParser :: Middleware
 
 indexHandler :: Handler
 indexHandler = send "Make POST request with JSON body like {\"message\": <msg>} to get your message back"
