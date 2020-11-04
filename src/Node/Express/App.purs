@@ -1,11 +1,15 @@
 module Node.Express.App
     ( AppM
     , App
+    , HandlerFn
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
     , listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
+
+    , mkApplication, _getProp, _setProp, _http, _httpServer, _httpsServer, _listenHttp, _listenHttps
+    , _listenHostHttp, _listenHostHttps, _listenPipe, _use, _useExternal, _useAt, _useAtExternal, _useOnParam, _useOnError
     ) where
 
 import Prelude hiding (apply)
