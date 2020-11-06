@@ -35,8 +35,8 @@ instance functorAppM :: Functor AppM where
 
 instance applyAppM :: Apply AppM where
     apply (AppM f) (AppM h) = AppM \app -> do
-        res <- h app
         trans <- f app
+        res <- h app
         pure $ trans res
 
 instance applicativeAppM :: Applicative AppM where
