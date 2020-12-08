@@ -1,11 +1,15 @@
 module Node.Express.App
     ( AppM
     , App
+    , HandlerFn
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
     , listenPipe, makeHttpServer, makeHttpsServer, apply
     , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
+
+    , mkApplication, _getProp, _setProp, _http, _httpServer, _httpsServer, _listenHttp, _listenHttps
+    , _listenHostHttp, _listenHostHttps, _listenPipe, _use, _useExternal, _useAt, _useAtExternal, _useOnParam, _useOnError
     ) where
 
 import Prelude hiding (apply)
@@ -17,7 +21,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
 import Foreign (Foreign, unsafeToForeign)
 import Node.Express.Handler (Handler, runHandlerM)
-import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..))
+import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..), Middleware)
 import Node.HTTP (Server)
 
 -- | Monad responsible for application related operations (initial setup mostly).
@@ -31,8 +35,8 @@ instance functorAppM :: Functor AppM where
 
 instance applyAppM :: Apply AppM where
     apply (AppM f) (AppM h) = AppM \app -> do
-        res <- h app
         trans <- f app
+        res <- h app
         pure $ trans res
 
 instance applicativeAppM :: Applicative AppM where
@@ -121,7 +125,7 @@ use middleware = AppM \app ->
 -- | Introduced to ease usage of a bunch of external
 -- | middleware written for express.js.
 -- | See http://expressjs.com/4x/api.html#middleware
-useExternal :: Fn3 Request Response (Effect Unit) (Effect Unit) -> App
+useExternal :: Middleware -> App
 useExternal fn = AppM \app ->
     runFn2 _useExternal app fn
 
@@ -134,7 +138,7 @@ useAt route middleware = AppM \app ->
 -- | Introduced to ease usage of a bunch of external
 -- | middleware written for express.js.
 -- | See http://expressjs.com/4x/api.html#middleware
-useAtExternal :: Path -> Fn3 Request Response (Effect Unit) (Effect Unit) -> App
+useAtExternal :: Path -> Middleware -> App
 useAtExternal route fn = AppM \app ->
     runFn3 _useAtExternal app route fn
 
@@ -211,11 +215,11 @@ foreign import _listenPipe :: Application -> String -> (Event -> Effect Unit) ->
 
 foreign import _use :: Fn2 Application HandlerFn (Effect Unit)
 
-foreign import _useExternal :: Fn2 Application (Fn3 Request Response (Effect Unit) (Effect Unit)) (Effect Unit)
+foreign import _useExternal :: Fn2 Application Middleware (Effect Unit)
 
 foreign import _useAt :: Fn3 Application String (HandlerFn) (Effect Unit)
 
-foreign import _useAtExternal :: Fn3 Application String (Fn3 Request Response (Effect Unit) (Effect Unit)) (Effect Unit)
+foreign import _useAtExternal :: Fn3 Application String Middleware (Effect Unit)
 
 foreign import _useOnParam :: Fn3 Application String (String -> HandlerFn) (Effect Unit)
 

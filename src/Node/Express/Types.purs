@@ -1,8 +1,11 @@
 module Node.Express.Types where
 
 import Prelude
+
+import Data.Maybe (Maybe(..))
 import Data.String.Regex (Regex)
-import Data.Maybe (Maybe (..))
+import Effect (Effect)
+import Effect.Uncurried (EffectFn3)
 
 foreign import data Application :: Type
 foreign import data Event :: Type
@@ -65,6 +68,8 @@ newtype CookieOptions = CookieOptions
     , signed :: Boolean
     , path :: String
     }
+
+type Middleware = EffectFn3 Request Response (Effect Unit) Unit
 
 defaultCookieOptions :: CookieOptions
 defaultCookieOptions =
