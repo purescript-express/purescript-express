@@ -1,8 +1,8 @@
 module Node.Express.Request
-  ( getRouteParam, getQueryParam, getQueryParams, getBody, getBody'
+  ( getRouteParam, getRouteParams, getQueryParam, getQueryParams, getBody, getBody'
   , getBodyParam, getRoute
   , getCookie, getSignedCookie
-  , getRequestHeader
+  , getRequestHeader, getRequestHeaders
   , accepts, ifAccepts, acceptsCharset, acceptsLanguage, hasType
   , getRemoteIp, getRemoteIps, getPath, getHostname, getSubdomains
   , isFresh, isStale
@@ -18,6 +18,7 @@ import Data.Maybe (Maybe(..), maybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Foreign (F, Foreign)
+import Foreign.Object (Object)
 import Foreign.Class (class Decode, decode)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
@@ -27,9 +28,14 @@ import Node.Express.Types (class RequestParam, Request, Method, Protocol, decode
 -- | regex route, e.g. `/user/(\d+)` then `getRouteParam 1` return
 -- | part that matched `(\d+)` and `getRouteParam 0` return whole
 -- | route.
-getRouteParam :: forall a. (RequestParam a) => a -> HandlerM (Maybe String)
+getRouteParam :: forall a. RequestParam a => a -> HandlerM (Maybe String)
 getRouteParam name = HandlerM \req _ _ ->
     liftEffect $ runFn4 _getRouteParam req name Nothing Just
+
+-- | Get all route params.
+getRouteParams :: HandlerM (Object Foreign)
+getRouteParams = HandlerM \req _ _ ->
+    liftEffect $ _getRouteParams req
 
 -- | Get the request's body.
 -- | NOTE: Not parsed by default, you must attach proper middleware
@@ -85,6 +91,10 @@ getSignedCookie name = HandlerM \req _ _ ->
 getRequestHeader :: String -> HandlerM (Maybe String)
 getRequestHeader field = HandlerM \req _ _ ->
     liftEffect $ runFn4 _getHeader req field Nothing Just
+
+-- | Get all request headers.
+getRequestHeaders :: HandlerM (Object Foreign)
+getRequestHeaders = HandlerM \req _ _ -> liftEffect $ _getHeaders req
 
 -- | Check if specified response type will be accepted by a client.
 accepts :: String -> HandlerM (Maybe String)
@@ -186,6 +196,8 @@ getUserData field = HandlerM \req _ _ -> do
 
 foreign import _getRouteParam :: forall a. Fn4 Request a (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
+foreign import _getRouteParams :: Request -> Effect (Object Foreign)
+
 foreign import _getRoute :: Request -> Effect String
 
 foreign import _getBody :: Request -> Effect Foreign
@@ -199,6 +211,8 @@ foreign import _getCookie :: Fn4 Request String (Maybe String) (String -> Maybe 
 foreign import _getSignedCookie :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 
 foreign import _getHeader :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
+
+foreign import _getHeaders :: Request -> Effect (Object Foreign)
 
 foreign import _accepts :: Fn4 Request String (Maybe String) (String -> Maybe String) (Effect (Maybe String))
 

@@ -9,6 +9,12 @@ exports._getRouteParam = function (req, name, nothing, just) {
     };
 };
 
+exports._getRouteParams = function (req) {
+    return function () {
+        return req.params;
+    };
+};
+
 exports._getRoute = function (req) {
     return function () {
         return req.route.path;
@@ -63,6 +69,12 @@ exports._getHeader = function (req, field, nothing, just) {
             return just(req.get(field));
         }
         return nothing;
+    };
+};
+
+exports._getHeaders = function (req) {
+    return function () {
+        return req.headers;
     };
 };
 
@@ -186,4 +198,3 @@ exports._setData = function (req, field, val) {
         req.userData[field] = val;
     };
 };
-
