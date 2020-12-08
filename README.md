@@ -8,8 +8,9 @@ Purescript wrapper around Node.js Express web-framework.
 ## Usage
 
 1. Add `express` dependency in your `package.json`
-2. Add `purescript-express` dependency in your `bower.json`
-3. Install/update and have fun
+2. Add `cookie-parser` dependency in your `package.json` IF you will use `CookieParser` middleware
+3. Add `purescript-express` dependency in your `bower.json`
+4. Install/update and have fun
 
 ## Documentation
 
