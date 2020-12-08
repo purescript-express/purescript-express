@@ -1,6 +1,6 @@
 # purescript-express
 
-[![Build Status](https://travis-ci.org/nkly/purescript-express.svg?branch=master)](https://travis-ci.org/nkly/purescript-express)
+[![Build Status](https://travis-ci.org/purescript-express/purescript-express.svg?branch=master)](https://travis-ci.org/purescript-express/purescript-express)
 [![purescript-express on Pursuit](https://pursuit.purescript.org/packages/purescript-express/badge)](https://pursuit.purescript.org/packages/purescript-express)
 
 Purescript wrapper around Node.js Express web-framework.
