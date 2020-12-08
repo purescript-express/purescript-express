@@ -1,5 +1,5 @@
 module Node.Express.App
-    ( AppM
+    ( AppM(..)
     , App
     , HandlerFn
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
@@ -25,7 +25,7 @@ import Node.Express.Types (class RoutePattern, Application, Response, Request, E
 import Node.HTTP (Server)
 
 -- | Monad responsible for application related operations (initial setup mostly).
-data AppM a = AppM (Application -> Effect a)
+newtype AppM a = AppM (Application -> Effect a)
 type App = AppM Unit
 
 type HandlerFn = Request -> Response -> Effect Unit -> Effect Unit
