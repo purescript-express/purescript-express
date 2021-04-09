@@ -1,6 +1,13 @@
-{ name = "express-examples"
-, dependencies =
-  (../spago.dhall).dependencies # [ "console", "effect", "node-fs", "psci-support", "refs", "strings", "node-process" ]
-, packages = (../spago.dhall).packages
-, sources = (../spago.dhall).sources # ["examples/src/**/*.purs"]
-}
+let conf = ../spago.dhall
+in conf //
+  { dependencies =
+      conf.dependencies #
+        [ "integers"
+        , "node-process"
+        , "refs"
+        ]
+  , sources =
+      conf.sources #
+        [ "examples/**/*.purs"
+        ]
+  }
