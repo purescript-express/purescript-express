@@ -24,11 +24,11 @@ import Data.Either (either)
 import Foreign (Foreign, unsafeToForeign, readString)
 import Foreign.Class (encode, decode)
 import Foreign.Object (Object)
-import Global.Unsafe (unsafeStringify)
 
 
 foreign import cwdJson :: String
 foreign import unsafeUpdateMapInPlace :: forall a. Object a -> String -> a -> Effect Unit
+foreign import unsafeStringify :: forall a. a -> String
 
 id :: forall a. a -> a
 id a = a
