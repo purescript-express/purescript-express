@@ -3,17 +3,17 @@
 A couple of examples of purescript-express usage
 
 ## Installation
-
+In the top-level directory:
 ```
-$ npm install -g bower pulp purescript
+$ npm install -g spago purescript
 $ npm install
-$ bower install
+$ spago -x examples/spago.dhall build
 ```
 
 ## Running
-
+In the top-level directory:
 ```
-$ pulp run -m <example-name>
+$ spago -x examples/spago.dhall run -m <example-name>
 ```
 
 ## Available examples

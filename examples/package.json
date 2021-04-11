@@ -1,9 +1,0 @@
-{
-    "name": "purescript-express-examples",
-    "repository": "https://github.com/purescript-express/purescript-express/tree/master/examples",
-    "license": "BSD-3-Clause",
-    "dependencies": {
-        "express": "~4.16.3",
-        "body-parser": "~1.18.3"
-    }
-}

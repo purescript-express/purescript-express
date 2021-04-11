@@ -25,5 +25,8 @@
   "homepage": "https://github.com/purescript-express/purescript-express#readme",
   "dependencies": {
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "body-parser": "^1.19.0"
   }
 }

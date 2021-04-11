@@ -11,3 +11,7 @@ exports.unsafeUpdateMapInPlace = function(map) {
         };
     };
 }
+
+exports.unsafeStringify = function(x) {
+    return JSON.stringify(x);
+}
