@@ -1,8 +1,8 @@
 // module Node.Express.App
 
 exports.mkApplication = function() {
-    var express = require('express');
-    return express();
+    var nanoexpress = require('nanoexpress');
+    return nanoexpress();
 }
 
 exports._httpServer = function(app) {
