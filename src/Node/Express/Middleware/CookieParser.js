@@ -1,10 +1,8 @@
-// module Node.Express.Middleware.CookieParser
-"use strict";
+import cp from "cookie-parser";
 
 // we could write this middleware as
-// `exports._cookieParser = require("cookie-parser")()`
+// `export function _cookieParser("cookie-parser")()`
 // but this variant is better for tree-shaking
-exports._cookieParser = function(req, res, nxt) {
-  var cp = require("cookie-parser");
-  return cp()(req, res, nxt);
+export function _cookieParser(req, res, nxt) {
+    return cp()(req, res, nxt);
 }

@@ -12,7 +12,6 @@
   , "maybe"
   , "node-http"
   , "prelude"
-  , "psci-support"
   , "strings"
   , "test-unit"
   , "transformers"

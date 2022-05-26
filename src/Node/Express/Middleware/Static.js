@@ -1,6 +1,5 @@
-// module Node.Express.Middleware.Static
-"use strict";
+import express from "express";
 
-exports._static = function(root) {
-  return require("express").static(root)
+export function _static(root) {
+    return express.static(root)
 }
