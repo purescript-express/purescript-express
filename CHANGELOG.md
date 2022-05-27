@@ -6,6 +6,8 @@ Notable changes to this project are documented in this file. The format is based
 
 Breaking changes (😱!!!):
 
+- Support for the PureScript 0.15
+
 - (#104): type for Middleware was changed from `Fn3 Request Response (Effect Unit) (Effect Unit)` to `EffectFn3 Request Response (Effect Unit) Unit`
 
 New features:
