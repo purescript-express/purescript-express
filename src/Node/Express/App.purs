@@ -1,5 +1,5 @@
 module Node.Express.App
-    ( AppM()
+    ( AppM(..)
     , App()
     , listenHttp, listenHttps, listenHostHttp, listenHostHttps
     , listenPipe, makeHttpServer, makeHttpsServer, apply
