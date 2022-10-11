@@ -3,6 +3,7 @@ module Node.Express.Types where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype)
 import Data.String.Regex (Regex)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn3)
@@ -84,6 +85,8 @@ newtype CookieOptions = CookieOptions
   , httpOnly :: Boolean
   , overwrite :: Boolean
   }
+
+derive instance Newtype CookieOptions _
 
 type Middleware = EffectFn3 Request Response (Effect Unit) Unit
 
