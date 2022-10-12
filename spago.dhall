@@ -10,6 +10,7 @@
   , "foreign-object"
   , "functions"
   , "maybe"
+  , "newtype"
   , "node-http"
   , "prelude"
   , "record"
