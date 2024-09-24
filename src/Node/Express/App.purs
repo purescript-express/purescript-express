@@ -7,7 +7,6 @@ module Node.Express.App
     , use, useExternal, useAt, useAtExternal, useOnParam, useOnError
     , getProp, setProp
     , http, get, post, put, delete, all
-
     , mkApplication, _getProp, _setProp, _http, _httpServer, _httpsServer, _listenHttp, _listenHttps
     , _listenHostHttp, _listenHostHttps, _listenPipe, _use, _useExternal, _useAt, _useAtExternal, _useOnParam, _useOnError
     ) where
