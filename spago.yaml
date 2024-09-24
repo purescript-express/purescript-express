@@ -1,29 +1,30 @@
 package:
   name: express
   dependencies:
-    - "aff"
-    - "arrays"
-    - "effect"
-    - "either"
-    - "exceptions"
-    - "foreign"
-    - "open-foreign-generic"
-    - "foreign-object"
-    - "functions"
-    - "maybe"
-    - "newtype"
-    - "node-http"
-    - "prelude"
-    - "record"
-    - "strings"
-    - "test-unit"
-    - "transformers"
-    - "typelevel-prelude"
-    - "unsafe-coerce"
+    - aff: ">=8.0.0 <9.0.0"
+    - effect: ">=4.0.0 <5.0.0"
+    - either: ">=6.1.0 <7.0.0"
+    - exceptions: ">=6.1.0 <7.0.0"
+    - foreign: ">=7.0.0 <8.0.0"
+    - foreign-object: ">=4.1.0 <5.0.0"
+    - open-foreign-generic: ">=11.0.0 <12.0.0"
+    - functions: ">=6.0.0 <7.0.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - newtype: ">=5.0.0 <6.0.0"
+    - node-http: ">=9.1.0 <10.0.0"
+    - prelude: ">=6.0.1 <7.0.0"
+    - record: ">=4.0.0 <5.0.0"
+    - strings: ">=6.0.1 <7.0.0"
+    - test-unit: ">=17.0.0 <18.0.0"
+    - transformers: ">=6.1.0 <7.0.0"
+    - typelevel-prelude: ">=7.0.0 <8.0.0"
   test:
     main: Test.Main
     dependencies: []
 workspace:
   packageSet:
     registry: 60.0.1
-  extraPackages: {}
+  extraPackages:
+    # wait for publish
+    open-foreign-generic:
+      path: /home/srghma/projects/purescript-open-foreign-generic

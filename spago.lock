@@ -3,31 +3,28 @@ workspace:
     express:
       path: ./
       dependencies:
-        - aff
-        - arrays
-        - effect
-        - either
-        - exceptions
-        - foreign
-        - foreign-object
-        - functions
-        - maybe
-        - newtype
-        - node-http
-        - open-foreign-generic
-        - prelude
-        - record
-        - strings
-        - test-unit
-        - transformers
-        - typelevel-prelude
-        - unsafe-coerce
+        - aff: ">=8.0.0 <9.0.0"
+        - effect: ">=4.0.0 <5.0.0"
+        - either: ">=6.1.0 <7.0.0"
+        - exceptions: ">=6.1.0 <7.0.0"
+        - foreign: ">=7.0.0 <8.0.0"
+        - foreign-object: ">=4.1.0 <5.0.0"
+        - functions: ">=6.0.0 <7.0.0"
+        - maybe: ">=6.0.0 <7.0.0"
+        - newtype: ">=5.0.0 <6.0.0"
+        - node-http: ">=9.1.0 <10.0.0"
+        - open-foreign-generic: ">=11.0.0 <12.0.0"
+        - prelude: ">=6.0.1 <7.0.0"
+        - record: ">=4.0.0 <5.0.0"
+        - strings: ">=6.0.1 <7.0.0"
+        - test-unit: ">=17.0.0 <18.0.0"
+        - transformers: ">=6.1.0 <7.0.0"
+        - typelevel-prelude: ">=7.0.0 <8.0.0"
       test_dependencies: []
       build_plan:
         - aff
         - arraybuffer-types
         - arrays
-        - assert
         - avar
         - bifunctors
         - catenable-lists
@@ -603,78 +600,8 @@ workspace:
       z3: 0.0.2
       zipperarray: 2.0.0
   extra_packages:
-    bolson:
-      path: /home/srghma/projects/purescript-bolson
-    codegen:
-      path: /home/srghma/projects/purescript-deku/codegen
-    deku:
-      path: /home/srghma/projects/purescript-deku/deku
-    deku-core:
-      path: /home/srghma/projects/purescript-deku/deku-core
-    deku-css:
-      path: /home/srghma/projects/purescript-deku/deku-css
-    deku-documentation:
-      path: /home/srghma/projects/deku-documentation
-    deku-dom:
-      path: /home/srghma/projects/purescript-deku/deku-dom
-    deku-nextui:
-      path: /home/srghma/projects/purescript-deku-nextui
-    docs:
-      path: /home/srghma/projects/purescript-lumi-components/docs
-    docs-search-client-halogen:
-      path: /home/srghma/projects/spago/docs-search/client-halogen
-    docs-search-common:
-      path: /home/srghma/projects/spago/docs-search/common
-    docs-search-index:
-      path: /home/srghma/projects/spago/docs-search/index
-    dodo-printer:
-      path: /home/srghma/projects/purescript-dodo-printer
-    github-actions-toolkit:
-      path: /home/srghma/projects/purescript-github-actions-toolkit
-    html2deku:
-      path: /home/srghma/projects/html2deku
-    hyrule:
-      path: /home/srghma/projects/purescript-hyrule
-    hyrule-demo:
-      path: /home/srghma/projects/purescript-hyrule-demo
-    lumi-components:
-      path: /home/srghma/projects/purescript-lumi-components
-    node-workerbees:
-      path: /home/srghma/projects/purescript-node-workerbees
-    open-drawing:
-      path: /home/srghma/projects/purescript-open-drawing/lib
-    open-drawing-example:
-      path: /home/srghma/projects/purescript-open-drawing/example
-    open-folds:
-      path: /home/srghma/projects/purescript-open-folds
     open-foreign-generic:
       path: /home/srghma/projects/purescript-open-foreign-generic
-    open-memoize:
-      path: /home/srghma/projects/purescript-open-memoize
-    open-mkdirp-aff:
-      path: /home/srghma/projects/purescript-open-mkdirp-aff
-    open-pairing:
-      path: /home/srghma/projects/purescript-open-pairing_
-    profunctor:
-      path: /home/srghma/projects/purescript-profunctor
-    spago:
-      path: /home/srghma/projects/spago
-    spago-bin:
-      path: /home/srghma/projects/spago/bin
-    spago-core:
-      path: /home/srghma/projects/spago/core
-    test:
-      path: /home/srghma/projects/purescript-test
-    tidy:
-      path: /home/srghma/projects/purescript-tidy/lib
-    tidy-cli:
-      path: /home/srghma/projects/purescript-tidy/bin
-    tidy-codegen:
-      path: /home/srghma/projects/purescript-tidy-codegen
-    tidy-script:
-      path: /home/srghma/projects/purescript-tidy/script
-    tldr:
-      path: /home/srghma/projects/purescript-tldr
 packages:
   aff:
     type: registry
@@ -721,14 +648,6 @@ packages:
       - tuples
       - unfoldable
       - unsafe-coerce
-  assert:
-    type: registry
-    version: 6.0.0
-    integrity: sha256-hCSYcCw9kj3qujoDcriWhCdmrpPZoguSPDZhEMnTl3A=
-    dependencies:
-      - console
-      - effect
-      - prelude
   avar:
     type: registry
     version: 5.0.0
@@ -1236,9 +1155,7 @@ packages:
     path: /home/srghma/projects/purescript-open-foreign-generic
     dependencies:
       - arrays
-      - assert
       - bifunctors
-      - console
       - control
       - effect
       - either
@@ -1254,10 +1171,8 @@ packages:
       - partial
       - prelude
       - record
-      - strings
       - transformers
       - tuples
-      - typelevel-prelude
       - unsafe-coerce
   options:
     type: registry
@@ -1319,8 +1234,9 @@ packages:
     integrity: sha256-o8p6SLYmVPqzXZhQFd2hGAWEwBoXl1swxLG/scpJ0V0=
     dependencies: []
   profunctor:
-    type: local
-    path: /home/srghma/projects/purescript-profunctor
+    type: registry
+    version: 6.0.1
+    integrity: sha256-E58hSYdJvF2Qjf9dnWLPlJKh2Z2fLfFLkQoYi16vsFk=
     dependencies:
       - control
       - distributive

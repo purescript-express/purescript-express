@@ -19,7 +19,7 @@ import Effect (Effect)
 import Effect.Class (liftEffect)
 import Foreign (F, Foreign)
 import Foreign.Object (Object)
-import Foreign.Class (class Decode, decode)
+import Foreign.Generic.Class (class Decode, decode)
 import Node.Express.Handler (Handler, HandlerM(..))
 import Node.Express.Types (class RequestParam, Request, Method, Protocol, decodeProtocol, decodeMethod)
 

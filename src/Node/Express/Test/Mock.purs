@@ -31,7 +31,7 @@ import Effect (Effect)
 import Effect.Class (liftEffect)
 import Control.Monad.Reader.Trans
 import Foreign (Foreign)
-import Foreign.Class (encode)
+import Foreign.Generic.Class (encode)
 import Foreign.Object (Object, lookup)
 import Data.Maybe (Maybe)
 import Node.Express.App (App, apply)
