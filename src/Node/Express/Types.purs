@@ -1,21 +1,12 @@
 module Node.Express.Types where
 
 import Prelude
-import Data.Foreign (ForeignError(..), readString, fail)
-import Data.Foreign.Class (class Decode)
+
+import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype)
 import Data.String.Regex (Regex)
-import Data.Default (class Default)
-import Control.Monad.Eff (Eff, kind Effect)
-
-
-foreign import data EXPRESS :: Effect
-
--- | General monad, indicates that we're dealing with
--- | express.js related functions.
--- | Applications should use HandlerM and AppM primarily
--- | and ExpressM in rare cases.
-type ExpressM e a = Eff (express :: EXPRESS | e) a
-
+import Effect (Effect)
+import Effect.Uncurried (EffectFn3)
 
 foreign import data Application :: Type
 foreign import data Event :: Type
@@ -25,63 +16,90 @@ foreign import data Request :: Type
 data Protocol = Http | Https
 
 instance showProtocol :: Show Protocol where
-    show Http  = "http"
-    show Https = "https"
+  show Http = "http"
+  show Https = "https"
 
-instance isForeignProtocol :: Decode Protocol where
-    decode value = readString value >>= case _ of
-        "http"  -> pure Http
-        "https" -> pure Https
-        _ -> fail $ JSONError "Unknown protocol"
-
+decodeProtocol :: String -> Maybe Protocol
+decodeProtocol "http" = Just Http
+decodeProtocol "https" = Just Https
+decodeProtocol _ = Nothing
 
 data Method = ALL | GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CustomMethod String
 
 instance showMethod :: Show Method where
-    show ALL     = "all"
-    show GET     = "get"
-    show POST    = "post"
-    show PUT     = "put"
-    show DELETE  = "delete"
-    show OPTIONS = "options"
-    show HEAD    = "head"
-    show TRACE   = "trace"
-    show (CustomMethod method) = method
+  show ALL = "all"
+  show GET = "get"
+  show POST = "post"
+  show PUT = "put"
+  show DELETE = "delete"
+  show OPTIONS = "options"
+  show HEAD = "head"
+  show TRACE = "trace"
+  show (CustomMethod method) = method
 
-instance isForeignMethod :: Decode Method where
-    decode value = readString value >>= case _ of
-        "GET"     -> pure GET
-        "POST"    -> pure POST
-        "PUT"     -> pure PUT
-        "DELETE"  -> pure DELETE
-        "OPTIONS" -> pure OPTIONS
-        "HEAD"    -> pure HEAD
-        "TRACE"   -> pure TRACE
-        method    -> pure $ CustomMethod method
-        
+decodeMethod :: String -> Method
+decodeMethod "GET" = GET
+decodeMethod "POST" = POST
+decodeMethod "PUT" = PUT
+decodeMethod "DELETE" = DELETE
+decodeMethod "OPTIONS" = OPTIONS
+decodeMethod "HEAD" = HEAD
+decodeMethod "TRACE" = TRACE
+decodeMethod method = CustomMethod method
+
 type Host = String
 type Port = Int
 type Pipe = String
 type Path = String
 
+class RoutePattern :: forall a. a -> Constraint
 class RoutePattern a
-instance routePath  :: RoutePattern String
+
+instance routePath :: RoutePattern String
 instance routeRegex :: RoutePattern Regex
 
+-- class RequestParam a :
+class RequestParam :: forall a. a -> Constraint
 class RequestParam a
+
 instance requestParamString :: RequestParam String
 instance requestParamNumber :: RequestParam Number
 
 -- | Cookie options
 -- | - maxAge -- time in msecs
 -- | - signed -- use secret to sign if true
--- | - path   -- cookie path
-newtype CookieOptions = CookieOptions
-    { maxAge :: Int
-    , signed :: Boolean
-    , path :: String
-    }
+-- | - path -- cookie path
+-- | - sameSite -- "same site" cookie; can be "none", "lax", "strict"
+-- | - secure -- whether the cookie is only to be sent over HTTPS
+-- | - httpOnly -- whether the cookie is and not made available to JavaScript
+-- | - overwrite -- whether to overwrite previously set cookies of the same name
 
-instance defaultCookieOptions :: Default CookieOptions where
-    def = CookieOptions { maxAge: oneYear, signed: false, path: "/" }
-      where oneYear = 365 * 24 * 60 * 60 * 1000
+data SameSite = None | Lax | Strict
+
+newtype CookieOptions = CookieOptions
+  { maxAge :: Int
+  , signed :: Boolean
+  , path :: String
+  , sameSite :: SameSite
+  , secure :: Boolean
+  , httpOnly :: Boolean
+  , overwrite :: Boolean
+  }
+
+derive instance Newtype CookieOptions _
+
+type Middleware = EffectFn3 Request Response (Effect Unit) Unit
+
+defaultCookieOptions :: CookieOptions
+defaultCookieOptions =
+  CookieOptions
+    { maxAge: oneYear
+    , signed: false
+    , path: "/"
+    , sameSite: Lax
+    , secure: true
+    , httpOnly: true
+    , overwrite: true
+    }
+  where
+  oneYear = 365 * 24 * 60 * 60 * 1000

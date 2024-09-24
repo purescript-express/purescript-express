@@ -1,31 +1,34 @@
 module Test.App (testSuite) where
 
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception
 import Control.Monad.Trans.Class
-import Data.Foreign.Class
 import Data.Function.Uncurried
 import Data.Maybe
-import Node.Express.Types
+import Effect
+import Effect.Class
+import Effect.Exception
 import Node.Express.App hiding (apply)
 import Node.Express.Handler
 import Node.Express.Test.Mock
+import Node.Express.Types
 import Prelude
 import Test.Unit
 import Test.Unit.Console
 
-foreign import mockMiddleware :: forall e.
-    String -> Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
+import Effect.Uncurried (EffectFn3)
+import Foreign.Class (class Decode)
 
-assertProperty :: forall a e. Show a => Eq a => Decode a =>
-    String -> Maybe a -> TestMockApp e
+foreign import mockMiddleware ::
+    String -> Middleware
+
+assertProperty :: forall a. Show a => Eq a => Decode a =>
+    String -> Maybe a -> TestMockApp
 assertProperty name expected = assertInApp $ \report -> do
     actual <- getProp name
     let message = "Property '" <> name <> "' does not match: \
         \Expected [ " <> show expected <> " ] Got [ " <> show actual <> " ]"
-    liftEff $ if expected == actual
-                then report success
-                else report $ failure message
+    liftEffect $ if expected == actual
+                  then report success
+                  else report $ failure message
 
 testApplicationGetProp = testExpress "getProp" $ do
     assertProperty "string" (Just "string")
@@ -46,15 +49,15 @@ testApplicationSetProp = testExpress "setProp" $ do
 
 testValue = "TestValue"
 
-sendTestRequest :: forall e.
+sendTestRequest ::
     Method
     -> String
-    -> (MockResponse -> TestMockApp e)
-    -> TestMockApp e
+    -> (MockResponse -> TestMockApp)
+    -> TestMockApp
 sendTestRequest method url testResponse =
     sendRequest method url (\x -> x) testResponse
 
-sendTestError :: forall e. (MockResponse -> TestMockApp e) -> TestMockApp e
+sendTestError :: (MockResponse -> TestMockApp) -> TestMockApp
 sendTestError testResponse =
     sendError GET "http://example.com/" testValue testResponse
 

@@ -1,11 +1,9 @@
 module Test.Handler (testSuite) where
 
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception
+import Effect
+import Effect.Class
+import Effect.Exception
 import Control.Monad.Trans.Class
-import Data.Default
-import Data.Foreign.Class
 import Data.Function
 import Data.Maybe
 import Node.Express.App hiding (apply)
@@ -14,22 +12,26 @@ import Node.Express.Request
 import Node.Express.Response
 import Node.Express.Test.Mock
 import Node.Express.Types
-import Prelude hiding (id)
+import Prelude
 import Test.Unit
 import Test.Unit.Assert
 import Test.Unit.Console
 import Unsafe.Coerce
 
 import Control.Monad.Except (runExcept)
-import Data.Array (head)
+import Data.Array (head, null)
 import Data.Either (either)
-import Data.Foreign (readString, toForeign)
-import Data.StrMap as StrMap
-import Global.Unsafe (unsafeStringify)
+import Foreign (Foreign, unsafeToForeign, readString)
+import Foreign.Class (encode, decode)
+import Foreign.Object (Object)
 
 
 foreign import cwdJson :: String
-foreign import unsafeUpdateMapInPlace :: forall a e. StrMap.StrMap a -> String -> a -> Eff e Unit
+foreign import unsafeUpdateMapInPlace :: forall a. Object a -> String -> a -> Effect Unit
+foreign import unsafeStringify :: forall a. a -> String
+
+id :: forall a. a -> a
+id a = a
 
 testValue = "TestValue"
 assertTestHeaderExists = assertTestHeader $ Just testValue
@@ -37,7 +39,7 @@ assertTestHeaderAbsent = assertTestHeader Nothing
 assertTestHeaderWith = assertTestHeader <<< Just
 sendTestRequest = sendRequest GET "http://example.com"
 
-muteTest :: forall e. TestMockApp e
+muteTest :: TestMockApp
 muteTest = lift $ assert "Muted" true
 
 testParams = do
@@ -58,31 +60,34 @@ testParams = do
         setupMockApp $ use paramsHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
         sendTestRequest withBodyParam assertTestHeaderExists
-    testExpress "getQueryParam" $ do
-        setupMockApp $ use paramsHandler
+    testExpress "getQueryParam (without params)" $ do
+        setupMockApp $ use $ queryParamHandler
         sendTestRequest withoutParams assertTestHeaderAbsent
-        sendRequest GET urlWithQueryParam id assertTestHeaderExists
-    testExpress "getQueryParams" $ do
-        setupMockApp $ use paramsHandler
-        sendTestRequest withoutParams assertTestHeaderAbsent
-        sendRequest GET urlWithQueryParams id assertTestHeaderExists
+    testExpress "getQueryParam (string)" $ do
+        setupMockApp $ use $ queryParamHandler
+        let url = "http://example.com/?param=testValue"
+        sendRequest GET url id $ assertTestHeaderWith "testValue"
+    testExpress "getQueryParam (array)" $ do
+        setupMockApp $ use $ queryParamArrayHandler
+        let url = "http://example.com/?param=1&param=2"
+        sendRequest GET url id $ assertTestHeaderWith $ show ["1", "2"]
   where
     testParam = "param"
     withoutParams  = id
     withRouteParam = setRouteParam testParam testValue
     withBody       = setBody       testValue
-    withBody'      = setBody' $ toForeign testValue
+    withBody'      = setBody' $ encode testValue
     withBodyParam  = setBodyParam  testParam testValue
-    urlWithQueryParam = "http://example.com?" <> testParam <> "=" <> testValue
-    urlWithQueryParams = urlWithQueryParam <> "&" <> testParam <> "=someOtherValue"
-    getBody'_ = getBody' <#> readString >>> runExcept
-    paramsHandler  = do
+    getBody'_ = getBody' <#> decode
+    paramsHandler = do
         getRouteParam testParam >>= maybe (pure unit) setTestHeader
-        getBody                 >>= either (pure <<< const unit) setTestHeader
-        getBody'_               >>= either (pure <<< const unit) setTestHeader
+        getBody >>= either (pure <<< const unit) setTestHeader <<< runExcept
+        getBody'_ >>= either (pure <<< const unit) setTestHeader <<< runExcept
         getBodyParam  testParam >>= maybe (pure unit) setTestHeader
+    queryParamHandler =
         getQueryParam testParam >>= maybe (pure unit) setTestHeader
-        map head (getQueryParams testParam) >>= maybe (pure unit) setTestHeader
+    queryParamArrayHandler =
+        getQueryParams testParam >>= maybe (pure unit) (\val -> setTestHeader $ show (val :: Array String))
 
 testHeaders = do
     testExpress "getRequestHeader" $ do
@@ -195,7 +200,7 @@ testMisc = do
         sendTestRequest id $ assertTestHeaderWith (show Http)
 
     testExpress "getMethod" $ do
-        setupMockApp $ use $ getMethod >>= maybe (pure unit) (show >>> setTestHeader)
+        setupMockApp $ use $ getMethod >>= show >>> setTestHeader
         sendTestRequest id $ assertTestHeaderWith (show GET)
 
     testExpress "getUrl" $ do
@@ -238,7 +243,7 @@ testResponse = do
         sendTestRequest id assertTestHeaderExists
 
     testExpress "setCookie" $ do
-        setupMockApp $ use $ setCookie testCookie testValue def
+        setupMockApp $ use $ setCookie testCookie testValue defaultCookieOptions
         sendTestRequest id (assertCookieValue testCookie $ Just testValue)
 
     testExpress "clearCookie" $ do
@@ -330,7 +335,7 @@ testResponse = do
     filepathHeader = "X-Filepath"
     realFilepathHeader = "X-Real-Filepath"
     testErrorHeader = "X-Test-Error"
-    testErrorHandler :: forall e. Error -> Eff e Unit
+    testErrorHandler :: Error -> Effect Unit
     testErrorHandler = \respAsError ->
         let response = unsafeCoerce respAsError in
         unsafeUpdateMapInPlace (response.headers) testErrorHeader testValue

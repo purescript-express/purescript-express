@@ -1,33 +1,31 @@
-// module Node.Express.App
+import express from 'express';
+import http from 'http';
+import https from 'https';
 
-exports.mkApplication = function() {
-    var express = require('express');
+export function mkApplication() {
     return express();
 }
 
-exports._httpServer = function(app) {
-    return function() {
-        var http = require('http');
+export function _httpServer(app) {
+    return function () {
         var server = http.createServer(app);
         return server;
     }
 }
 
-exports._httpsServer = function(app) {
-    return function() {
-        var https = require('https');
+export function _httpsServer(app) {
+    return function () {
         var server = https.createServer(app);
         return server;
     }
 }
 
-exports._listenHttp = function(app) {
-    return function(port) {
-        return function(cb) {
-            return function() {
-                var http = require('http');
+export function _listenHttp(app) {
+    return function (port) {
+        return function (cb) {
+            return function () {
                 var server = http.createServer(app);
-                server.listen(port, function(e) {
+                server.listen(port, function (e) {
                     return cb(e)();
                 });
                 return server;
@@ -36,14 +34,13 @@ exports._listenHttp = function(app) {
     }
 }
 
-exports._listenHttps = function(app) {
-    return function(port) {
-        return function(opts) {
-            return function(cb) {
-                return function() {
-                    var https = require('https');
+export function _listenHttps(app) {
+    return function (port) {
+        return function (opts) {
+            return function (cb) {
+                return function () {
                     var server = https.createServer(opts, app);
-                    server.listen(port, function(e) {
+                    server.listen(port, function (e) {
                         return cb(e)();
                     });
                     return server;
@@ -53,16 +50,15 @@ exports._listenHttps = function(app) {
     }
 }
 
-exports._listenPipe = exports._listenHttp;
+export const _listenPipe = _listenHttp;
 
-exports._listenHostHttp = function(app) {
-    return function(port) {
-        return function(host) {
-            return function(cb) {
-                return function() {
-                    var http = require('http');
+export function _listenHostHttp(app) {
+    return function (port) {
+        return function (host) {
+            return function (cb) {
+                return function () {
                     var server = http.createServer(app);
-                    server.listen(port, host, function(e) {
+                    server.listen(port, host, function (e) {
                         return cb(e)();
                     });
                     return server;
@@ -72,15 +68,14 @@ exports._listenHostHttp = function(app) {
     }
 }
 
-exports._listenHostHttps = function(app) {
-    return function(port) {
-        return function(host) {
-            return function(opts) {
-                return function(cb) {
-                    return function() {
-                        var https = require('https');
+export function _listenHostHttps(app) {
+    return function (port) {
+        return function (host) {
+            return function (opts) {
+                return function (cb) {
+                    return function () {
                         var server = https.createServer(opts, app);
-                        server.listen(port, host, function(e) {
+                        server.listen(port, host, function (e) {
                             return cb(e)();
                         });
                         return server;
@@ -91,65 +86,68 @@ exports._listenHostHttps = function(app) {
     }
 }
 
-exports._http = function (app, method, route, handler) {
+export function _http(app, method, route, handler) {
     return function () {
-        app[method](route, function(req, resp, next) {
+        app[method](route, function (req, resp, next) {
             return handler(req)(resp)(next)();
         });
     };
 };
 
-exports._use = function (app, mw) {
+export function _use(app, mw) {
     return function () {
-        app.use(function(req, resp, next) {
+        app.use(function (req, resp, next) {
             return mw(req)(resp)(next)();
         });
     };
 };
 
-exports._useAt = function (app, route, mw) {
+export function _useAt(app, route, mw) {
     return function () {
-        app.use(route, function(req, resp, next) {
+        app.use(route, function (req, resp, next) {
             return mw(req)(resp)(next)();
         });
     };
 };
 
-exports._useOnParam = function (app, name, cb) {
+export function _useOnParam(app, name, cb) {
     return function () {
-        app.param(name, function(req, resp, next, val) {
+        app.param(name, function (req, resp, next, val) {
             return cb(val)(req)(resp)(next)();
         });
     };
 };
 
-exports._useOnError = function (app, cb) {
+export function _useOnError(app, cb) {
     return function () {
-        app.use(function(err, req, resp, next) {
+        app.use(function (err, req, resp, next) {
             return cb(err)(req)(resp)(next)();
         });
     };
 };
 
-exports._getProp = function (app, name) {
+export function _getProp(app, name, nothing, just) {
     return function () {
-        return app.get(name);
+        if (app.get(name) != null) {
+            return just(app.get(name));
+        }
+        return nothing;
     };
 };
 
-exports._setProp = function (app, name, val) {
+export function _setProp(app, name, val) {
     return function () {
         app.set(name, val);
     };
 };
 
-exports._useExternal = function (app, mw) {
+export function _useExternal(app, mw) {
     return function () {
         app.use(mw);
     };
 };
 
-exports._useAtExternal = function (app, route, mw) {
+export function _useAtExternal(app, route, mw) {
     return function () {
         app.use(route, mw);
     };

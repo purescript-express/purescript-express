@@ -1,159 +1,198 @@
-// module Node.Express.Request
-
-exports._getRouteParam = function (req, name) {
+export function _getRouteParam(req, name, nothing, just) {
     return function () {
-        return req.params[name];
+        if (req.params[name] != null) {
+            return just(req.params[name]);
+        }
+        return nothing;
     };
 };
 
-exports._getRoute = function (req) {
+export function _getRouteParams(req) {
+    return function () {
+        return req.params;
+    };
+};
+
+export function _getRoute(req) {
     return function () {
         return req.route.path;
     };
 };
 
-exports._getBody = function (req) {
+export function _getBody(req) {
     return function () {
-        return req.body == null ? void 0 : req.body;
+        return req.body;
     };
 };
 
-exports._getBodyParam = function (req, name) {
+export function _getBodyParam(req, name, nothing, just) {
     return function () {
-        return req.body == null ? void 0 : req.body[name];
+        if (req.body && name in req.body && req.body[name] != null) {
+            return just(req.body[name]);
+        }
+        return nothing;
     };
 };
 
-exports._getQueryParams = function (req) {
+export function _getQueryParam(req, name, nothing, just) {
     return function () {
-        return req.url.split('?')[1] || '';
+        if (req.query && name in req.query && req.query[name] != null) {
+            return just(req.query[name]);
+        }
+        return nothing;
     };
 };
 
-exports._getCookie = function (req, name) {
+export function _getCookie(req, name, nothing, just) {
     return function () {
-        return req.cookies[name];
+        if (req.cookies[name] != null) {
+            return just(req.cookies[name]);
+        }
+        return nothing;
     }
 };
 
-exports._getSignedCookie = function (req, name) {
+export function _getSignedCookie(req, name, nothing, just) {
     return function () {
-        return req.signedCookies[name];
+        if (req.signedCookies[name] != null) {
+            return just(req.signedCookies[name]);
+        }
+        return nothing;
     };
 };
 
-exports._getHeader = function (req, field) {
+export function _getHeader(req, field, nothing, just) {
     return function () {
-        return req.get(field);
+        if (req.get(field) != null) {
+            return just(req.get(field));
+        }
+        return nothing;
     };
 };
 
-exports._accepts = function (req, types) {
+export function _getHeaders(req) {
     return function () {
-        return req.accepts(types);
+        return req.headers;
     };
 };
 
-exports._acceptsCharset = function (req, charset) {
+export function _accepts(req, types, nothing, just) {
     return function () {
-        return req.acceptsCharset(charset);
+        if (req.accepts(types) != null) {
+            return just(req.accepts(types));
+        }
+        return nothing;
     };
 };
 
-exports._acceptsLanguage = function (req, language) {
+export function _acceptsCharset(req, charset, nothing, just) {
     return function () {
-        return req.acceptsLanguage(language);
+        if (req.acceptsCharset(charset) != null) {
+            return just(req.acceptsCharset(charset));
+        }
+        return nothing;
     };
 };
 
-exports._hasType = function (req, type) {
+export function _acceptsLanguage(req, language, nothing, just) {
+    return function () {
+        if (req.acceptsLanguage(language) != null) {
+            return just(req.acceptsLanguage(language));
+        }
+        return nothing;
+    };
+};
+
+export function _hasType(req, type) {
     return function () {
         return req.is(type);
     };
 };
 
-exports._getRemoteIp = function (req) {
+export function _getRemoteIp(req) {
     return function () {
         return req.ip;
     };
 };
 
-exports._getRemoteIps = function (req) {
+export function _getRemoteIps(req) {
     return function () {
         return req.ips;
     };
 };
 
-exports._getPath = function (req) {
+export function _getPath(req) {
     return function () {
         return req.path;
     };
 };
 
-exports._getHostname = function (req) {
+export function _getHostname(req) {
     return function () {
         return req.hostname;
     };
 };
 
-exports._getSubdomains = function (req) {
+export function _getSubdomains(req) {
     return function () {
         return req.subdomains;
     };
 };
 
-exports._isFresh = function (req) {
+export function _isFresh(req) {
     return function () {
         return req.fresh;
     };
 };
 
-exports._isStale = function (req) {
+export function _isStale(req) {
     return function () {
         return req.stale;
     };
 };
 
-exports._isXhr = function (req) {
+export function _isXhr(req) {
     return function () {
         return req.xhr;
     };
 };
 
-exports._getProtocol = function (req) {
+export function _getProtocol(req) {
     return function () {
         return req.protocol;
     };
 };
 
-exports._getMethod = function (req) {
+export function _getMethod(req) {
     return function () {
         return req.method;
     };
 };
 
-exports._getUrl = function (req) {
+export function _getUrl(req) {
     return function () {
         return req.url;
     };
 };
 
-exports._getOriginalUrl = function (req) {
+export function _getOriginalUrl(req) {
     return function () {
         return req.originalUrl;
     };
 };
 
-exports._getData = function (req, field) {
+export function _getData(req, field, nothing, just) {
     return function () {
-        return req.userData && req.userData[field];
+        if (req.userData && req.userData[field] != null) {
+            return just(req.userData[field]);
+        }
+        return nothing;
     };
 };
 
-exports._setData = function (req, field, val) {
+export function _setData(req, field, val) {
     return function () {
         req.userData = req.userData || {};
         req.userData[field] = val;
     };
 };
-

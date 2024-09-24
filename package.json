@@ -1,0 +1,32 @@
+{
+  "name": "purescript-express",
+  "version": "0.8.0",
+  "description": "Purescript wrapper around Express.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purescript-express/purescript-express.git"
+  },
+  "keywords": [
+    "purescript",
+    "express"
+  ],
+  "author": "Nikolai Obedin",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/purescript-express/purescript-express/issues"
+  },
+  "homepage": "https://github.com/purescript-express/purescript-express#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "body-parser": "^1.19.0"
+  }
+}

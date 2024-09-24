@@ -1,13 +1,15 @@
-// module Test.Handler
+export const cwdJson = JSON.stringify(process.cwd());
 
-exports.cwdJson = JSON.stringify(process.cwd());
-
-exports.unsafeUpdateMapInPlace = function(map) {
-    return function(key) {
-        return function(newValue) {
-            return function() {
+export function unsafeUpdateMapInPlace(map) {
+    return function (key) {
+        return function (newValue) {
+            return function () {
                 map[key] = newValue;
             };
         };
     };
+}
+
+export function unsafeStringify(x) {
+    return JSON.stringify(x);
 }

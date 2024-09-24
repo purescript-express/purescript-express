@@ -1,14 +1,16 @@
 # purescript-express
 
-[![Build Status](https://travis-ci.org/nkly/purescript-express.svg?branch=master)](https://travis-ci.org/nkly/purescript-express)
+[![Build Status](https://travis-ci.org/purescript-express/purescript-express.svg?branch=master)](https://travis-ci.org/purescript-express/purescript-express)
+[![purescript-express on Pursuit](https://pursuit.purescript.org/packages/purescript-express/badge)](https://pursuit.purescript.org/packages/purescript-express)
 
 Purescript wrapper around Node.js Express web-framework.
 
 ## Usage
 
 1. Add `express` dependency in your `package.json`
-2. Add `purescript-express` dependency in your `bower.json`
-3. Install/update and have fun
+2. Add `cookie-parser` dependency in your `package.json` IF you will use `CookieParser` middleware
+3. Add `purescript-express` dependency in your `bower.json`
+4. Install/update and have fun
 
 ## Documentation
 

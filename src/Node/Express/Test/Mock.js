@@ -1,9 +1,7 @@
-// module Test.Mock
-
-var Url = require('url');
+import Url from 'url';
 
 // String -> String -> MockRequest
-var MockRequest = function(method, url) {
+var MockRequest = function (method, url) {
     this.method = method;
     this.url = url;
     this.originalUrl = url;
@@ -14,69 +12,69 @@ var MockRequest = function(method, url) {
     this.params = {};
 
     // NOTE: to be initialized when corresponding handler is called
-    this.route = {path: null};
+    this.route = { path: null };
 
     this.initHardcodedValues();
     this.parseUrlAndInit();
 }
 
 // String -> String -> MockRequest
-MockRequest.prototype.setHeader = function(headerName) {
+MockRequest.prototype.setHeader = function (headerName) {
     var self = this;
-    return function(headerValue) {
+    return function (headerValue) {
         self.headers[headerName] = headerValue;
         return self;
     };
 }
 
 // String -> MockRequest
-MockRequest.prototype.setBody = function(value) {
+MockRequest.prototype.setBody = function (value) {
     var self = this;
     self.body = value;
     return self;
 }
 
 // String -> String -> MockRequest
-MockRequest.prototype.setBodyParam = function(paramName) {
+MockRequest.prototype.setBodyParam = function (paramName) {
     var self = this;
-    return function(paramValue) {
+    return function (paramValue) {
         self.body[paramName] = paramValue;
         return self;
     };
 }
 
 // String -> String -> MockRequest
-MockRequest.prototype.setRouteParam = function(paramName) {
+MockRequest.prototype.setRouteParam = function (paramName) {
     var self = this;
-    return function(paramValue) {
+    return function (paramValue) {
         self.params[paramName] = paramValue;
         return self;
     };
 }
 
 // String -> String -> MockRequest
-MockRequest.prototype.setCookie = function(cookieName) {
+MockRequest.prototype.setCookie = function (cookieName) {
     var self = this;
-    return function(cookieValue) {
+    return function (cookieValue) {
         self.cookies[cookieName] = cookieValue;
         return self;
     };
 }
 
 // String -> String -> MockRequest
-MockRequest.prototype.setSignedCookie = function(cookieName) {
+MockRequest.prototype.setSignedCookie = function (cookieName) {
     var self = this;
-    return function(cookieValue) {
+    return function (cookieValue) {
         self.signedCookies[cookieName] = cookieValue;
         return self;
     };
 }
 
-MockRequest.prototype.setRoute = function(routePath) {
+MockRequest.prototype.setRoute = function (routePath) {
     this.route.path = routePath;
 }
 
-MockRequest.prototype.initHardcodedValues = function() {
+MockRequest.prototype.initHardcodedValues = function () {
     this.fresh = true;
     this.stale = false;
     this.xhr = false;
@@ -84,7 +82,7 @@ MockRequest.prototype.initHardcodedValues = function() {
     this.ips = ["0.0.0.0", "0.0.0.1", "0.0.0.2"];
 }
 
-MockRequest.prototype.parseUrlAndInit = function() {
+MockRequest.prototype.parseUrlAndInit = function () {
     var parsedUrl = Url.parse(this.url, true);
     this.path = parsedUrl.pathname;
     this.protocol = parsedUrl.protocol.slice(0, -1);
@@ -94,9 +92,9 @@ MockRequest.prototype.parseUrlAndInit = function() {
     this.secure = this.protocol == "https";
 }
 
-MockRequest.prototype.checkAccepts = function(header, value) {
+MockRequest.prototype.checkAccepts = function (header, value) {
     var values = (this.headers[header] || "").split(",")
-        .map(function(str, i) { return str.trim(); });
+        .map(function (str, i) { return str.trim(); });
     if (values.indexOf(value) >= 0) {
         return value;
     }
@@ -104,27 +102,27 @@ MockRequest.prototype.checkAccepts = function(header, value) {
 
 /* Methods mocking corresponding Express.js methods */
 
-MockRequest.prototype.get = function(headerName) {
+MockRequest.prototype.get = function (headerName) {
     return this.headers[headerName];
 }
 
-MockRequest.prototype.accepts = function(type) {
+MockRequest.prototype.accepts = function (type) {
     return this.checkAccepts('Accept', type);
 }
 
-MockRequest.prototype.acceptsCharset = function(type) {
+MockRequest.prototype.acceptsCharset = function (type) {
     return this.checkAccepts('Accept-Charset', type);
 }
 
-MockRequest.prototype.acceptsLanguage = function(type) {
+MockRequest.prototype.acceptsLanguage = function (type) {
     return this.checkAccepts('Accept-Language', type);
 }
 
-MockRequest.prototype.is = function(type) {
+MockRequest.prototype.is = function (type) {
     return this.headers['Content-Type'] == type;
 }
 
-var MockResponse = function() {
+var MockResponse = function () {
     this.statusCode = 0;
     this.headers = {};
     this.data = "";
@@ -132,31 +130,31 @@ var MockResponse = function() {
     this.headersSent = false;
 }
 
-MockResponse.prototype.status = function(statusCode) {
+MockResponse.prototype.status = function (statusCode) {
     this.statusCode = statusCode;
 }
 
-MockResponse.prototype.type = function(contentType) {
+MockResponse.prototype.type = function (contentType) {
     this.headers['Content-Type'] = contentType;
 }
 
-MockResponse.prototype.get = function(headerName) {
+MockResponse.prototype.get = function (headerName) {
     return this.headers[headerName];
 }
 
-MockResponse.prototype.set = function(headerName, value) {
+MockResponse.prototype.set = function (headerName, value) {
     this.headers[headerName] = value;
 }
 
-MockResponse.prototype.cookie = function(name, value, options) {
-    this.cookies[name] = {name: name, value: value, options: options};
+MockResponse.prototype.cookie = function (name, value, options) {
+    this.cookies[name] = { name: name, value: value, options: options };
 }
 
-MockResponse.prototype.clearCookie = function(name, options) {
+MockResponse.prototype.clearCookie = function (name, options) {
     delete this.cookies[name];
 }
 
-MockResponse.prototype.send = function(data) {
+MockResponse.prototype.send = function (data) {
     if (typeof data === 'string') {
         this.data += data;
     } else {
@@ -165,31 +163,31 @@ MockResponse.prototype.send = function(data) {
     this.headersSent = true;
 }
 
-MockResponse.prototype.end = function() {
+MockResponse.prototype.end = function () {
     this.statusCode = 200;
     this.headersSent = true;
 }
 
-MockResponse.prototype.json = function(obj) {
-   this.send(JSON.stringify(obj));
+MockResponse.prototype.json = function (obj) {
+    this.send(JSON.stringify(obj));
 }
 
-MockResponse.prototype.render = function(view, obj) {
-   this.send('Rendered ' + view + ' with data: ' + JSON.stringify(obj));
+MockResponse.prototype.render = function (view, obj) {
+    this.send('Rendered ' + view + ' with data: ' + JSON.stringify(obj));
 }
 
 MockResponse.prototype.jsonp = MockResponse.prototype.json;
 
-MockResponse.prototype.redirect = function(statusCode, url) {
+MockResponse.prototype.redirect = function (statusCode, url) {
     this.status(statusCode);
     this.location(url);
 }
 
-MockResponse.prototype.location = function(url) {
+MockResponse.prototype.location = function (url) {
     this.set("Location", url);
 }
 
-MockResponse.prototype.sendFile = function(path, options, callback) {
+MockResponse.prototype.sendFile = function (path, options, callback) {
     if (typeof options === 'object' && options.triggerError) {
         return callback(this);
     }
@@ -198,7 +196,7 @@ MockResponse.prototype.sendFile = function(path, options, callback) {
     this.json(options);
 }
 
-MockResponse.prototype.download = function() {
+MockResponse.prototype.download = function () {
     if (arguments.length == 2) {
         var args = Array.prototype.slice.call(arguments);
         args.unshift(arguments[0])
@@ -208,7 +206,7 @@ MockResponse.prototype.download = function() {
     }
 }
 
-MockResponse.prototype.downloadImpl = function(path, filename, callback) {
+MockResponse.prototype.downloadImpl = function (path, filename, callback) {
     if (filename == "triggerError") {
         return callback(this);
     }
@@ -217,55 +215,55 @@ MockResponse.prototype.downloadImpl = function(path, filename, callback) {
     this.set("X-Real-Filepath", path);
 }
 
-var Handler = function(method, route, param, useOnError, fn) {
+var Handler = function (method, route, param, useOnError, fn) {
     this.method = method;
     this.route = route;
     this.param = param;
     this.useOnError = useOnError;
     if (useOnError) {
-        this.run = function(app, error, req, resp, next) {
+        this.run = function (app, error, req, resp, next) {
             return fn.apply(app, [error, req, resp, next]);
         };
     } else if (param) {
-        this.run = function(app, req, resp, next) {
+        this.run = function (app, req, resp, next) {
             req.setRoute(route);
             var paramValue = req.params[param];
             return fn.apply(app, [req, resp, next, paramValue]);
         };
     } else {
-        this.run = function(app, req, resp, next) {
+        this.run = function (app, req, resp, next) {
             req.setRoute(route);
             return fn.apply(app, [req, resp, next]);
         };
     }
 }
 
-Handler.prototype.matches = function(request) {
+Handler.prototype.matches = function (request) {
     return this.methodMatches(request)
         && this.routeMatches(request)
         && this.paramMatches(request)
         && !this.useOnError;
 }
 
-Handler.prototype.methodMatches = function(request) {
+Handler.prototype.methodMatches = function (request) {
     return this.method == null || this.method == request.method;
 }
 
-Handler.prototype.routeMatches = function(request) {
+Handler.prototype.routeMatches = function (request) {
     var routeRx = new RegExp(this.route);
     return this.route == null || routeRx.test(request.path);
 }
 
-Handler.prototype.paramMatches = function(request) {
+Handler.prototype.paramMatches = function (request) {
     return this.param == null || typeof request.params[this.param] == 'string';
 }
 
-var MockApp = function(properties) {
+var MockApp = function (properties) {
     this.properties = properties;
     this.handlers = [];
 }
 
-MockApp.prototype.get = function() {
+MockApp.prototype.get = function () {
     if (arguments.length == 1) {
         var propertyName = arguments[0];
         return this.properties[propertyName];
@@ -276,12 +274,12 @@ MockApp.prototype.get = function() {
     }
 }
 
-MockApp.prototype.set = function(propertyName, value) {
+MockApp.prototype.set = function (propertyName, value) {
     this.properties[propertyName] = value;
 }
 
-MockApp.prototype.use = function() {
-    var use = function(handler) {
+MockApp.prototype.use = function () {
+    var use = function (handler) {
         if (handler.length == 3) {
             this.handlers.push(new Handler(null, null, null, false, handler));
         } else if (handler.length == 4) {
@@ -289,7 +287,7 @@ MockApp.prototype.use = function() {
         }
     }
 
-    var useAtRoute = function(route, handler) {
+    var useAtRoute = function (route, handler) {
         this.handlers.push(new Handler(null, route, null, false, handler));
     }
 
@@ -300,7 +298,7 @@ MockApp.prototype.use = function() {
     }
 }
 
-MockApp.prototype.httpMethod = function(method, route, handler) {
+MockApp.prototype.httpMethod = function (method, route, handler) {
     if (method == "all") {
         method = null;
     }
@@ -311,41 +309,41 @@ var methods = [
     "all", "post", "put", "delete",
     "options", "head", "trace"
 ];
-methods.forEach(function(method) {
-    MockApp.prototype[method] = function() {
+methods.forEach(function (method) {
+    MockApp.prototype[method] = function () {
         var args = Array.prototype.slice.call(arguments);
         args.unshift(method)
         this.httpMethod.apply(this, args);
     };
 });
 
-MockApp.prototype.param = function(name, handler) {
+MockApp.prototype.param = function (name, handler) {
     this.handlers.push(new Handler(null, null, name, false, handler));
 }
 
-MockApp.prototype.emulate = function(request, error) {
+MockApp.prototype.emulate = function (request, error) {
     var isError = error != null;
     var response = new MockResponse();
     var app = this;
     this.handlers.forEach(function (handler, i) {
         if (isError && handler.useOnError) {
-            handler.run(app, error, request, response, function() {});
+            handler.run(app, error, request, response, function () { });
         } else if (handler.matches(request)) {
-            handler.run(app, request, response, function() {});
+            handler.run(app, request, response, function () { });
         }
     });
     return response;
 }
 
-MockApp.prototype.sendRequest = function(request) {
+MockApp.prototype.sendRequest = function (request) {
     return this.emulate(request, null);
 }
 
-MockApp.prototype.sendError = function(request, error) {
+MockApp.prototype.sendError = function (request, error) {
     return this.emulate(request, error);
 }
 
-exports.createMockApp = function() {
+export function createMockApp() {
     var predefinedProperties = {
         string: "string",
         emptyString: "",
@@ -361,26 +359,26 @@ exports.createMockApp = function() {
     return new MockApp(predefinedProperties);
 }
 
-exports.createMockRequest = function(method) {
-    return function(url) {
-        return function() {
+export function createMockRequest(method) {
+    return function (url) {
+        return function () {
             return new MockRequest(method, url);
         };
     };
 }
 
-exports.sendMockRequest = function(mockApp) {
-    return function(request) {
-        return function() {
+export function sendMockRequest(mockApp) {
+    return function (request) {
+        return function () {
             return mockApp.sendRequest(request);
         };
     };
 }
 
-exports.sendMockError = function(mockApp) {
-    return function(request) {
-        return function(error) {
-            return function() {
+export function sendMockError(mockApp) {
+    return function (request) {
+        return function (error) {
+            return function () {
                 return mockApp.sendError(request, new Error(error));
             };
         };

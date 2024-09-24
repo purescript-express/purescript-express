@@ -7,3 +7,6 @@ docs/**/Internal
 *.tix
 pursuit.json
 package-lock.json
+.spago
+.purs-repl
+.psc-ide-port

@@ -3,7 +3,7 @@
 #### `static`
 
 ``` purescript
-static :: forall eff. String -> Handler eff
+static :: String -> Handler
 ```
 
 Handler that uses builtin 'static' middleware to serve files from specified location
