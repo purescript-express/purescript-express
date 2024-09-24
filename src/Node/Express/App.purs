@@ -21,7 +21,7 @@ import Effect.Exception (Error)
 import Foreign (Foreign, unsafeToForeign)
 import Node.Express.Handler (Handler, runHandlerM)
 import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..), Middleware)
-import Node.HTTP (Server)
+import Node.HTTP.Types (HttpServer, HttpsServer)
 
 -- | Monad responsible for application related operations (initial setup mostly).
 newtype AppM a = AppM (Application -> Effect a)
@@ -55,7 +55,7 @@ instance monadEffectAppM :: MonadEffect AppM where
 
 -- | Create a Node.HTTP server from the Express application.
 -- | HTTP version
-makeHttpServer :: App -> Effect Server
+makeHttpServer :: App -> Effect HttpServer
 makeHttpServer (AppM act) = do
     app <- mkApplication
     act app
@@ -63,7 +63,7 @@ makeHttpServer (AppM act) = do
 
 -- | Create a Node.HTTP server from the Express application.
 -- | HTTPS version
-makeHttpsServer :: App -> Effect Server
+makeHttpsServer :: App -> Effect HttpsServer
 makeHttpsServer (AppM act) = do
     app <- mkApplication
     act app
@@ -71,7 +71,7 @@ makeHttpsServer (AppM act) = do
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTP version
-listenHttp :: App -> Port -> (Event -> Effect Unit) -> Effect Server
+listenHttp :: App -> Port -> (Event -> Effect Unit) -> Effect HttpServer
 listenHttp (AppM act) port cb = do
     app <- mkApplication
     act app
@@ -80,7 +80,7 @@ listenHttp (AppM act) port cb = do
 -- | Run application on specified port and execute callback after launch.
 -- | HTTPS version
 listenHttps :: forall opts.
-    App -> Port -> opts -> (Event -> Effect Unit) -> Effect Server
+    App -> Port -> opts -> (Event -> Effect Unit) -> Effect HttpsServer
 listenHttps (AppM act) port opts cb = do
     app <- mkApplication
     act app
@@ -88,7 +88,7 @@ listenHttps (AppM act) port opts cb = do
 
 -- | Run application on specified port & host and execute callback after launch.
 -- | HTTP version
-listenHostHttp :: App -> Port -> Host -> (Event -> Effect Unit) -> Effect Server
+listenHostHttp :: App -> Port -> Host -> (Event -> Effect Unit) -> Effect HttpServer
 listenHostHttp (AppM act) port host cb = do
     app <- mkApplication
     act app
@@ -97,7 +97,7 @@ listenHostHttp (AppM act) port host cb = do
 -- | Run application on specified port & host and execute callback after launch.
 -- | HTTPS version
 listenHostHttps :: forall opts.
-    App -> Port -> Host-> opts -> (Event -> Effect Unit) -> Effect Server
+    App -> Port -> Host-> opts -> (Event -> Effect Unit) -> Effect HttpsServer
 listenHostHttps (AppM act) port host opts cb = do
     app <- mkApplication
     act app
@@ -105,7 +105,7 @@ listenHostHttps (AppM act) port host opts cb = do
 
 -- | Run application on specified named pipe and execute callback after launch.
 -- | HTTP version
-listenPipe :: App -> Pipe -> (Event -> Effect Unit) -> Effect Server
+listenPipe :: App -> Pipe -> (Event -> Effect Unit) -> Effect HttpServer
 listenPipe (AppM act) pipe cb = do
     app <- mkApplication
     act app
@@ -198,19 +198,19 @@ foreign import _setProp :: forall a. Fn3 Application String a (Effect Unit)
 
 foreign import _http :: Fn4 Application String Foreign HandlerFn (Effect Unit)
 
-foreign import _httpServer :: Application -> Effect Server
+foreign import _httpServer :: Application -> Effect HttpServer
 
-foreign import _httpsServer :: Application -> Effect Server
+foreign import _httpsServer :: Application -> Effect HttpsServer
 
-foreign import _listenHttp :: Application -> Int -> (Event -> Effect Unit) -> Effect Server
+foreign import _listenHttp :: Application -> Int -> (Event -> Effect Unit) -> Effect HttpServer
 
-foreign import _listenHttps :: forall opts. Application -> Int -> opts -> (Event -> Effect Unit) -> Effect Server
+foreign import _listenHttps :: forall opts. Application -> Int -> opts -> (Event -> Effect Unit) -> Effect HttpsServer
 
-foreign import _listenHostHttp :: Application -> Int -> String -> (Event -> Effect Unit) -> Effect Server
+foreign import _listenHostHttp :: Application -> Int -> String -> (Event -> Effect Unit) -> Effect HttpServer
 
-foreign import _listenHostHttps :: forall opts. Application -> Int -> String -> opts -> (Event -> Effect Unit) -> Effect Server
+foreign import _listenHostHttps :: forall opts. Application -> Int -> String -> opts -> (Event -> Effect Unit) -> Effect HttpsServer
 
-foreign import _listenPipe :: Application -> String -> (Event -> Effect Unit) -> Effect Server
+foreign import _listenPipe :: Application -> String -> (Event -> Effect Unit) -> Effect HttpServer
 
 foreign import _use :: Fn2 Application HandlerFn (Effect Unit)
 

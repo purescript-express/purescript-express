@@ -1,0 +1,29 @@
+package:
+  name: express
+  dependencies:
+    - "aff"
+    - "arrays"
+    - "effect"
+    - "either"
+    - "exceptions"
+    - "foreign"
+    - "open-foreign-generic"
+    - "foreign-object"
+    - "functions"
+    - "maybe"
+    - "newtype"
+    - "node-http"
+    - "prelude"
+    - "record"
+    - "strings"
+    - "test-unit"
+    - "transformers"
+    - "typelevel-prelude"
+    - "unsafe-coerce"
+  test:
+    main: Test.Main
+    dependencies: []
+workspace:
+  packageSet:
+    registry: 60.0.1
+  extraPackages: {}
