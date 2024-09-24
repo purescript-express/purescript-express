@@ -10,11 +10,14 @@
   , "foreign-object"
   , "functions"
   , "maybe"
+  , "newtype"
   , "node-http"
   , "prelude"
+  , "record"
   , "strings"
   , "test-unit"
   , "transformers"
+  , "typelevel-prelude"
   , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
