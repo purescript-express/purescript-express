@@ -23,8 +23,8 @@ package:
     dependencies: []
 workspace:
   packageSet:
-    registry: 60.0.1
-  extraPackages:
+    registry: 60.2.1
+  extraPackages: {}
     # wait for publish
-    open-foreign-generic:
-      path: /home/srghma/projects/purescript-open-foreign-generic
+    # open-foreign-generic:
+    #   path: /home/srghma/projects/purescript-open-foreign-generic
