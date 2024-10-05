@@ -11,7 +11,6 @@ package:
     - exceptions: ">=6.1.0 <7.0.0"
     - foreign: ">=7.0.0 <8.0.0"
     - foreign-object: ">=4.1.0 <5.0.0"
-    - functions: ">=6.0.0 <7.0.0"
     - maybe: ">=6.0.0 <7.0.0"
     - newtype: ">=5.0.0 <6.0.0"
     - node-http: ">=9.1.0 <10.0.0"
@@ -30,7 +29,8 @@ package:
 workspace:
   packageSet:
     registry: 60.3.0
-  extraPackages: {}
+  extraPackages:
+    {}
     # wait for publish
     # open-foreign-generic:
     #   path: /home/srghma/projects/purescript-open-foreign-generic
