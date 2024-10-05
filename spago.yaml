@@ -20,7 +20,9 @@ package:
     - typelevel-prelude: ">=7.0.0 <8.0.0"
   test:
     main: Test.Main
-    dependencies: []
+    dependencies:
+      - free
+      - unsafe-coerce
 workspace:
   packageSet:
     registry: 60.2.1
