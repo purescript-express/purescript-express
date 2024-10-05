@@ -62,7 +62,7 @@ nextThrow err = HandlerM \_ _ nxt ->
   liftEffect $ runFn2 _nextWithError nxt err
 
 instance monadThrowHandlerM :: MonadThrow Error HandlerM where
-  throwError err = HandlerM \_ _ nxt -> throwError err
+  throwError err = HandlerM \_ _ _nxt -> throwError err
 
 instance monadErrorHandlerM ∷ MonadError Error HandlerM where
   catchError (HandlerM m) h = HandlerM $ \req res nxt ->

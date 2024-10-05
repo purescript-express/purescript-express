@@ -5,6 +5,7 @@ module Node.Express.Response
   , headersSent
   , setContentType
   , setCookie
+  , setAttachment
   , clearCookie
   , send
   , sendJson
