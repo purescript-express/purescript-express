@@ -1,198 +1,28 @@
-export function _getRouteParam(req, name, nothing, just) {
-    return function () {
-        if (req.params[name] != null) {
-            return just(req.params[name]);
-        }
-        return nothing;
-    };
-};
-
-export function _getRouteParams(req) {
-    return function () {
-        return req.params;
-    };
-};
-
-export function _getRoute(req) {
-    return function () {
-        return req.route.path;
-    };
-};
-
-export function _getBody(req) {
-    return function () {
-        return req.body;
-    };
-};
-
-export function _getBodyParam(req, name, nothing, just) {
-    return function () {
-        if (req.body && name in req.body && req.body[name] != null) {
-            return just(req.body[name]);
-        }
-        return nothing;
-    };
-};
-
-export function _getQueryParam(req, name, nothing, just) {
-    return function () {
-        if (req.query && name in req.query && req.query[name] != null) {
-            return just(req.query[name]);
-        }
-        return nothing;
-    };
-};
-
-export function _getCookie(req, name, nothing, just) {
-    return function () {
-        if (req.cookies[name] != null) {
-            return just(req.cookies[name]);
-        }
-        return nothing;
-    }
-};
-
-export function _getSignedCookie(req, name, nothing, just) {
-    return function () {
-        if (req.signedCookies[name] != null) {
-            return just(req.signedCookies[name]);
-        }
-        return nothing;
-    };
-};
-
-export function _getHeader(req, field, nothing, just) {
-    return function () {
-        if (req.get(field) != null) {
-            return just(req.get(field));
-        }
-        return nothing;
-    };
-};
-
-export function _getHeaders(req) {
-    return function () {
-        return req.headers;
-    };
-};
-
-export function _accepts(req, types, nothing, just) {
-    return function () {
-        if (req.accepts(types) != null) {
-            return just(req.accepts(types));
-        }
-        return nothing;
-    };
-};
-
-export function _acceptsCharset(req, charset, nothing, just) {
-    return function () {
-        if (req.acceptsCharset(charset) != null) {
-            return just(req.acceptsCharset(charset));
-        }
-        return nothing;
-    };
-};
-
-export function _acceptsLanguage(req, language, nothing, just) {
-    return function () {
-        if (req.acceptsLanguage(language) != null) {
-            return just(req.acceptsLanguage(language));
-        }
-        return nothing;
-    };
-};
-
-export function _hasType(req, type) {
-    return function () {
-        return req.is(type);
-    };
-};
-
-export function _getRemoteIp(req) {
-    return function () {
-        return req.ip;
-    };
-};
-
-export function _getRemoteIps(req) {
-    return function () {
-        return req.ips;
-    };
-};
-
-export function _getPath(req) {
-    return function () {
-        return req.path;
-    };
-};
-
-export function _getHostname(req) {
-    return function () {
-        return req.hostname;
-    };
-};
-
-export function _getSubdomains(req) {
-    return function () {
-        return req.subdomains;
-    };
-};
-
-export function _isFresh(req) {
-    return function () {
-        return req.fresh;
-    };
-};
-
-export function _isStale(req) {
-    return function () {
-        return req.stale;
-    };
-};
-
-export function _isXhr(req) {
-    return function () {
-        return req.xhr;
-    };
-};
-
-export function _getProtocol(req) {
-    return function () {
-        return req.protocol;
-    };
-};
-
-export function _getMethod(req) {
-    return function () {
-        return req.method;
-    };
-};
-
-export function _getUrl(req) {
-    return function () {
-        return req.url;
-    };
-};
-
-export function _getOriginalUrl(req) {
-    return function () {
-        return req.originalUrl;
-    };
-};
-
-export function _getData(req, field, nothing, just) {
-    return function () {
-        if (req.userData && req.userData[field] != null) {
-            return just(req.userData[field]);
-        }
-        return nothing;
-    };
-};
-
-export function _setData(req, field, val) {
-    return function () {
-        req.userData = req.userData || {};
-        req.userData[field] = val;
-    };
-};
+export const _getRouteParam = (req, name) => req.params[name];
+export const _getRouteParams = (req) => req.params;
+export const _getRoute = (req) => req.route.path;
+export const _getBody = (req) => req.body;
+export const _getBodyParam = (req, name) => req.body ? req.body[name] : null;
+export const _getQueryParam = (req, name) => req.query ? req.query[name] : null;
+export const _getCookie = (req, name) => req.cookies ? req.cookies[name] : null;
+export const _getSignedCookie = (req, name) => req.signedCookies ? req.signedCookies[name] : null;
+export const _getHeader = (req, field) => req.get(field);
+export const _getHeaders = (req) => req.headers;
+export const _accepts = (req, types) => req.accepts(types);
+export const _acceptsCharset = (req, charset) => req.acceptsCharset(charset);
+export const _acceptsLanguage = (req, language) => req.acceptsLanguage(language);
+export const _hasType = (req, type) => req.is(type);
+export const _getRemoteIp = (req) => req.ip;
+export const _getRemoteIps = (req) => req.ips;
+export const _getPath = (req) => req.path;
+export const _getHostname = (req) => req.hostname;
+export const _getSubdomains = (req) => req.subdomains;
+export const _isFresh = (req) => req.fresh;
+export const _isStale = (req) => req.stale;
+export const _isXhr = (req) => req.xhr;
+export const _getProtocol = (req) => req.protocol;
+export const _getMethod = (req) => req.method;
+export const _getUrl = (req) => req.url;
+export const _getOriginalUrl = (req) => req.originalUrl;
+export const _getData = (req, name) => req.userData ? req.userData[name] : null;
+export const _setData = (req, name, val) => (req.userData = req.userData || {}, req.userData[name] = val);

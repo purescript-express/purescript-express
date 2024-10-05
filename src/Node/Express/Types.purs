@@ -4,14 +4,23 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
+import Data.Nullable (Nullable)
 import Data.String.Regex (Regex)
-import Effect (Effect)
-import Effect.Uncurried (EffectFn3)
+import Effect.Exception (Error)
+import Effect.Uncurried (EffectFn1, EffectFn3, EffectFn4)
+import Node.Path (FilePath)
 
 foreign import data Application :: Type
 foreign import data Event :: Type
-foreign import data Response :: Type
+foreign import data Response :: Type -- use from purescript-node-http?
 foreign import data Request :: Type
+
+type Middleware = HandlerFnInternal_Req_Res_Next -- External Middleware
+
+type NextFnInternal = EffectFn1 (Nullable Error) Unit
+type HandlerFnInternal_Req_Res_Next = EffectFn3 Request Response NextFnInternal Unit
+type HandlerFnInternal_Req_Res_Next_Param = EffectFn4 Request Response NextFnInternal String Unit
+type HandlerFnInternal_Err_Req_Res_Next = EffectFn4 Error Request Response NextFnInternal Unit
 
 data Protocol = Http | Https
 
@@ -47,10 +56,12 @@ decodeMethod "HEAD" = HEAD
 decodeMethod "TRACE" = TRACE
 decodeMethod method = CustomMethod method
 
-type Host = String
-type Port = Int
-type Pipe = String
+newtype Host = Host String
+newtype Port = Port Int
+newtype Status = Status Int
+newtype Pipe = Pipe FilePath
 type Path = String
+newtype DownloadFileName = DownloadFileName String
 
 class RoutePattern :: forall a. a -> Constraint
 class RoutePattern a
@@ -87,8 +98,6 @@ newtype CookieOptions = CookieOptions
   }
 
 derive instance Newtype CookieOptions _
-
-type Middleware = EffectFn3 Request Response (Effect Unit) Unit
 
 defaultCookieOptions :: CookieOptions
 defaultCookieOptions =

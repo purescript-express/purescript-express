@@ -10,9 +10,9 @@ import Effect.Class (liftEffect)
 import Effect.Exception (message)
 import Foreign.Generic.Class (class Decode)
 import Foreign.Object (Object)
-import Node.Express.App (getProp, http, setProp, use, useAt, useAtExternal, useExternal, useOnError, useOnParam)
+import Node.Express.App
 import Node.Express.Test.Mock (MockResponse, TestMockApp, assertInApp, assertTestHeader, sendError, sendRequest, setRouteParam, setTestHeader, setupMockApp, testExpress)
-import Node.Express.Types (Application, Method(..), Middleware)
+import Node.Express.Types
 import Test.Unit (TestF, failure, success, suite)
 
 foreign import mockMiddleware
@@ -133,7 +133,7 @@ testApplicationUseAtExternal = testExpress "useAtExternal" $ do
 
 testApplicationUseOnParam :: Free TestF Unit
 testApplicationUseOnParam = testExpress "useOnParam" $ do
-  setupMockApp $ useOnParam "param" setTestHeader
+  setupMockApp $ param "param" setTestHeader
   sendTestRequest GET "http://example.com/some/path" assertTestHeaderAbsent
   sendRequest GET "http://example/com" withRouteParam $ assertTestHeaderExists
   where

@@ -2,15 +2,15 @@ module Node.Express.Middleware.CookieParser
   ( cookieParser
   ) where
 
-import Effect.Class (liftEffect)
-import Data.Function (($))
-import Node.Express.Handler (Handler, HandlerM(..))
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable)
+import Data.Nullable as Nullable
+import Effect (Effect)
+import Effect.Uncurried (EffectFn1, runEffectFn1)
 import Node.Express.Types (Middleware)
-import Effect.Uncurried (runEffectFn3)
 
-foreign import _cookieParser :: Middleware
+foreign import _cookieParser :: EffectFn1 (Nullable String) Middleware
 
 -- | Handler that parses cookies using 'cookie-parser' middleware.
-cookieParser :: Handler
-cookieParser = HandlerM $
-  \req res nxt -> liftEffect $ runEffectFn3 _cookieParser req res nxt
+cookieParser :: Maybe String -> Effect Middleware
+cookieParser maybeSecret = runEffectFn1 _cookieParser (Nullable.toNullable maybeSecret)

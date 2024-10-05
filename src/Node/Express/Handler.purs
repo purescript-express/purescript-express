@@ -2,24 +2,29 @@ module Node.Express.Handler
   ( HandlerM(..)
   , Handler()
   , runHandlerM
+  , runParamHandlerM
+  , runErrorHandlerM
   , next
   , nextThrow
   ) where
 
 import Prelude
 
+import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError, catchError)
+import Data.Either (either)
+import Data.Maybe (Maybe(..))
+import Data.Nullable (toNullable)
+import Data.Nullable as Nullable
+import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Aff.Class (class MonadAff)
-import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
-import Data.Either (either)
-import Data.Function.Uncurried (Fn2, runFn2)
-import Node.Express.Types (Response, Request)
-import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError, catchError)
+import Effect.Uncurried (mkEffectFn3, mkEffectFn4, runEffectFn1)
+import Node.Express.Types (HandlerFnInternal_Req_Res_Next, HandlerFnInternal_Req_Res_Next_Param, Request, Response, HandlerFnInternal_Err_Req_Res_Next)
 
 -- | Monad responsible for handling single request.
-newtype HandlerM a = HandlerM (Request -> Response -> Effect Unit -> Aff a)
+newtype HandlerM a = HandlerM (Request -> Response -> (Maybe Error -> Effect Unit) -> Aff a)
 
 type Handler = HandlerM Unit
 
@@ -49,17 +54,45 @@ instance monadEffHandlerM :: MonadEffect HandlerM where
 instance monadAffHandlerM :: MonadAff HandlerM where
   liftAff act = HandlerM \_ _ _ -> act
 
-runHandlerM :: Handler -> Request -> Response -> Effect Unit -> Effect Unit
-runHandlerM (HandlerM h) req res nxt = void $ runAff_ (either (runFn2 _nextWithError nxt) pure) (h req res nxt)
+runHandlerM :: Handler -> HandlerFnInternal_Req_Res_Next
+runHandlerM (HandlerM h) = mkEffectFn3 \req res nxtFn ->
+  runAff_
+    ( either (runEffectFn1 nxtFn <<< Just >>> toNullable)
+        (const $ runEffectFn1 nxtFn Nullable.null)
+    )
+    (h req res (runEffectFn1 nxtFn <<< toNullable))
+
+runParamHandlerM :: (String -> Handler) -> HandlerFnInternal_Req_Res_Next_Param
+runParamHandlerM mkHandlerFromParamValue = mkEffectFn4 \req res nxtFn paramValue ->
+  let
+    (HandlerM h) = mkHandlerFromParamValue paramValue
+  in
+    runAff_
+      ( either (runEffectFn1 nxtFn <<< Just >>> toNullable)
+          (const $ runEffectFn1 nxtFn Nullable.null)
+      )
+      (h req res (runEffectFn1 nxtFn <<< toNullable))
+
+runErrorHandlerM :: (Error -> Handler) -> HandlerFnInternal_Err_Req_Res_Next
+runErrorHandlerM mkHandlerFromParamValue = mkEffectFn4 \error req res nxtFn ->
+  let
+    (HandlerM h) = mkHandlerFromParamValue error
+  in
+    runAff_
+      ( either (runEffectFn1 nxtFn <<< Just >>> toNullable)
+          (const $ runEffectFn1 nxtFn Nullable.null)
+      )
+      (h req res (runEffectFn1 nxtFn <<< toNullable))
 
 -- | Call next handler/middleware in a chain.
 next :: Handler
-next = HandlerM \_ _ nxt -> liftEffect nxt
+next = HandlerM \_req _res nxt ->
+  liftEffect $ nxt Nothing
 
 -- | Call next handler/middleware and pass error to it.
-nextThrow :: forall a. Error -> HandlerM a
-nextThrow err = HandlerM \_ _ nxt ->
-  liftEffect $ runFn2 _nextWithError nxt err
+nextThrow :: Error -> HandlerM Unit
+nextThrow err = HandlerM \_req _res nxt ->
+  liftEffect $ nxt (Just err)
 
 instance monadThrowHandlerM :: MonadThrow Error HandlerM where
   throwError err = HandlerM \_ _ _nxt -> throwError err
@@ -67,5 +100,3 @@ instance monadThrowHandlerM :: MonadThrow Error HandlerM where
 instance monadErrorHandlerM ∷ MonadError Error HandlerM where
   catchError (HandlerM m) h = HandlerM $ \req res nxt ->
     catchError (m req res nxt) $ \e -> case h e of HandlerM m0 -> m0 req res nxt
-
-foreign import _nextWithError :: forall a. Fn2 (Effect Unit) Error (Effect a)

@@ -1,5 +1,3 @@
-import express from "express";
+import { static as expressStatic } from "express";
 
-export function _static(root) {
-    return express.static(root)
-}
+export const _static = expressStatic

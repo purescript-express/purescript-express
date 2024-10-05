@@ -1,7 +1,6 @@
 module Node.Express.App
   ( AppM(..)
   , App
-  , HandlerFn
   , listenHttp
   , listenHttps
   , listenHostHttp
@@ -14,7 +13,7 @@ module Node.Express.App
   , useExternal
   , useAt
   , useAtExternal
-  , useOnParam
+  , param
   , useOnError
   , getProp
   , setProp
@@ -36,30 +35,30 @@ module Node.Express.App
   , _listenHostHttps
   , _listenPipe
   , _use
-  , _useExternal
   , _useAt
-  , _useAtExternal
-  , _useOnParam
+  , _param
   , _useOnError
   ) where
 
-import Prelude hiding (apply)
+import Node.Express.Types (class RoutePattern, Application, Event, HandlerFnInternal_Err_Req_Res_Next, HandlerFnInternal_Req_Res_Next, HandlerFnInternal_Req_Res_Next_Param, Host, Method(..), Middleware, Path, Pipe, Port)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftM1, map, pure, show, ($))
 
-import Data.Function.Uncurried (Fn2, Fn3, Fn4, runFn4, runFn3, runFn2)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable)
+import Data.Nullable as Nullable
 import Effect (Effect)
+import Effect.Aff.Compat (runEffectFn1)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)
+import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, EffectFn4, EffectFn5, mkEffectFn1, runEffectFn2, runEffectFn3, runEffectFn4, runEffectFn5)
 import Foreign (Foreign, unsafeToForeign)
-import Node.Express.Handler (Handler, runHandlerM)
-import Node.Express.Types (class RoutePattern, Application, Response, Request, Event, Host, Path, Port, Pipe, Method(..), Middleware)
+import Node.Express.Handler (Handler, runErrorHandlerM, runHandlerM, runParamHandlerM)
 import Node.HTTP.Types (HttpServer, HttpsServer)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | Monad responsible for application related operations (initial setup mostly).
 newtype AppM a = AppM (Application -> Effect a)
 type App = AppM Unit
-
-type HandlerFn = Request -> Response -> Effect Unit -> Effect Unit
 
 instance functorAppM :: Functor AppM where
   map f (AppM h) = AppM \app -> liftM1 f $ h app
@@ -90,7 +89,7 @@ makeHttpServer :: App -> Effect HttpServer
 makeHttpServer (AppM act) = do
   app <- mkApplication
   act app
-  _httpServer app
+  runEffectFn1 _httpServer app
 
 -- | Create a Node.HTTP server from the Express application.
 -- | HTTPS version
@@ -98,7 +97,7 @@ makeHttpsServer :: App -> Effect HttpsServer
 makeHttpsServer (AppM act) = do
   app <- mkApplication
   act app
-  _httpsServer app
+  runEffectFn1 _httpsServer app
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTP version
@@ -106,7 +105,7 @@ listenHttp :: App -> Port -> (Event -> Effect Unit) -> Effect HttpServer
 listenHttp (AppM act) port cb = do
   app <- mkApplication
   act app
-  _listenHttp app port cb
+  runEffectFn3 _listenHttp app port (mkEffectFn1 cb)
 
 -- | Run application on specified port and execute callback after launch.
 -- | HTTPS version
@@ -120,7 +119,7 @@ listenHttps
 listenHttps (AppM act) port opts cb = do
   app <- mkApplication
   act app
-  _listenHttps app port opts cb
+  runEffectFn4 _listenHttps app port opts (mkEffectFn1 cb)
 
 -- | Run application on specified port & host and execute callback after launch.
 -- | HTTP version
@@ -128,7 +127,7 @@ listenHostHttp :: App -> Port -> Host -> (Event -> Effect Unit) -> Effect HttpSe
 listenHostHttp (AppM act) port host cb = do
   app <- mkApplication
   act app
-  _listenHostHttp app port host cb
+  runEffectFn4 _listenHostHttp app port host (mkEffectFn1 cb)
 
 -- | Run application on specified port & host and execute callback after launch.
 -- | HTTPS version
@@ -143,7 +142,7 @@ listenHostHttps
 listenHostHttps (AppM act) port host opts cb = do
   app <- mkApplication
   act app
-  _listenHostHttps app port host opts cb
+  runEffectFn5 _listenHostHttps app port host opts (mkEffectFn1 cb)
 
 -- | Run application on specified named pipe and execute callback after launch.
 -- | HTTP version
@@ -151,7 +150,7 @@ listenPipe :: App -> Pipe -> (Event -> Effect Unit) -> Effect HttpServer
 listenPipe (AppM act) pipe cb = do
   app <- mkApplication
   act app
-  _listenPipe app pipe cb
+  runEffectFn3 _listenPipe app pipe (mkEffectFn1 cb)
 
 -- | Apply App actions to existent Express.js application
 apply :: App -> Application -> Effect Unit
@@ -160,7 +159,7 @@ apply (AppM act) app = act app
 -- | Use specified middleware handler.
 use :: Handler -> App
 use middleware = AppM \app ->
-  runFn2 _use app $ runHandlerM middleware
+  runEffectFn2 _use app $ runHandlerM middleware
 
 -- | Use any function as middleware.
 -- | Introduced to ease usage of a bunch of external
@@ -168,47 +167,47 @@ use middleware = AppM \app ->
 -- | See http://expressjs.com/4x/api.html#middleware
 useExternal :: Middleware -> App
 useExternal fn = AppM \app ->
-  runFn2 _useExternal app fn
+  runEffectFn2 _use app fn
 
 -- | Use specified middleware only on requests matching path.
 useAt :: Path -> Handler -> App
 useAt route middleware = AppM \app ->
-  runFn3 _useAt app route $ runHandlerM middleware
+  runEffectFn3 _useAt app route $ runHandlerM middleware
 
 -- | Use any function as middleware only on requests matching path.
 -- | Introduced to ease usage of a bunch of external
 -- | middleware written for express.js.
 -- | See http://expressjs.com/4x/api.html#middleware
 useAtExternal :: Path -> Middleware -> App
-useAtExternal route fn = AppM \app ->
-  runFn3 _useAtExternal app route fn
+useAtExternal route middleware = AppM \app ->
+  runEffectFn3 _useAt app route middleware
 
 -- | Process route param with specified handler.
-useOnParam :: String -> (String -> Handler) -> App
-useOnParam param handler = AppM \app ->
-  runFn3 _useOnParam app param (runHandlerM <<< handler)
+param :: String -> (String -> Handler) -> App
+param paramId mkHandler = AppM \app ->
+  runEffectFn3 _param app paramId (runParamHandlerM mkHandler)
 
 -- | Use error handler. Probably this should be the last middleware to attach.
 useOnError :: (Error -> Handler) -> App
-useOnError handler = AppM \app ->
-  runFn2 _useOnError app (runHandlerM <<< handler)
+useOnError mkHandler = AppM \app ->
+  runEffectFn2 _useOnError app (runErrorHandlerM mkHandler)
 
 -- | Get application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
 getProp :: forall a. String -> AppM (Maybe a)
 getProp name = AppM \app ->
-  liftEffect $ runFn4 _getProp app name Nothing Just
+  liftEffect $ map Nullable.toMaybe $ runEffectFn2 _getProp app name
 
 -- | Set application property.
 -- | See http://expressjs.com/4x/api.html#app-settings
 setProp :: forall a. String -> a -> App
 setProp name val = AppM \app ->
-  runFn3 _setProp app name val
+  runEffectFn3 _setProp app name val
 
 -- | Bind specified handler to handle request matching route and method.
 http :: forall r. (RoutePattern r) => Method -> r -> Handler -> App
 http method route handler = AppM \app ->
-  runFn4 _http app (show method) (unsafeToForeign route) $ runHandlerM handler
+  runEffectFn4 _http app (show method) (unsafeToForeign route) $ runHandlerM handler
 
 -- | Shortcut for `http GET`.
 get :: forall r. (RoutePattern r) => r -> Handler -> App
@@ -231,35 +230,19 @@ all :: forall r. (RoutePattern r) => r -> Handler -> App
 all = http ALL
 
 foreign import mkApplication :: Effect Application
+foreign import _getProp :: forall a. EffectFn2 Application String (Nullable a)
+foreign import _setProp :: forall a. EffectFn3 Application String a Unit
+foreign import _http :: EffectFn4 Application String Foreign HandlerFnInternal_Req_Res_Next Unit
+foreign import _httpServer :: EffectFn1 Application HttpServer
+foreign import _httpsServer :: EffectFn1 Application HttpsServer
+foreign import _listenHttp :: EffectFn3 Application Port (EffectFn1 Event Unit) HttpServer
+foreign import _listenHttps :: forall opts. EffectFn4 Application Port opts (EffectFn1 Event Unit) HttpsServer
+foreign import _listenHostHttp :: EffectFn4 Application Port Host (EffectFn1 Event Unit) HttpServer
+foreign import _listenHostHttps :: forall opts. EffectFn5 Application Port Host opts (EffectFn1 Event Unit) HttpsServer
+foreign import _listenPipe :: EffectFn3 Application Pipe (EffectFn1 Event Unit) HttpServer
+foreign import _use :: EffectFn2 Application HandlerFnInternal_Req_Res_Next Unit
+foreign import _useAt :: EffectFn3 Application Path HandlerFnInternal_Req_Res_Next Unit
+foreign import _param :: EffectFn3 Application String HandlerFnInternal_Req_Res_Next_Param Unit
 
-foreign import _getProp :: forall a. Fn4 Application String (Maybe a) (a -> Maybe a) (Effect (Maybe a))
-
-foreign import _setProp :: forall a. Fn3 Application String a (Effect Unit)
-
-foreign import _http :: Fn4 Application String Foreign HandlerFn (Effect Unit)
-
-foreign import _httpServer :: Application -> Effect HttpServer
-
-foreign import _httpsServer :: Application -> Effect HttpsServer
-
-foreign import _listenHttp :: Application -> Int -> (Event -> Effect Unit) -> Effect HttpServer
-
-foreign import _listenHttps :: forall opts. Application -> Int -> opts -> (Event -> Effect Unit) -> Effect HttpsServer
-
-foreign import _listenHostHttp :: Application -> Int -> String -> (Event -> Effect Unit) -> Effect HttpServer
-
-foreign import _listenHostHttps :: forall opts. Application -> Int -> String -> opts -> (Event -> Effect Unit) -> Effect HttpsServer
-
-foreign import _listenPipe :: Application -> String -> (Event -> Effect Unit) -> Effect HttpServer
-
-foreign import _use :: Fn2 Application HandlerFn (Effect Unit)
-
-foreign import _useExternal :: Fn2 Application Middleware (Effect Unit)
-
-foreign import _useAt :: Fn3 Application String (HandlerFn) (Effect Unit)
-
-foreign import _useAtExternal :: Fn3 Application String Middleware (Effect Unit)
-
-foreign import _useOnParam :: Fn3 Application String (String -> HandlerFn) (Effect Unit)
-
-foreign import _useOnError :: Fn2 Application (Error -> HandlerFn) (Effect Unit)
+_useOnError :: EffectFn2 Application HandlerFnInternal_Err_Req_Res_Next Unit
+_useOnError = unsafeCoerce _use

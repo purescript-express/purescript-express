@@ -23,10 +23,12 @@ package:
     dependencies:
       - free
       - unsafe-coerce
+      - debug
 workspace:
   packageSet:
     registry: 60.2.1
-  extraPackages: {}
+  extraPackages:
+    {}
     # wait for publish
     # open-foreign-generic:
     #   path: /home/srghma/projects/purescript-open-foreign-generic
