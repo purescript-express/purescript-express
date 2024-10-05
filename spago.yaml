@@ -1,17 +1,21 @@
 package:
   name: express
   dependencies:
+    - foldable-traversable
+    - node-path
+    - nullable
+    - unsafe-coerce
     - aff: ">=8.0.0 <9.0.0"
     - effect: ">=4.0.0 <5.0.0"
     - either: ">=6.1.0 <7.0.0"
     - exceptions: ">=6.1.0 <7.0.0"
     - foreign: ">=7.0.0 <8.0.0"
     - foreign-object: ">=4.1.0 <5.0.0"
-    - open-foreign-generic: ">=11.0.0 <12.0.0"
     - functions: ">=6.0.0 <7.0.0"
     - maybe: ">=6.0.0 <7.0.0"
     - newtype: ">=5.0.0 <6.0.0"
     - node-http: ">=9.1.0 <10.0.0"
+    - open-foreign-generic: ">=11.0.0 <12.0.0"
     - prelude: ">=6.0.1 <7.0.0"
     - record: ">=4.0.0 <5.0.0"
     - strings: ">=6.0.1 <7.0.0"
@@ -23,12 +27,10 @@ package:
     dependencies:
       - free
       - unsafe-coerce
-      - debug
 workspace:
   packageSet:
-    registry: 60.2.1
-  extraPackages:
-    {}
+    registry: 60.3.0
+  extraPackages: {}
     # wait for publish
     # open-foreign-generic:
     #   path: /home/srghma/projects/purescript-open-foreign-generic

@@ -10,9 +10,9 @@ import Effect.Class (liftEffect)
 import Effect.Exception (message)
 import Foreign.Generic.Class (class Decode)
 import Foreign.Object (Object)
-import Node.Express.App
+import Node.Express.App (getProp, http, param, setProp, use, useAt, useAtExternal, useExternal, useOnError)
 import Node.Express.Test.Mock (MockResponse, TestMockApp, assertInApp, assertTestHeader, sendError, sendRequest, setRouteParam, setTestHeader, setupMockApp, testExpress)
-import Node.Express.Types
+import Node.Express.Types (Application, Method(..), Middleware)
 import Test.Unit (TestF, failure, success, suite)
 
 foreign import mockMiddleware

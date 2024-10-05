@@ -126,7 +126,7 @@ sendFile path handleError = sendFileExt path defaultSendFileOptions handleError
 -- | Send file by its path using specified options and error handler.
 -- | See http://expressjs.com/4x/api.html#res.sendfile
 -- | TODO: Next handler next should handle error?
-sendFileExt :: forall o. FilePath -> SendFileOptions -> (Error -> Effect Unit) -> Handler
+sendFileExt :: FilePath -> SendFileOptions -> (Error -> Effect Unit) -> Handler
 sendFileExt path opts handleError = HandlerM \_ resp _ ->
   liftEffect $ runEffectFn4 _sendFileExt resp path (sendFileOptionsToInternal opts)
     (mkEffectFn1 \nullableError -> maybe (pure unit) handleError $ Nullable.toMaybe nullableError)

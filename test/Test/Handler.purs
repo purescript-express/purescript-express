@@ -7,22 +7,17 @@ import Control.Monad.Free (Free)
 import Control.Monad.Reader (ReaderT)
 import Data.Either (either)
 import Data.Maybe (Maybe(..), maybe)
-import Data.Tuple (Tuple(..))
-import Debug (traceM)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Class.Console (log)
-import Effect.Exception (Error, throwException)
+import Effect.Exception (throwException)
 import Foreign.Generic.Class (encode, decode)
 import Foreign.Object (Object)
-import Foreign.Object as Object
 import Node.Express.App (get, use)
 import Node.Express.Request (accepts, acceptsCharset, acceptsLanguage, getBody, getBody', getBodyParam, getCookie, getHostname, getMethod, getOriginalUrl, getPath, getProtocol, getQueryParam, getQueryParams, getRemoteIp, getRemoteIps, getRequestHeader, getRoute, getRouteParam, getSignedCookie, getSubdomains, getUrl, getUserData, hasType, isFresh, isStale, isXhr, setUserData)
 import Node.Express.Response (clearCookie, defaultDownloadOptions, defaultSendFileOptions, download, downloadExt, end, getResponseHeader, headersSent, redirect, redirectWithStatus, render, send, sendFile, sendFileExt, sendJson, sendJsonp, setContentType, setCookie, setLocation, setResponseHeader, setStatus)
 import Node.Express.Test.Mock (MockRequest, assertCookieValue, assertData, assertHeader, assertStatusCode, assertTestHeader, sendRequest, setBody, setBody', setBodyParam, setRequestCookie, setRequestHeader, setRequestSignedCookie, setRouteParam, setTestHeader, setupMockApp, testExpress)
 import Node.Express.Types (Application, DownloadFileName(..), Method(..), Protocol(..), Status(..), defaultCookieOptions)
 import Test.Unit (TestF, suite)
-import Unsafe.Coerce (unsafeCoerce)
 
 foreign import cwdJson :: String
 foreign import unsafeUpdateMapInPlace :: forall a. Object a -> String -> a -> Effect Unit
@@ -402,17 +397,6 @@ testResponse = do
   testFile = "test.txt"
   filepathHeader = "X-Filepath"
   realFilepathHeader = "X-Real-Filepath"
-  testErrorHeader = "X-Test-Error"
-
--- testErrorHandler :: Error -> Effect Unit
--- testErrorHandler = \error -> do
---   traceM "AHHHHFHDHFHSDF"
---   traceM error
---   pure unit
---   -- let
---   --   response = unsafeCoerce error
---   -- in
---   --   unsafeUpdateMapInPlace (response.headers) testErrorHeader testValue
 
 testSuite :: Free TestF Unit
 testSuite = suite "Handler" do

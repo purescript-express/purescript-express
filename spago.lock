@@ -17,6 +17,7 @@
             {
               "exceptions": ">=6.1.0 <7.0.0"
             },
+            "foldable-traversable",
             {
               "foreign": ">=7.0.0 <8.0.0"
             },
@@ -35,6 +36,8 @@
             {
               "node-http": ">=9.1.0 <10.0.0"
             },
+            "node-path",
+            "nullable",
             {
               "open-foreign-generic": ">=11.0.0 <12.0.0"
             },
@@ -55,7 +58,8 @@
             },
             {
               "typelevel-prelude": ">=7.0.0 <8.0.0"
-            }
+            },
+            "unsafe-coerce"
           ],
           "build_plan": [
             "aff",
@@ -132,7 +136,6 @@
         },
         "test": {
           "dependencies": [
-            "debug",
             "free",
             "unsafe-coerce"
           ],
@@ -142,7 +145,6 @@
             "const",
             "contravariant",
             "control",
-            "debug",
             "distributive",
             "effect",
             "either",
@@ -150,7 +152,6 @@
             "exists",
             "foldable-traversable",
             "free",
-            "functions",
             "functors",
             "identity",
             "invariant",
@@ -178,7 +179,7 @@
     },
     "package_set": {
       "address": {
-        "registry": "60.2.1"
+        "registry": "60.3.0"
       },
       "compiler": ">=0.15.15 <0.16.0",
       "content": {
@@ -475,6 +476,7 @@
         "object-maps": "0.3.0",
         "ocarina": "1.5.4",
         "oooooooooorrrrrrrmm-lib": "0.0.1",
+        "open-colors-scales-and-schemes": "1.0.0",
         "open-folds": "6.4.0",
         "open-foreign-generic": "11.0.3",
         "open-memoize": "6.2.0",
@@ -530,6 +532,7 @@
         "react-basic-classic": "3.0.0",
         "react-basic-dnd": "10.1.0",
         "react-basic-dom": "6.1.0",
+        "react-basic-dom-beta": "0.1.1",
         "react-basic-emotion": "7.1.0",
         "react-basic-hooks": "8.2.0",
         "react-basic-storybook": "2.0.0",
@@ -841,15 +844,6 @@
         "partial",
         "prelude",
         "tuples"
-      ]
-    },
-    "debug": {
-      "type": "registry",
-      "version": "6.0.2",
-      "integrity": "sha256-vmkYFuXYuELBzeauvgHG6E6Kf/Hp1dAnxwE9ByHfwSg=",
-      "dependencies": [
-        "functions",
-        "prelude"
       ]
     },
     "distributive": {
