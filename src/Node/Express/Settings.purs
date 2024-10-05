@@ -26,12 +26,12 @@ etagToString =
 etagFromString :: String -> Etag
 etagFromString =
   case _ of
-    "false"   -> Etag_Disabled
-    "true"    -> Etag_Enabled
-    "strong"  -> Etag_Strong
-    "weak"    -> Etag_Weak
+    "false" -> Etag_Disabled
+    "true" -> Etag_Enabled
+    "strong" -> Etag_Strong
+    "weak" -> Etag_Weak
     "dynamic" -> Etag_Dynamic
-    _         -> Etag_Weak -- Default to Weak if unknown value
+    _ -> Etag_Weak -- Default to Weak if unknown value
 
 ------------------------------------------------------------------
 
@@ -68,24 +68,21 @@ trustProxyFromForeignOrThrow :: Foreign -> Effect TrustProxy
 trustProxyFromForeignOrThrow f =
   case runExcept (trustProxyFromForeignF f) of
     Right trustProxy -> pure trustProxy
-    Left err         -> throw $ "Foreign parsing failed: " <> show err
-
+    Left err -> throw $ "Foreign parsing failed: " <> show err
 
 ------------------------------------------------------------------
 
-fromForeignUsingOrThrow :: forall a . (Foreign -> F a) -> Foreign -> Effect a
+fromForeignUsingOrThrow :: forall a. (Foreign -> F a) -> Foreign -> Effect a
 fromForeignUsingOrThrow read f =
   case runExcept (read f) of
     Right trustProxy -> pure trustProxy
-    Left err         -> throw $ "Foreign parsing failed: " <> show err
-
+    Left err -> throw $ "Foreign parsing failed: " <> show err
 
 ------------------------------------------------------------------
 
 -- Foreign imports for unsafe get and set operations
 foreign import _get :: EffectFn2 Application String Foreign
 foreign import _set :: EffectFn3 Application String Foreign Unit
-
 
 -- String constants
 -- from https://expressjs.com/en/5x/api.html#app.settings.table
