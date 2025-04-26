@@ -15,7 +15,7 @@ jobs:
       - uses: purescript-contrib/setup-purescript@main
         with:
           purescript: "latest"
-          purs-tidy: "latest"
+          purs-tidy: "0.11.0" # "latest"
           spago: "unstable"
 
       - name: Set up Node toolchain
