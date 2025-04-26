@@ -1,3 +1,4 @@
+// TODO: https://pursuit.purescript.org/packages/purescript-test-unit is old, convert to use purescript-spec Node.Express.Test.Spec.Mock
 import Url from 'url';
 
 // String -> String -> MockRequest
@@ -94,7 +95,7 @@ MockRequest.prototype.parseUrlAndInit = function () {
 
 MockRequest.prototype.checkAccepts = function (header, value) {
     var values = (this.headers[header] || "").split(",")
-        .map(function (str, i) { return str.trim(); });
+        .map(function (str, _i) { return str.trim(); });
     if (values.indexOf(value) >= 0) {
         return value;
     }

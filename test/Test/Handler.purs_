@@ -1,3 +1,4 @@
+-- TODO: https://pursuit.purescript.org/packages/purescript-test-unit is old, convert to use purescript-spec
 module Test.Handler (testSuite) where
 
 import Prelude
