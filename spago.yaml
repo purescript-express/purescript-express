@@ -1,19 +1,24 @@
 package:
   name: express
+  publish:
+    license: MIT
+    version: 0.8.0
+    location:
+      githubOwner: purescript-express
+      githubRepo: purescript-express
   dependencies:
-    - foldable-traversable
-    - node-path
-    - nullable
-    - unsafe-coerce
     - aff: ">=8.0.0 <9.0.0"
     - effect: ">=4.0.0 <5.0.0"
     - either: ">=6.1.0 <7.0.0"
     - exceptions: ">=6.1.0 <7.0.0"
+    - foldable-traversable: ">=6.0.0 <7.0.0"
     - foreign: ">=7.0.0 <8.0.0"
     - foreign-object: ">=4.1.0 <5.0.0"
     - maybe: ">=6.0.0 <7.0.0"
     - newtype: ">=5.0.0 <6.0.0"
     - node-http: ">=9.1.0 <10.0.0"
+    - node-path: ">=5.0.1 <6.0.0"
+    - nullable: ">=6.0.0 <7.0.0"
     - open-foreign-generic: ">=11.0.0 <12.0.0"
     - prelude: ">=6.0.1 <7.0.0"
     - record: ">=4.0.0 <5.0.0"
@@ -21,6 +26,7 @@ package:
     - test-unit: ">=17.0.0 <18.0.0"
     - transformers: ">=6.1.0 <7.0.0"
     - typelevel-prelude: ">=7.0.0 <8.0.0"
+    - unsafe-coerce: ">=6.0.0 <7.0.0"
   test:
     main: Test.Main
     dependencies:
@@ -28,9 +34,8 @@ package:
       - unsafe-coerce
 workspace:
   packageSet:
-    registry: 60.3.0
-  extraPackages:
-    {}
+    registry: 64.4.0
+  extraPackages: {}
     # wait for publish
     # open-foreign-generic:
     #   path: /home/srghma/projects/purescript-open-foreign-generic
