@@ -2,7 +2,7 @@ package:
   name: express
   publish:
     license: MIT
-    version: 0.8.0
+    version: 0.9.1
     location:
       githubOwner: purescript-express
       githubRepo: purescript-express
@@ -33,7 +33,8 @@ package:
 workspace:
   packageSet:
     registry: 64.4.0
-  extraPackages: {}
+  extraPackages:
+    {}
     # wait for publish
     # open-foreign-generic:
     #   path: /home/srghma/projects/purescript-open-foreign-generic
